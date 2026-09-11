@@ -1,0 +1,1402 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0f766e">
+  <title>Suivi Revenus Mobile</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f7f4;
+      --surface: #ffffff;
+      --surface-soft: #edf7f4;
+      --ink: #17211f;
+      --muted: #66706d;
+      --line: #dce3df;
+      --brand: #0f766e;
+      --brand-dark: #09534e;
+      --accent: #b45309;
+      --danger: #b91c1c;
+      --warn: #a16207;
+      --ok: #15803d;
+      --shadow: 0 16px 40px rgba(23, 33, 31, 0.12);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100svh;
+      background:
+        linear-gradient(180deg, #d9eee9 0, rgba(217, 238, 233, 0) 270px),
+        var(--bg);
+      color: var(--ink);
+    }
+
+    button, input, select, textarea {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .app {
+      width: min(100%, 460px);
+      min-height: 100svh;
+      margin: 0 auto;
+      padding: env(safe-area-inset-top) 16px calc(88px + env(safe-area-inset-bottom));
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: grid;
+      gap: 10px;
+      padding: 16px 0 12px;
+      background: linear-gradient(180deg, #d9eee9 0, rgba(217, 238, 233, 0.88) 72%, rgba(217, 238, 233, 0));
+      backdrop-filter: blur(10px);
+    }
+
+    .topline {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.25rem;
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin: 3px 0 0;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .period-controls {
+      display: flex;
+      gap: 8px;
+    }
+
+    .period-controls select {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .period-controls .icon-btn {
+      flex: 0 0 auto;
+    }
+
+    .month-select {
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: var(--ink);
+      background: var(--surface);
+      box-shadow: 0 8px 22px rgba(23, 33, 31, 0.08);
+    }
+
+    .hero {
+      display: grid;
+      gap: 12px;
+      padding: 18px;
+      border-radius: 8px;
+      background: var(--brand-dark);
+      color: #f8fffd;
+      box-shadow: var(--shadow);
+    }
+
+    .hero-label {
+      margin: 0;
+      color: rgba(248, 255, 253, 0.74);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .hero-period {
+      margin: -6px 0 0;
+      color: rgba(248, 255, 253, 0.88);
+      font-size: 0.86rem;
+      font-weight: 650;
+    }
+
+    .hero-main {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .amount {
+      font-size: clamp(2rem, 12vw, 3.3rem);
+      line-height: 0.96;
+      font-weight: 780;
+      letter-spacing: 0;
+    }
+
+    .hero-pill {
+      flex: 0 0 auto;
+      border-radius: 999px;
+      padding: 8px 10px;
+      background: rgba(255, 255, 255, 0.13);
+      color: #d6fff8;
+      font-size: 0.78rem;
+      white-space: nowrap;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .metric, .panel, .item, .form-row {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+    }
+
+    .metric {
+      min-height: 86px;
+      padding: 13px;
+      display: grid;
+      align-content: space-between;
+      gap: 10px;
+    }
+
+    .metric span, .item small, label, .hint {
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    .metric strong {
+      font-size: 1.13rem;
+      letter-spacing: 0;
+    }
+
+    main {
+      display: grid;
+      gap: 14px;
+    }
+
+    .view {
+      display: none;
+      gap: 14px;
+    }
+
+    .view.active {
+      display: grid;
+    }
+
+    .panel {
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .panel-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .panel-title-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 1rem;
+      letter-spacing: 0;
+    }
+
+    .stack {
+      display: grid;
+      gap: 10px;
+    }
+
+    .budget-row, .saving-row, .history-row, .expense-row {
+      display: grid;
+      gap: 8px;
+      padding: 12px;
+      border-radius: 8px;
+      background: #f9fbfa;
+      border: 1px solid #e6ece9;
+      position: relative;
+    }
+
+    .row-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .row-head strong {
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .status {
+      flex: 0 0 auto;
+      border-radius: 999px;
+      padding: 5px 8px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .status.ok { background: #dcfce7; color: var(--ok); }
+    .status.warn { background: #fef3c7; color: var(--warn); }
+    .status.bad { background: #fee2e2; color: var(--danger); }
+
+    .warn-text { color: var(--warn); font-weight: 700; }
+    .bad-text { color: var(--danger); font-weight: 700; }
+    .ok-text { color: var(--ok); font-weight: 700; }
+
+    .bar {
+      height: 9px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #e7edea;
+    }
+
+    .bar > i {
+      display: block;
+      width: 0;
+      max-width: 100%;
+      height: 100%;
+      border-radius: inherit;
+      background: var(--brand);
+    }
+
+    .bar > i.warn { background: var(--warn); }
+    .bar > i.bad { background: var(--danger); }
+
+    .row-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    .row-stats b {
+      display: block;
+      margin-top: 2px;
+      color: var(--ink);
+      font-size: 0.84rem;
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .form-row {
+      display: grid;
+      gap: 6px;
+      padding: 10px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: var(--ink);
+      min-height: 30px;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 52px;
+    }
+
+    .button-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .btn {
+      min-height: 44px;
+      border-radius: 8px;
+      padding: 10px 12px;
+      background: var(--ink);
+      color: #fff;
+      font-weight: 720;
+    }
+
+    .btn.secondary {
+      background: #e8efec;
+      color: var(--ink);
+    }
+
+    .btn.danger {
+      background: #fee2e2;
+      color: var(--danger);
+    }
+
+    .icon-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      display: inline-grid;
+      place-items: center;
+      background: #edf2ef;
+      color: var(--ink);
+      font-weight: 800;
+      flex: 0 0 auto;
+    }
+
+    .edit-row {
+      display: grid;
+      grid-template-columns: 1fr 76px 38px;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .edit-row input {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px 10px;
+      background: var(--surface);
+    }
+
+    .saving-head-input {
+      border: 0;
+      font-weight: 720;
+      font-size: 0.98rem;
+      padding: 0;
+      min-height: auto;
+    }
+
+    .chart-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .donut {
+      width: 112px;
+      height: 112px;
+      border-radius: 50%;
+      flex: 0 0 auto;
+      background: #e7edea;
+      position: relative;
+    }
+
+    .donut::after {
+      content: "";
+      position: absolute;
+      inset: 20px;
+      border-radius: 50%;
+      background: var(--surface);
+    }
+
+    .legend {
+      flex: 1 1 160px;
+      display: grid;
+      gap: 6px;
+      min-width: 140px;
+    }
+
+    .legend-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.82rem;
+    }
+
+    .legend-row i {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex: 0 0 auto;
+    }
+
+    .legend-row span {
+      flex: 1;
+      min-width: 0;
+      overflow-wrap: anywhere;
+      color: var(--ink);
+    }
+
+    .legend-row b {
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 0.78rem;
+    }
+
+    .ybars {
+      display: flex;
+      align-items: flex-end;
+      gap: 5px;
+      height: 70px;
+      padding-top: 4px;
+    }
+
+    .ybar {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 4px;
+      height: 100%;
+    }
+
+    .ybar-fill {
+      width: 100%;
+      max-width: 16px;
+      border-radius: 4px 4px 0 0;
+      background: var(--brand);
+      min-height: 3px;
+    }
+
+    .ybar-fill.bad { background: var(--danger); }
+
+    .ybar span {
+      font-size: 0.6rem;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    .tabs {
+      position: fixed;
+      left: 50%;
+      bottom: max(12px, env(safe-area-inset-bottom));
+      z-index: 20;
+      width: min(calc(100% - 24px), 440px);
+      transform: translateX(-50%);
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 4px;
+      padding: 6px;
+      border: 1px solid rgba(220, 227, 223, 0.9);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: 0 16px 36px rgba(23, 33, 31, 0.18);
+      backdrop-filter: blur(14px);
+    }
+
+    .tab {
+      min-width: 0;
+      min-height: 54px;
+      border-radius: 7px;
+      display: grid;
+      place-items: center;
+      gap: 2px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 0.68rem;
+    }
+
+    .tab i {
+      font-style: normal;
+      font-size: 1rem;
+      line-height: 1;
+    }
+
+    .tab.active {
+      background: var(--surface-soft);
+      color: var(--brand-dark);
+      font-weight: 760;
+    }
+
+    .empty {
+      padding: 16px;
+      border: 1px dashed var(--line);
+      border-radius: 8px;
+      color: var(--muted);
+      text-align: center;
+      background: #fbfcfb;
+    }
+
+    @media (min-width: 740px) {
+      .app {
+        width: min(100%, 980px);
+      }
+
+      main {
+        grid-template-columns: minmax(330px, 0.9fr) minmax(360px, 1.1fr);
+        align-items: start;
+      }
+
+      .view.active {
+        grid-column: 1 / -1;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        align-items: start;
+      }
+
+      #dashboard.active {
+        grid-template-columns: minmax(320px, 0.8fr) minmax(360px, 1.2fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="topline">
+        <div>
+          <h1>Suivi revenus</h1>
+          <p class="subtitle">Version mobile du classeur</p>
+        </div>
+      </div>
+      <div class="period-controls">
+        <select id="yearSelect" class="month-select" aria-label="Année affichée"></select>
+        <select id="monthSelect" class="month-select" aria-label="Mois affiché"></select>
+        <button class="icon-btn" id="addYear" type="button" title="Ajouter une année">+</button>
+      </div>
+      <section class="hero" aria-label="Resume du mois">
+        <p class="hero-label">Reste disponible</p>
+        <p class="hero-period" id="heroPeriod"></p>
+        <div class="hero-main">
+          <div id="heroRemaining" class="amount">0</div>
+          <div id="heroStatus" class="hero-pill">A jour</div>
+        </div>
+      </section>
+    </header>
+
+    <main>
+      <section id="dashboard" class="view active" aria-label="Tableau de bord">
+        <div class="grid-2">
+          <div class="metric"><span>Revenu</span><strong id="metricIncome">0</strong></div>
+          <div class="metric"><span>Dépenses</span><strong id="metricSpent">0</strong></div>
+          <div class="metric"><span>Limites proches</span><strong id="metricWarn">0</strong></div>
+          <div class="metric"><span>Dépassements</span><strong id="metricBad">0</strong></div>
+        </div>
+        <section class="panel">
+          <div class="panel-title">
+            <h2>Répartition du mois</h2>
+            <span class="hint" id="budgetPercentTotal">100%</span>
+          </div>
+          <div class="chart-row">
+            <div class="donut" id="categoryChart"></div>
+            <div class="legend" id="categoryLegend"></div>
+          </div>
+          <div id="budgetList" class="stack"></div>
+        </section>
+        <section class="panel">
+          <div class="panel-title">
+            <h2>Dernières dépenses</h2>
+            <button class="icon-btn" data-jump="expenses" title="Ajouter une dépense" type="button">+</button>
+          </div>
+          <div id="recentExpenses" class="stack"></div>
+        </section>
+        <section class="panel">
+          <div class="panel-title">
+            <h2>Epargne</h2>
+            <span class="hint" id="savingsTotal">0%</span>
+          </div>
+          <div id="savingsCompact" class="stack"></div>
+        </section>
+      </section>
+
+      <section id="income" class="view" aria-label="Revenus">
+        <section class="panel">
+          <h2>Revenus du mois</h2>
+          <div class="form-grid">
+            <div class="form-row"><label>Salaire principal</label><input id="incomeSalary" inputmode="decimal" type="number" min="0" step="0.01"></div>
+            <div class="form-row"><label>Primes</label><input id="incomeBonus" inputmode="decimal" type="number" min="0" step="0.01"></div>
+            <div class="form-row"><label>Freelance / autres</label><input id="incomeOther" inputmode="decimal" type="number" min="0" step="0.01"></div>
+          </div>
+          <button class="btn" id="saveIncome" type="button">Enregistrer</button>
+        </section>
+        <section class="panel">
+          <h2>Historique revenus <span id="incomeYearLabel"></span></h2>
+          <div id="incomeHistory" class="stack"></div>
+        </section>
+      </section>
+
+      <section id="expenses" class="view" aria-label="Depenses">
+        <section class="panel">
+          <h2>Nouvelle dépense</h2>
+          <div class="form-grid">
+            <div class="form-row"><label>Date</label><input id="expenseDate" type="date"></div>
+            <div class="form-row"><label>Catégorie</label><select id="expenseCategory"></select></div>
+            <div class="form-row"><label>Montant</label><input id="expenseAmount" inputmode="decimal" type="number" min="0" step="0.01"></div>
+            <div class="form-row"><label>Note</label><textarea id="expenseNote" placeholder="Optionnel"></textarea></div>
+          </div>
+          <button class="btn" id="addExpense" type="button">Ajouter</button>
+        </section>
+        <section class="panel">
+          <div class="panel-title">
+            <h2>Journal du mois</h2>
+            <button class="btn danger" id="clearMonth" type="button">Vider</button>
+          </div>
+          <div id="expenseList" class="stack"></div>
+        </section>
+      </section>
+
+      <section id="budgets" class="view" aria-label="Budgets">
+        <section class="panel">
+          <div class="panel-title">
+            <h2>Pourcentages</h2>
+            <div class="panel-title-actions">
+              <span class="hint" id="budgetCheck">Total 100%</span>
+              <button class="icon-btn" id="addBudgetCategory" type="button" title="Ajouter une catégorie">+</button>
+            </div>
+          </div>
+          <div id="budgetEditList" class="stack"></div>
+          <button class="btn" id="saveBudgets" type="button">Enregistrer</button>
+        </section>
+      </section>
+
+      <section id="savings" class="view" aria-label="Épargne">
+        <section class="panel">
+          <div class="panel-title">
+            <h2>Objectifs</h2>
+            <button class="icon-btn" id="addSaving" type="button" title="Ajouter un objectif">+</button>
+          </div>
+          <div id="savingEditList" class="stack"></div>
+          <button class="btn" id="saveSavings" type="button">Enregistrer</button>
+        </section>
+      </section>
+
+      <section id="history" class="view" aria-label="Historique">
+        <section class="panel">
+          <h2>Bilan <span id="yearLabel"></span></h2>
+          <div class="grid-2">
+            <div class="metric"><span>Revenu annuel</span><strong id="yearRevenue">0</strong></div>
+            <div class="metric"><span>Dépenses annuelles</span><strong id="yearSpent">0</strong></div>
+            <div class="metric"><span>Reste annuel</span><strong id="yearRest">0</strong></div>
+            <div class="metric"><span>Taux d'épargne</span><strong id="yearSavingsRate">0%</strong></div>
+          </div>
+          <p class="hint">Mois le plus dépensier : <span id="yearWorstMonth">—</span></p>
+          <div class="ybars" id="yearChart"></div>
+        </section>
+        <section class="panel">
+          <div class="panel-title">
+            <h2>Vue mois par mois</h2>
+            <button class="btn secondary" id="exportData" type="button">Télécharger (.json)</button>
+          </div>
+          <div id="historyList" class="stack"></div>
+          <p class="hint" id="lastBackupInfo"></p>
+        </section>
+        <section class="panel">
+          <h2>Importer</h2>
+          <div class="form-row"><label>Depuis un fichier .json</label><input type="file" id="importFile" accept="application/json"></div>
+          <div class="form-row"><label>Ou coller une sauvegarde JSON</label><textarea id="importText"></textarea></div>
+          <button class="btn secondary" id="importData" type="button">Importer le texte collé</button>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <nav class="tabs" aria-label="Navigation">
+    <button class="tab active" data-view="dashboard"><i>⌂</i><span>Accueil</span></button>
+    <button class="tab" data-view="income"><i>+</i><span>Revenus</span></button>
+    <button class="tab" data-view="expenses"><i>-</i><span>Dépenses</span></button>
+    <button class="tab" data-view="budgets"><i>%</i><span>Budgets</span></button>
+    <button class="tab" data-view="savings"><i>◇</i><span>Épargne</span></button>
+    <button class="tab" data-view="history"><i>≡</i><span>Bilan</span></button>
+  </nav>
+
+  <script>
+    const MONTHS = [
+      "JANVIER", "FÉVRIER", "MARS", "AVRIL", "MAI", "JUIN",
+      "JUILLET", "AOÛT", "SEPTEMBRE", "OCTOBRE", "NOVEMBRE", "DÉCEMBRE"
+    ];
+
+    const CATEGORY_PALETTE = ["#0f766e", "#b45309", "#7c3aed", "#2563eb", "#be123c", "#15803d", "#a16207", "#0891b2", "#c026d3", "#4338ca"];
+
+    const STORE_KEY = "suivi-revenus-mobile-v2";
+    const LEGACY_STORE_KEY = "suivi-revenus-mobile-v1";
+
+    function uid() {
+      return (globalThis.crypto && crypto.randomUUID) ? crypto.randomUUID() : `id-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    }
+
+    function defaultState() {
+      const year = new Date().getFullYear();
+      return {
+        selectedYear: year,
+        selectedMonth: new Date().getMonth(),
+        years: [year],
+        incomes: {},
+        budgets: [
+          { id: uid(), name: "Logement", percent: 0.30 },
+          { id: uid(), name: "Alimentation", percent: 0.20 },
+          { id: uid(), name: "Transport", percent: 0.10 },
+          { id: uid(), name: "Santé", percent: 0.08 },
+          { id: uid(), name: "Loisirs", percent: 0.08 },
+          { id: uid(), name: "Abonnements", percent: 0.04 },
+          { id: uid(), name: "Autres", percent: 0.20 }
+        ],
+        expenses: [],
+        savings: [
+          { id: uid(), name: "Fonds d'urgence", target: 0, paid: 0 },
+          { id: uid(), name: "Projet personnel", target: 0, paid: 0 },
+          { id: uid(), name: "Épargne retraite", target: 0, paid: 0 },
+          { id: uid(), name: "Autre objectif", target: 0, paid: 0 }
+        ],
+        lastBackup: null
+      };
+    }
+
+    function migrateFromLegacy() {
+      const raw = localStorage.getItem(LEGACY_STORE_KEY);
+      if (!raw) return null;
+      try {
+        const old = JSON.parse(raw);
+        const incomes = {};
+        (old.incomes || []).forEach((row, i) => { incomes[incomeKey(2026, i)] = row; });
+        const budgets = (old.budgets || []).map(b => ({ id: uid(), name: b.name, percent: b.percent }));
+        const savings = (old.savings || []).map(s => ({ id: uid(), name: s.name, target: s.target, paid: s.paid }));
+        return {
+          selectedYear: 2026,
+          selectedMonth: typeof old.selectedMonth === "number" ? old.selectedMonth : new Date().getMonth(),
+          years: [2026],
+          incomes,
+          budgets: budgets.length ? budgets : defaultState().budgets,
+          expenses: (old.expenses || []).map(e => ({ ...e })),
+          savings: savings.length ? savings : defaultState().savings,
+          lastBackup: null
+        };
+      } catch {
+        return null;
+      }
+    }
+
+    function deriveYears(s) {
+      const years = new Set(Array.isArray(s.years) ? s.years : []);
+      Object.keys(s.incomes || {}).forEach(key => {
+        const y = parseInt(key.split("-")[0], 10);
+        if (Number.isInteger(y)) years.add(y);
+      });
+      (s.expenses || []).forEach(e => {
+        const y = parseInt(String(e.date || "").slice(0, 4), 10);
+        if (Number.isInteger(y)) years.add(y);
+      });
+      if (!years.size) years.add(new Date().getFullYear());
+      return [...years].sort((a, b) => a - b);
+    }
+
+    function loadState() {
+      const raw = localStorage.getItem(STORE_KEY);
+      if (raw) {
+        try {
+          const parsed = JSON.parse(raw);
+          const merged = { ...defaultState(), ...parsed };
+          merged.years = deriveYears(merged);
+          if (!merged.years.includes(merged.selectedYear)) merged.selectedYear = merged.years[0];
+          return merged;
+        } catch {
+          /* fall through to migration / defaults */
+        }
+      }
+      const migrated = migrateFromLegacy();
+      if (migrated) {
+        migrated.years = deriveYears(migrated);
+        return migrated;
+      }
+      return defaultState();
+    }
+
+    let state = loadState();
+
+    function saveState() {
+      localStorage.setItem(STORE_KEY, JSON.stringify(state));
+    }
+
+    const money = new Intl.NumberFormat("fr-FR", {
+      style: "currency",
+      currency: "EUR",
+      maximumFractionDigits: 0
+    });
+
+    const pct = new Intl.NumberFormat("fr-FR", {
+      style: "percent",
+      maximumFractionDigits: 0
+    });
+
+    function numberValue(value) {
+      const parsed = Number(String(value).replace(",", "."));
+      return Number.isFinite(parsed) ? parsed : 0;
+    }
+
+    function incomeKey(year, index) {
+      return `${year}-${index}`;
+    }
+
+    function incomeRow(year, index) {
+      return state.incomes[incomeKey(year, index)] || { salary: 0, bonus: 0, other: 0 };
+    }
+
+    function incomeTotal(year, index) {
+      const row = incomeRow(year, index);
+      return numberValue(row.salary) + numberValue(row.bonus) + numberValue(row.other);
+    }
+
+    function monthDatePrefix(year, index) {
+      return `${year}-${String(index + 1).padStart(2, "0")}`;
+    }
+
+    function monthExpenses(year, index) {
+      const prefix = monthDatePrefix(year, index);
+      return state.expenses
+        .filter(expense => String(expense.date || "").startsWith(prefix))
+        .sort((a, b) => String(b.date).localeCompare(String(a.date)));
+    }
+
+    function categoryMatches(expense, budget) {
+      if (expense.categoryId) return expense.categoryId === budget.id;
+      return expense.category === budget.name;
+    }
+
+    function categoryLabel(expense) {
+      if (expense.categoryId) {
+        const budget = state.budgets.find(b => b.id === expense.categoryId);
+        if (budget) return budget.name;
+        return expense.category ? `${expense.category} (supprimée)` : "Catégorie supprimée";
+      }
+      return expense.category || "—";
+    }
+
+    function categoryColor(index) {
+      if (index < 0) return "#9aa39f";
+      return CATEGORY_PALETTE[index % CATEGORY_PALETTE.length];
+    }
+
+    function spentByCategory(year, index, budget) {
+      return monthExpenses(year, index)
+        .filter(expense => categoryMatches(expense, budget))
+        .reduce((sum, expense) => sum + numberValue(expense.amount), 0);
+    }
+
+    function monthSummary(year, index) {
+      const revenue = incomeTotal(year, index);
+      const rows = state.budgets.map(budget => {
+        const limit = revenue * numberValue(budget.percent);
+        const spent = spentByCategory(year, index, budget);
+        const ratio = limit > 0 ? spent / limit : (spent > 0 ? 2 : 0);
+        const status = ratio > 1 ? "bad" : ratio >= 0.8 ? "warn" : "ok";
+        return { ...budget, limit, spent, rest: limit - spent, ratio, status };
+      });
+      const totalSpent = monthExpenses(year, index).reduce((sum, expense) => sum + numberValue(expense.amount), 0);
+      return {
+        revenue,
+        rows,
+        totalSpent,
+        rest: revenue - totalSpent,
+        warnings: rows.filter(row => row.status === "warn").length,
+        over: rows.filter(row => row.status === "bad").length
+      };
+    }
+
+    function yearSummary(year) {
+      const months = MONTHS.map((_, i) => monthSummary(year, i));
+      const revenue = months.reduce((sum, m) => sum + m.revenue, 0);
+      const spent = months.reduce((sum, m) => sum + m.totalSpent, 0);
+      const savingsRate = revenue ? (revenue - spent) / revenue : 0;
+      let worstMonth = -1;
+      let worstSpent = -1;
+      months.forEach((m, i) => {
+        if (m.totalSpent > worstSpent) { worstSpent = m.totalSpent; worstMonth = i; }
+      });
+      return { revenue, spent, rest: revenue - spent, savingsRate, worstMonth, worstSpent, months };
+    }
+
+    function budgetTotalPercent() {
+      return state.budgets.reduce((sum, item) => sum + numberValue(item.percent), 0);
+    }
+
+    function render() {
+      renderYearSelect();
+      renderHeader();
+      renderDashboard();
+      renderIncome();
+      renderExpenses();
+      renderBudgets();
+      renderSavings();
+      renderHistory();
+      saveState();
+    }
+
+    function renderYearSelect() {
+      const select = document.getElementById("yearSelect");
+      const years = [...state.years].sort((a, b) => a - b);
+      select.innerHTML = years.map(y => `<option value="${y}">${y}</option>`).join("");
+      select.value = state.selectedYear;
+    }
+
+    function renderHeader() {
+      const summary = monthSummary(state.selectedYear, state.selectedMonth);
+      document.getElementById("heroPeriod").textContent = `${MONTHS[state.selectedMonth].charAt(0)}${MONTHS[state.selectedMonth].slice(1).toLowerCase()} ${state.selectedYear}`;
+      document.getElementById("heroRemaining").textContent = money.format(summary.rest);
+      document.getElementById("heroStatus").textContent = summary.over ? `${summary.over} dépassement(s)` : summary.warnings ? `${summary.warnings} proche(s)` : "Dans le budget";
+      document.getElementById("metricIncome").textContent = money.format(summary.revenue);
+      document.getElementById("metricSpent").textContent = money.format(summary.totalSpent);
+      document.getElementById("metricWarn").textContent = summary.warnings;
+      document.getElementById("metricBad").textContent = summary.over;
+    }
+
+    function renderDashboard() {
+      const summary = monthSummary(state.selectedYear, state.selectedMonth);
+      document.getElementById("budgetPercentTotal").textContent = `Total ${pct.format(budgetTotalPercent())}`;
+      document.getElementById("budgetList").innerHTML = summary.rows.map(row => budgetRow(row)).join("");
+      renderCategoryChart(summary.rows);
+
+      const recent = monthExpenses(state.selectedYear, state.selectedMonth).slice(0, 4);
+      document.getElementById("recentExpenses").innerHTML = recent.length
+        ? recent.map(expenseRow).join("")
+        : `<div class="empty">Aucune dépense pour ce mois.</div>`;
+
+      const totalTarget = state.savings.reduce((sum, item) => sum + numberValue(item.target), 0);
+      const totalPaid = state.savings.reduce((sum, item) => sum + numberValue(item.paid), 0);
+      document.getElementById("savingsTotal").textContent = totalTarget ? pct.format(totalPaid / totalTarget) : "0%";
+      document.getElementById("savingsCompact").innerHTML = state.savings.length
+        ? state.savings.map(savingRow).join("")
+        : `<div class="empty">Aucun objectif d'épargne.</div>`;
+    }
+
+    function renderCategoryChart(rows) {
+      const el = document.getElementById("categoryChart");
+      const legend = document.getElementById("categoryLegend");
+      const total = rows.reduce((sum, row) => sum + row.spent, 0);
+      if (!total) {
+        el.style.background = "#e7edea";
+        legend.innerHTML = `<div class="empty">Pas encore de dépenses ce mois-ci.</div>`;
+        return;
+      }
+      let acc = 0;
+      const spentRows = rows.filter(row => row.spent > 0);
+      const stops = spentRows.map(row => {
+        const idx = state.budgets.findIndex(b => b.id === row.id);
+        const start = (acc / total) * 360;
+        acc += row.spent;
+        const end = (acc / total) * 360;
+        return `${categoryColor(idx)} ${start}deg ${end}deg`;
+      }).join(", ");
+      el.style.background = `conic-gradient(${stops})`;
+      legend.innerHTML = spentRows
+        .sort((a, b) => b.spent - a.spent)
+        .map(row => {
+          const idx = state.budgets.findIndex(b => b.id === row.id);
+          return `
+            <div class="legend-row">
+              <i style="background:${categoryColor(idx)}"></i>
+              <span>${escapeHtml(row.name)}</span>
+              <b>${pct.format(row.spent / total)}</b>
+            </div>`;
+        }).join("");
+    }
+
+    function budgetRow(row) {
+      const width = Math.min(100, Math.max(0, row.ratio * 100));
+      const label = row.status === "bad" ? "Dépassé" : row.status === "warn" ? "Proche" : "OK";
+      return `
+        <article class="budget-row">
+          <div class="row-head">
+            <strong>${escapeHtml(row.name)}</strong>
+            <span class="status ${row.status}">${label}</span>
+          </div>
+          <div class="bar"><i class="${row.status}" style="width:${width}%"></i></div>
+          <div class="row-stats">
+            <span>Limite<b>${money.format(row.limit)}</b></span>
+            <span>Dépense<b>${money.format(row.spent)}</b></span>
+            <span>Reste<b>${money.format(row.rest)}</b></span>
+          </div>
+        </article>`;
+    }
+
+    function savingRow(item) {
+      const target = numberValue(item.target);
+      const paid = numberValue(item.paid);
+      const ratio = target ? paid / target : 0;
+      return `
+        <article class="saving-row">
+          <div class="row-head">
+            <strong>${escapeHtml(item.name)}</strong>
+            <span class="hint">${pct.format(ratio)}</span>
+          </div>
+          <div class="bar"><i style="width:${Math.min(100, ratio * 100)}%"></i></div>
+          <div class="row-stats">
+            <span>Cible<b>${money.format(target)}</b></span>
+            <span>Versé<b>${money.format(paid)}</b></span>
+            <span>Reste<b>${money.format(Math.max(0, target - paid))}</b></span>
+          </div>
+        </article>`;
+    }
+
+    function renderIncome() {
+      const row = incomeRow(state.selectedYear, state.selectedMonth);
+      document.getElementById("incomeSalary").value = row.salary || "";
+      document.getElementById("incomeBonus").value = row.bonus || "";
+      document.getElementById("incomeOther").value = row.other || "";
+      document.getElementById("incomeYearLabel").textContent = state.selectedYear;
+      document.getElementById("incomeHistory").innerHTML = MONTHS.map((month, index) => {
+        const total = incomeTotal(state.selectedYear, index);
+        return `<article class="history-row"><div class="row-head"><strong>${month}</strong><span>${money.format(total)}</span></div></article>`;
+      }).join("");
+    }
+
+    function renderExpenses() {
+      const categories = state.budgets.map(item => `<option value="${escapeAttr(item.id)}">${escapeHtml(item.name)}</option>`).join("");
+      document.getElementById("expenseCategory").innerHTML = categories;
+      document.getElementById("expenseDate").value = document.getElementById("expenseDate").value || `${monthDatePrefix(state.selectedYear, state.selectedMonth)}-01`;
+      const list = monthExpenses(state.selectedYear, state.selectedMonth);
+      document.getElementById("expenseList").innerHTML = list.length
+        ? list.map(expenseRow).join("")
+        : `<div class="empty">Le journal est vide pour ${MONTHS[state.selectedMonth].toLowerCase()} ${state.selectedYear}.</div>`;
+    }
+
+    function expenseRow(expense) {
+      return `
+        <article class="expense-row">
+          <div class="row-head">
+            <strong>${escapeHtml(categoryLabel(expense))}</strong>
+            <span>${money.format(numberValue(expense.amount))}</span>
+          </div>
+          <small>${escapeHtml(expense.date || "")}${expense.note ? ` - ${escapeHtml(expense.note)}` : ""}</small>
+          <button class="icon-btn" data-delete-expense="${escapeAttr(expense.id)}" title="Supprimer" type="button">×</button>
+        </article>`;
+    }
+
+    function renderBudgets() {
+      const total = budgetTotalPercent();
+      const diffPts = Math.round(total * 100) - 100;
+      const el = document.getElementById("budgetCheck");
+      el.textContent = diffPts === 0 ? "Total 100%" : `Total ${pct.format(total)} (${diffPts > 0 ? "+" : ""}${diffPts} pts)`;
+      el.className = "hint" + (diffPts === 0 ? "" : Math.abs(diffPts) <= 5 ? " warn-text" : " bad-text");
+
+      document.getElementById("budgetEditList").innerHTML = state.budgets.length
+        ? state.budgets.map(item => `
+          <div class="edit-row">
+            <input data-budget-name="${escapeAttr(item.id)}" value="${escapeAttr(item.name)}" placeholder="Nom">
+            <input data-budget-percent="${escapeAttr(item.id)}" inputmode="decimal" type="number" min="0" max="100" step="1" value="${Math.round(numberValue(item.percent) * 100)}">
+            <button class="icon-btn" data-delete-budget="${escapeAttr(item.id)}" title="Supprimer" type="button">×</button>
+          </div>
+        `).join("")
+        : `<div class="empty">Aucune catégorie. Ajoutes-en une avec le bouton +.</div>`;
+    }
+
+    function renderSavings() {
+      document.getElementById("savingEditList").innerHTML = state.savings.length
+        ? state.savings.map(item => `
+          <article class="panel">
+            <div class="row-head">
+              <input class="saving-head-input" data-saving-name="${escapeAttr(item.id)}" value="${escapeAttr(item.name)}" placeholder="Nom de l'objectif">
+              <button class="icon-btn" data-delete-saving="${escapeAttr(item.id)}" title="Supprimer" type="button">×</button>
+            </div>
+            <div class="grid-2">
+              <div class="form-row"><label>Cible</label><input data-saving-target="${escapeAttr(item.id)}" type="number" min="0" step="0.01" value="${numberValue(item.target) || ""}"></div>
+              <div class="form-row"><label>Versé</label><input data-saving-paid="${escapeAttr(item.id)}" type="number" min="0" step="0.01" value="${numberValue(item.paid) || ""}"></div>
+            </div>
+          </article>
+        `).join("")
+        : `<div class="empty">Aucun objectif. Ajoutes-en un avec le bouton +.</div>`;
+    }
+
+    function renderYearChart(year) {
+      const summaries = MONTHS.map((_, i) => monthSummary(year, i));
+      const maxAbs = Math.max(1, ...summaries.map(s => Math.abs(s.rest)));
+      document.getElementById("yearChart").innerHTML = summaries.map((s, i) => {
+        const h = Math.max(3, Math.round((Math.abs(s.rest) / maxAbs) * 56));
+        const cls = s.rest < 0 ? "bad" : "";
+        return `
+          <div class="ybar" title="${MONTHS[i]}: ${money.format(s.rest)}">
+            <div class="ybar-fill ${cls}" style="height:${h}px"></div>
+            <span>${MONTHS[i].slice(0, 1)}</span>
+          </div>`;
+      }).join("");
+    }
+
+    function renderHistory() {
+      const year = state.selectedYear;
+      document.getElementById("yearLabel").textContent = year;
+      const ys = yearSummary(year);
+      document.getElementById("yearRevenue").textContent = money.format(ys.revenue);
+      document.getElementById("yearSpent").textContent = money.format(ys.spent);
+      document.getElementById("yearRest").textContent = money.format(ys.rest);
+      document.getElementById("yearSavingsRate").textContent = pct.format(ys.savingsRate);
+      document.getElementById("yearWorstMonth").textContent = ys.worstSpent > 0
+        ? `${MONTHS[ys.worstMonth]} (${money.format(ys.worstSpent)})`
+        : "—";
+      renderYearChart(year);
+
+      document.getElementById("historyList").innerHTML = MONTHS.map((month, index) => {
+        const summary = monthSummary(year, index);
+        const spentRatio = summary.revenue ? summary.totalSpent / summary.revenue : 0;
+        const status = summary.over ? `${summary.over} dépassement(s)` : "OK";
+        return `
+          <article class="history-row">
+            <div class="row-head"><strong>${month}</strong><span class="status ${summary.over ? "bad" : "ok"}">${status}</span></div>
+            <div class="row-stats">
+              <span>Revenu<b>${money.format(summary.revenue)}</b></span>
+              <span>Dépense<b>${money.format(summary.totalSpent)}</b></span>
+              <span>Utilisé<b>${pct.format(spentRatio)}</b></span>
+            </div>
+          </article>
+        `;
+      }).join("");
+
+      renderBackupInfo();
+    }
+
+    function renderBackupInfo() {
+      const el = document.getElementById("lastBackupInfo");
+      if (!state.lastBackup) {
+        el.textContent = "Dernière sauvegarde : jamais — pense à exporter tes données régulièrement.";
+        el.className = "hint bad-text";
+        return;
+      }
+      const days = Math.floor((Date.now() - new Date(state.lastBackup).getTime()) / 86400000);
+      el.textContent = `Dernière sauvegarde : ${new Date(state.lastBackup).toLocaleString("fr-FR")}`;
+      el.className = "hint" + (days >= 14 ? " bad-text" : days >= 7 ? " warn-text" : "");
+    }
+
+    function setView(viewName) {
+      document.querySelectorAll(".view").forEach(view => view.classList.toggle("active", view.id === viewName));
+      document.querySelectorAll(".tab").forEach(tab => tab.classList.toggle("active", tab.dataset.view === viewName));
+      scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      }[char]));
+    }
+
+    function escapeAttr(value) {
+      return escapeHtml(value).replace(/`/g, "&#96;");
+    }
+
+    function commitBudgetEdits() {
+      document.querySelectorAll("[data-budget-name]").forEach(input => {
+        const item = state.budgets.find(b => b.id === input.dataset.budgetName);
+        if (item) item.name = input.value.trim() || item.name;
+      });
+      document.querySelectorAll("[data-budget-percent]").forEach(input => {
+        const item = state.budgets.find(b => b.id === input.dataset.budgetPercent);
+        if (item) item.percent = numberValue(input.value) / 100;
+      });
+    }
+
+    function commitSavingEdits() {
+      document.querySelectorAll("[data-saving-name]").forEach(input => {
+        const item = state.savings.find(s => s.id === input.dataset.savingName);
+        if (item) item.name = input.value.trim() || item.name;
+      });
+      document.querySelectorAll("[data-saving-target]").forEach(input => {
+        const item = state.savings.find(s => s.id === input.dataset.savingTarget);
+        if (item) item.target = numberValue(input.value);
+      });
+      document.querySelectorAll("[data-saving-paid]").forEach(input => {
+        const item = state.savings.find(s => s.id === input.dataset.savingPaid);
+        if (item) item.paid = numberValue(input.value);
+      });
+    }
+
+    function triggerJsonDownload(filename, text) {
+      const blob = new Blob([text], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function applyImportedState(parsed) {
+      state = { ...defaultState(), ...parsed };
+      state.years = deriveYears(state);
+      if (!state.years.includes(state.selectedYear)) state.selectedYear = state.years[0];
+      render();
+    }
+
+    function setup() {
+      const monthSelect = document.getElementById("monthSelect");
+      monthSelect.innerHTML = MONTHS.map((month, index) => `<option value="${index}">${month}</option>`).join("");
+      monthSelect.value = state.selectedMonth;
+      monthSelect.addEventListener("change", event => {
+        state.selectedMonth = Number(event.target.value);
+        document.getElementById("expenseDate").value = `${monthDatePrefix(state.selectedYear, state.selectedMonth)}-01`;
+        render();
+      });
+
+      document.getElementById("yearSelect").addEventListener("change", event => {
+        state.selectedYear = Number(event.target.value);
+        document.getElementById("expenseDate").value = `${monthDatePrefix(state.selectedYear, state.selectedMonth)}-01`;
+        render();
+      });
+
+      document.getElementById("addYear").addEventListener("click", () => {
+        const suggestion = Math.max(...state.years) + 1;
+        const input = prompt("Ajouter quelle année ?", String(suggestion));
+        if (!input) return;
+        const year = parseInt(input, 10);
+        if (!Number.isInteger(year) || year < 1900 || year > 2999) {
+          alert("Année invalide.");
+          return;
+        }
+        if (!state.years.includes(year)) {
+          state.years.push(year);
+          state.years.sort((a, b) => a - b);
+        }
+        state.selectedYear = year;
+        render();
+      });
+
+      document.querySelectorAll(".tab").forEach(tab => tab.addEventListener("click", () => setView(tab.dataset.view)));
+      document.body.addEventListener("click", event => {
+        const jump = event.target.closest("[data-jump]");
+        if (jump) setView(jump.dataset.jump);
+
+        const deleteExpense = event.target.closest("[data-delete-expense]");
+        if (deleteExpense) {
+          state.expenses = state.expenses.filter(expense => expense.id !== deleteExpense.dataset.deleteExpense);
+          render();
+          return;
+        }
+
+        const deleteBudget = event.target.closest("[data-delete-budget]");
+        if (deleteBudget) {
+          const id = deleteBudget.dataset.deleteBudget;
+          const budget = state.budgets.find(b => b.id === id);
+          const hasSpend = budget && state.expenses.some(e => categoryMatches(e, budget));
+          if (hasSpend && !confirm(`"${budget.name}" a des dépenses associées. Les dépenses resteront dans le journal mais ne compteront plus dans aucun budget. Supprimer quand même ?`)) return;
+          commitBudgetEdits();
+          state.budgets = state.budgets.filter(b => b.id !== id);
+          render();
+          return;
+        }
+
+        const deleteSaving = event.target.closest("[data-delete-saving]");
+        if (deleteSaving) {
+          const id = deleteSaving.dataset.deleteSaving;
+          const goal = state.savings.find(s => s.id === id);
+          if (goal && numberValue(goal.paid) > 0 && !confirm(`"${goal.name}" a déjà ${money.format(numberValue(goal.paid))} versés. Supprimer quand même cet objectif ?`)) return;
+          commitSavingEdits();
+          state.savings = state.savings.filter(s => s.id !== id);
+          render();
+          return;
+        }
+      });
+
+      document.getElementById("saveIncome").addEventListener("click", () => {
+        state.incomes[incomeKey(state.selectedYear, state.selectedMonth)] = {
+          salary: numberValue(document.getElementById("incomeSalary").value),
+          bonus: numberValue(document.getElementById("incomeBonus").value),
+          other: numberValue(document.getElementById("incomeOther").value)
+        };
+        render();
+        setView("dashboard");
+      });
+
+      document.getElementById("addExpense").addEventListener("click", () => {
+        const amount = numberValue(document.getElementById("expenseAmount").value);
+        if (!amount) return;
+        const categoryId = document.getElementById("expenseCategory").value;
+        const budget = state.budgets.find(b => b.id === categoryId);
+        state.expenses.push({
+          id: uid(),
+          date: document.getElementById("expenseDate").value || `${monthDatePrefix(state.selectedYear, state.selectedMonth)}-01`,
+          categoryId,
+          category: budget ? budget.name : "",
+          amount,
+          note: document.getElementById("expenseNote").value.trim()
+        });
+        document.getElementById("expenseAmount").value = "";
+        document.getElementById("expenseNote").value = "";
+        render();
+      });
+
+      document.getElementById("clearMonth").addEventListener("click", () => {
+        if (!confirm(`Vider toutes les dépenses de ${MONTHS[state.selectedMonth].toLowerCase()} ${state.selectedYear} ? Cette action est irréversible.`)) return;
+        const prefix = monthDatePrefix(state.selectedYear, state.selectedMonth);
+        state.expenses = state.expenses.filter(expense => !String(expense.date || "").startsWith(prefix));
+        render();
+      });
+
+      document.getElementById("addBudgetCategory").addEventListener("click", () => {
+        commitBudgetEdits();
+        state.budgets.push({ id: uid(), name: "Nouvelle catégorie", percent: 0 });
+        render();
+        const inputs = document.querySelectorAll("[data-budget-name]");
+        const last = inputs[inputs.length - 1];
+        if (last) { last.focus(); last.select(); }
+      });
+
+      document.getElementById("saveBudgets").addEventListener("click", () => {
+        commitBudgetEdits();
+        render();
+        setView("dashboard");
+      });
+
+      document.getElementById("addSaving").addEventListener("click", () => {
+        commitSavingEdits();
+        state.savings.push({ id: uid(), name: "Nouvel objectif", target: 0, paid: 0 });
+        render();
+        const inputs = document.querySelectorAll("[data-saving-name]");
+        const last = inputs[inputs.length - 1];
+        if (last) { last.focus(); last.select(); }
+      });
+
+      document.getElementById("saveSavings").addEventListener("click", () => {
+        commitSavingEdits();
+        render();
+        setView("dashboard");
+      });
+
+      document.getElementById("exportData").addEventListener("click", () => {
+        const text = JSON.stringify(state, null, 2);
+        triggerJsonDownload(`suivi-revenus-${new Date().toISOString().slice(0, 10)}.json`, text);
+        state.lastBackup = new Date().toISOString();
+        render();
+        setView("history");
+      });
+
+      document.getElementById("importFile").addEventListener("change", event => {
+        const file = event.target.files && event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            applyImportedState(JSON.parse(String(reader.result)));
+          } catch {
+            alert("Fichier JSON invalide.");
+          }
+          event.target.value = "";
+        };
+        reader.readAsText(file);
+      });
+
+      document.getElementById("importData").addEventListener("click", () => {
+        try {
+          applyImportedState(JSON.parse(document.getElementById("importText").value));
+          document.getElementById("importText").value = "";
+        } catch {
+          alert("Sauvegarde JSON invalide.");
+        }
+      });
+
+      render();
+    }
+
+    setup();
+  </script>
+</body>
+</html>
