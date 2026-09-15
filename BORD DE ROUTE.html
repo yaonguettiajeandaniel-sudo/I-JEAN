@@ -1,0 +1,1326 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1D3A5F">
+<link rel="manifest" href="bord-de-route.manifest.json">
+<link rel="icon" href="bord-de-route-icon-192.png">
+<link rel="apple-touch-icon" href="bord-de-route-icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Bord de Route">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Bord de Route</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  :root{ color-scheme:light dark; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); }
+  img{ max-width:100%; }
+
+  :root{
+    --paper:#EEF0EE;
+    --surface:#FFFFFF;
+    --surface-2:#F7F8F6;
+    --ink:#171A1F;
+    --ink-soft:#5B616B;
+    --ink-faint:#8A8F97;
+    --line:#DCE0DC;
+    --line-strong:#C6CBC6;
+    --accent:#D99400;
+    --accent-ink:#1B1F24;
+    --accent-soft:#FBEBC9;
+    --deep:#1D3A5F;
+    --deep-soft:#E4ECF3;
+    --good:#2E7D4F;
+    --good-soft:#E1F1E6;
+    --warn:#C17A00;
+    --warn-soft:#FBEDD6;
+    --bad:#B3392A;
+    --bad-soft:#F8E4E0;
+    --plate-bg:#1D3A5F;
+    --plate-fg:#FFFFFF;
+    --shadow: 0 1px 2px rgba(23,26,31,.06), 0 6px 20px -8px rgba(23,26,31,.12);
+    --radius: 12px;
+    font-variant-numeric: tabular-nums;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#14171B;
+      --surface:#1B1F24;
+      --surface-2:#20252B;
+      --ink:#ECEEEF;
+      --ink-soft:#A4ABB4;
+      --ink-faint:#767D86;
+      --line:#2B3037;
+      --line-strong:#3A4048;
+      --accent:#F0B429;
+      --accent-ink:#171A1F;
+      --accent-soft:#3A2E10;
+      --deep:#7FAAD4;
+      --deep-soft:#1C2A3A;
+      --good:#5BBE84;
+      --good-soft:#173425;
+      --warn:#E2A93B;
+      --warn-soft:#3A2C10;
+      --bad:#E4786A;
+      --bad-soft:#3A1F1C;
+      --plate-bg:#1C2A3A;
+      --plate-fg:#7FAAD4;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -8px rgba(0,0,0,.5);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#14171B;
+    --surface:#1B1F24;
+    --surface-2:#20252B;
+    --ink:#ECEEEF;
+    --ink-soft:#A4ABB4;
+    --ink-faint:#767D86;
+    --line:#2B3037;
+    --line-strong:#3A4048;
+    --accent:#F0B429;
+    --accent-ink:#171A1F;
+    --accent-soft:#3A2E10;
+    --deep:#7FAAD4;
+    --deep-soft:#1C2A3A;
+    --good:#5BBE84;
+    --good-soft:#173425;
+    --warn:#E2A93B;
+    --warn-soft:#3A2C10;
+    --bad:#E4786A;
+    --bad-soft:#3A1F1C;
+    --plate-bg:#1C2A3A;
+    --plate-fg:#7FAAD4;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -8px rgba(0,0,0,.5);
+  }
+
+  *{box-sizing:border-box;}
+  [hidden]{ display:none !important; }
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{
+    font-family:"Fraunces", Georgia, serif;
+    text-wrap:balance;
+    margin:0;
+    letter-spacing:-0.01em;
+  }
+  .mono{ font-family:"IBM Plex Mono", ui-monospace, monospace; }
+  a{color:inherit;}
+  button{font-family:inherit;}
+
+  .app{ max-width:1080px; margin:0 auto; padding-inline:16px; padding-block: calc(env(safe-area-inset-top,0px) + 18px) calc(env(safe-area-inset-bottom,0px) + 48px); }
+
+  /* ---------- Header ---------- */
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+    padding-bottom:16px; margin-bottom:6px;
+  }
+  .brand{ display:flex; align-items:center; gap:12px; min-width:0; }
+  @media (max-width:460px){
+    .brand h1{ white-space:normal; overflow:visible; text-overflow:clip; font-size:18px; }
+    .brand .sub{ display:none; }
+  }
+  .plate{
+    font-family:"IBM Plex Mono"; font-weight:600; font-size:13px;
+    background:var(--plate-bg); color:var(--plate-fg); padding:5px 9px; border-radius:6px;
+    letter-spacing:0.04em; flex-shrink:0;
+  }
+  .brand h1{ font-size:20px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .brand .sub{ font-size:12px; color:var(--ink-faint); }
+  .alert-pill{
+    display:flex; align-items:center; gap:6px; font-size:12.5px; font-weight:600;
+    background:var(--warn-soft); color:var(--warn); border-radius:999px; padding:6px 12px;
+    white-space:nowrap; flex-shrink:0; border:1px solid transparent;
+  }
+  .alert-pill.ok{ background:var(--good-soft); color:var(--good); }
+  .alert-pill svg{ width:14px; height:14px; }
+
+  /* ---------- Tabs ---------- */
+  .tabs{
+    display:flex; gap:4px; overflow-x:auto; -webkit-overflow-scrolling:touch;
+    border-bottom:1px solid var(--line); margin-bottom:22px; scrollbar-width:none;
+  }
+  .tabs::-webkit-scrollbar{ display:none; }
+  .tab{
+    appearance:none; border:none; background:none; cursor:pointer;
+    padding:10px 14px 12px; font-size:14px; font-weight:500; color:var(--ink-soft);
+    border-bottom:2px solid transparent; white-space:nowrap; display:flex; align-items:center; gap:7px;
+  }
+  .tab .n{
+    font-family:"IBM Plex Mono"; font-size:11px; background:var(--surface-2); color:var(--ink-faint);
+    border-radius:999px; padding:1px 6px; min-width:18px; text-align:center;
+  }
+  .tab.active{ color:var(--ink); border-bottom-color:var(--accent); }
+  .tab.active .n{ background:var(--accent-soft); color:var(--accent); }
+  .tab:hover:not(.active){ color:var(--ink); }
+
+  section.view{ display:none; animation:fade .25s ease; }
+  section.view.active{ display:block; }
+  @keyframes fade{ from{opacity:0; transform:translateY(3px);} to{opacity:1; transform:none;} }
+  @media (prefers-reduced-motion: reduce){ section.view{ animation:none; } }
+
+  /* ---------- Generic building blocks ---------- */
+  .grid{ display:grid; gap:14px; }
+  .kpis{ grid-template-columns:repeat(4, 1fr); margin-bottom:20px; }
+  @media (max-width:820px){ .kpis{ grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:460px){ .kpis{ grid-template-columns:1fr; } }
+
+  .card{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+    padding:16px 18px;
+  }
+  .kpi{ box-shadow:var(--shadow); }
+  .kpi .label{ font-size:11.5px; text-transform:uppercase; letter-spacing:0.06em; color:var(--ink-faint); font-weight:600; }
+  .kpi .value{ font-family:"IBM Plex Mono"; font-size:26px; font-weight:600; margin-top:6px; line-height:1.1; }
+  .kpi .value.small{font-size:20px;}
+  .kpi .foot{ font-size:12.5px; color:var(--ink-soft); margin-top:6px; }
+  .kpi .foot.good{ color:var(--good); } .kpi .foot.bad{ color:var(--bad); } .kpi .foot.warn{ color:var(--warn); }
+
+  .section-head{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin:28px 0 12px; flex-wrap:wrap; }
+  .section-head h2{ font-size:19px; }
+  .section-head .hint{ font-size:12.5px; color:var(--ink-faint); }
+
+  .bar-row{ display:flex; align-items:center; gap:12px; padding:9px 0; border-bottom:1px solid var(--line); }
+  .bar-row:last-child{ border-bottom:none; }
+  .bar-row .m{ width:74px; font-size:12.5px; color:var(--ink-soft); flex-shrink:0; }
+  .bar-track{ flex:1; height:9px; border-radius:5px; background:var(--surface-2); overflow:hidden; position:relative; }
+  .bar-fill{ height:100%; border-radius:5px; background:var(--deep); }
+  .bar-fill.hit{ background:var(--good); }
+  .bar-fill.behind{ background:var(--warn); }
+  .bar-row .amt{ width:150px; text-align:right; font-family:"IBM Plex Mono"; font-size:12.5px; color:var(--ink-soft); flex-shrink:0; }
+
+  .pill{ display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:600; padding:3px 9px; border-radius:999px; }
+  .pill.good{ background:var(--good-soft); color:var(--good); }
+  .pill.warn{ background:var(--warn-soft); color:var(--warn); }
+  .pill.bad{ background:var(--bad-soft); color:var(--bad); }
+  .pill.neutral{ background:var(--surface-2); color:var(--ink-faint); }
+
+  table{ width:100%; border-collapse:collapse; font-size:13.5px; }
+  th{ text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:0.05em; color:var(--ink-faint); font-weight:600; padding:8px 10px; border-bottom:1px solid var(--line-strong); }
+  td{ padding:9px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+  tr:last-child td{ border-bottom:none; }
+  td.num, th.num{ text-align:right; font-family:"IBM Plex Mono"; }
+  .table-wrap{ overflow-x:auto; border:1px solid var(--line); border-radius:var(--radius); background:var(--surface); }
+  .table-wrap table{ min-width:560px; }
+  .row-note{ font-size:12px; color:var(--ink-faint); margin-top:2px; }
+  .empty-row td{ text-align:center; color:var(--ink-faint); padding:26px 10px; }
+
+  form.entry{
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(140px,1fr)); gap:10px;
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:16px; margin-bottom:16px;
+    align-items:end;
+  }
+  form.entry .field{ display:flex; flex-direction:column; gap:5px; min-width:0; }
+  form.entry .field.grow{ grid-column:span 2; }
+  @media (max-width:460px){ form.entry .field.grow{ grid-column:span 1; } }
+  label{ font-size:11.5px; font-weight:600; color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.04em; }
+  input, select{
+    font:inherit; font-size:14px; padding:8px 10px; border-radius:8px; border:1px solid var(--line-strong);
+    background:var(--surface-2); color:var(--ink); width:100%;
+  }
+  input:focus, select:focus, button:focus-visible{ outline:2px solid var(--deep); outline-offset:1px; }
+  input.mono{ font-family:"IBM Plex Mono"; }
+
+  .btn{
+    appearance:none; border:1px solid var(--line-strong); background:var(--surface-2); color:var(--ink);
+    border-radius:8px; padding:9px 14px; font-size:13.5px; font-weight:600; cursor:pointer;
+  }
+  .btn:hover{ border-color:var(--ink-faint); }
+  .btn.primary{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+  .btn.primary:hover{ filter:brightness(1.05); }
+  .btn.ghost{ background:none; border-color:transparent; color:var(--ink-soft); padding:6px 8px; font-size:12.5px; }
+  .btn.ghost:hover{ color:var(--bad); }
+  .btn.small{ padding:6px 10px; font-size:12.5px; }
+  .btn[disabled]{ opacity:.5; cursor:default; }
+
+  .two-col{ display:grid; grid-template-columns:1.3fr 1fr; gap:20px; align-items:start; }
+  @media (max-width:760px){ .two-col{ grid-template-columns:1fr; } }
+
+  .creditor-card{ display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--line); flex-wrap:wrap; }
+  .creditor-card:last-child{ border-bottom:none; }
+  .creditor-card .who{ width:92px; font-weight:600; font-size:13.5px; flex-shrink:0; }
+  .creditor-card .bars{ flex:1; min-width:140px; }
+  .creditor-card .track{ height:8px; border-radius:5px; background:var(--surface-2); overflow:hidden; }
+  .creditor-card .fill{ height:100%; background:var(--deep); border-radius:5px; }
+  .creditor-card .nums{ display:flex; justify-content:space-between; font-size:11.5px; color:var(--ink-faint); margin-top:4px; font-family:"IBM Plex Mono"; }
+  .creditor-card .reste{ width:110px; text-align:right; flex-shrink:0; }
+  .creditor-card .reste b{ font-family:"IBM Plex Mono"; font-size:14px; }
+  .creditor-card .reste div{ font-size:11px; color:var(--ink-faint); }
+  .creditor-card .actions{ display:flex; gap:6px; align-items:center; flex-shrink:0; margin-left:auto; }
+  @media (max-width:640px){ .creditor-card .actions{ margin-left:104px; } }
+
+  .alert-item{ display:flex; gap:10px; align-items:flex-start; padding:10px 0; border-bottom:1px solid var(--line); font-size:13.5px; }
+  .alert-item:last-child{ border-bottom:none; }
+  .alert-item .dot{ width:8px; height:8px; border-radius:50%; margin-top:5px; flex-shrink:0; }
+  .alert-item .dot.bad{ background:var(--bad); } .alert-item .dot.warn{ background:var(--warn); }
+  .alert-item .txt b{ display:block; }
+  .alert-item .txt span{ color:var(--ink-soft); font-size:12.5px; }
+
+  .subtabs{ display:flex; gap:8px; margin-bottom:14px; }
+  .subtab{ appearance:none; border:1px solid var(--line-strong); background:var(--surface); color:var(--ink-soft); border-radius:999px; padding:6px 13px; font-size:12.5px; font-weight:600; cursor:pointer; }
+  .subtab.active{ background:var(--deep); border-color:var(--deep); color:#fff; }
+
+  .stat-strip{ display:flex; gap:22px; flex-wrap:wrap; margin-bottom:16px; }
+  .stat-strip .s{ font-size:13px; color:var(--ink-soft); }
+  .stat-strip .s b{ font-family:"IBM Plex Mono"; color:var(--ink); font-weight:600; }
+
+  /* ---------- Evolution chart ---------- */
+  .chart-card{ margin-bottom:20px; }
+  .chart-legend{ display:flex; gap:18px; flex-wrap:wrap; margin-bottom:10px; font-size:12.5px; color:var(--ink-soft); }
+  .chart-legend .lg{ display:flex; align-items:center; gap:6px; }
+  .chart-legend .sw{ width:14px; height:3px; border-radius:2px; flex-shrink:0; }
+  .chart-wrap{ position:relative; }
+  .chart-wrap svg{ display:block; width:100%; height:auto; overflow:visible; }
+  .chart-tip{
+    position:absolute; pointer-events:none; background:var(--ink); color:var(--paper);
+    font-size:12px; padding:7px 10px; border-radius:8px; box-shadow:var(--shadow);
+    transform:translate(-50%,-115%); white-space:nowrap; opacity:0; transition:opacity .1s; z-index:5;
+  }
+  .chart-tip.show{ opacity:1; }
+  .chart-tip .d{ color:var(--ink-faint); font-size:11px; margin-bottom:2px; }
+  .chart-tip .row{ display:flex; justify-content:space-between; gap:12px; }
+  .chart-tip .row .k{ display:flex; align-items:center; gap:5px; }
+  .chart-tip .row .k i{ width:8px; height:8px; border-radius:2px; display:inline-block; }
+
+  /* ---------- Inline editable numbers ---------- */
+  .edit-num{ cursor:pointer; border-bottom:1px dashed var(--ink-faint); }
+  .edit-num:hover{ color:var(--deep); border-color:var(--deep); }
+  .inline-input{ width:88px; font-family:"IBM Plex Mono"; font-size:12.5px; padding:2px 6px; border-radius:5px; }
+  .objectif-default{ display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--ink-soft); margin-top:10px; padding-top:10px; border-top:1px solid var(--line); }
+
+  .row-actions{ display:flex; gap:4px; white-space:nowrap; }
+  .edit-banner{ display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--deep); background:var(--deep-soft); padding:6px 12px; border-radius:8px; margin:-6px 0 12px; }
+  .edit-banner .btn{ padding:4px 10px; font-size:12px; }
+
+  .filter-row{ display:flex; align-items:center; gap:10px; margin-bottom:14px; flex-wrap:wrap; }
+  .filter-row select{ width:auto; min-width:150px; }
+
+  .rembourser-form{ display:flex; align-items:center; gap:6px; }
+  .rembourser-form input{ width:100px; }
+
+  .toast{
+    position:fixed; left:50%; bottom:calc(env(safe-area-inset-bottom,0px) + 20px); transform:translateX(-50%) translateY(12px);
+    background:var(--ink); color:var(--paper); padding:10px 16px; border-radius:999px; font-size:13px; font-weight:500;
+    box-shadow:var(--shadow); opacity:0; pointer-events:none; transition:opacity .2s, transform .2s; z-index:50;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+  .foot-note{ margin-top:36px; padding-top:16px; border-top:1px solid var(--line); font-size:12px; color:var(--ink-faint); }
+  .foot-note p{ margin:0 0 10px; max-width:60ch; }
+
+  .data-actions{ display:flex; gap:8px; flex-wrap:wrap; }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <div class="topbar">
+    <div class="brand">
+      <span class="plate">AA-395-AD</span>
+      <div style="min-width:0;">
+        <h1>Bord de Route</h1>
+        <div class="sub">Suivi véhicule &mdash; contrat de vente</div>
+      </div>
+    </div>
+    <div id="headerAlert" class="alert-pill ok">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg>
+      <span>Chargement…</span>
+    </div>
+  </div>
+
+  <nav class="tabs" id="tabs">
+    <button class="tab active" data-tab="dash">Tableau de bord</button>
+    <button class="tab" data-tab="journal">Recettes <span class="n" id="cJournal">0</span></button>
+    <button class="tab" data-tab="entretien">Entretien <span class="n" id="cEntretien">0</span></button>
+    <button class="tab" data-tab="documents">Documents <span class="n" id="cDocs">0</span></button>
+    <button class="tab" data-tab="financement">Financement</button>
+  </nav>
+
+  <!-- ============ DASHBOARD ============ -->
+  <section class="view active" id="view-dash">
+    <div class="grid kpis">
+      <div class="card kpi">
+        <div class="label">Recette totale</div>
+        <div class="value mono" id="kpiRecette">—</div>
+        <div class="foot">Depuis le début du contrat</div>
+      </div>
+      <div class="card kpi">
+        <div class="label">Solde net</div>
+        <div class="value mono" id="kpiSolde">—</div>
+        <div class="foot" id="kpiSoldeFoot">Après remboursements créanciers</div>
+      </div>
+      <div class="card kpi">
+        <div class="label">Reste à verser (vente)</div>
+        <div class="value mono" id="kpiReste">—</div>
+        <div class="foot" id="kpiResteFoot">&nbsp;</div>
+      </div>
+      <div class="card kpi">
+        <div class="label">Dettes en cours</div>
+        <div class="value mono" id="kpiDettes">—</div>
+        <div class="foot" id="kpiDettesFoot">Exploitation + créanciers</div>
+      </div>
+    </div>
+
+    <div class="section-head" style="margin-top:0;">
+      <h2>Évolution de la recette</h2>
+      <span class="hint">Cumul depuis le début du contrat</span>
+    </div>
+    <div class="card chart-card">
+      <div class="chart-legend">
+        <span class="lg"><span class="sw" style="background:var(--deep);"></span> Réel cumulé</span>
+        <span class="lg"><span class="sw" style="background:var(--ink-faint); border-top:2px dashed var(--ink-faint); height:0;"></span> Théorique cumulé</span>
+      </div>
+      <div class="chart-wrap" id="evoChart"></div>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <div class="section-head" style="margin-top:0;">
+          <h2>Objectif mensuel</h2>
+          <span class="hint">Clic sur un montant pour l'ajuster</span>
+        </div>
+        <div class="card">
+          <div id="monthBars"></div>
+          <div class="objectif-default">Objectif par défaut : <span class="edit-num mono" id="objDefault" data-edit-default="1"></span> / mois</div>
+        </div>
+      </div>
+      <div>
+        <div class="section-head" style="margin-top:0;">
+          <h2>Alertes</h2>
+        </div>
+        <div class="card" id="alertList"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ JOURNAL ============ -->
+  <section class="view" id="view-journal">
+    <div class="section-head" style="margin-top:0;">
+      <h2>Recette quotidienne</h2>
+      <span class="hint">Théorique : 23 000 F (lun&ndash;ven), 17 000 F (sam), 0 F (dim)</span>
+    </div>
+    <div class="edit-banner" id="editBannerJournal" hidden>Modification du <b id="editBannerJournalDate"></b> <button type="button" class="btn" data-cancel-edit="journal">Annuler</button></div>
+    <form class="entry" id="formJournal">
+      <div class="field"><label for="jDate">Date</label><input type="date" id="jDate" required></div>
+      <div class="field"><label for="jReel">Recette réelle (F)</label><input type="number" id="jReel" class="mono" min="0" step="500" placeholder="23000"></div>
+      <div class="field grow"><label for="jNote">Note (écart, incident…)</label><input type="text" id="jNote" placeholder="Ex. demi-journée, panne, jour férié"></div>
+      <button class="btn primary" type="submit" id="submitJournal">Enregistrer</button>
+    </form>
+    <div class="stat-strip" id="journalStrip"></div>
+    <div class="filter-row">
+      <label for="jMonthFilter" style="margin:0;">Mois</label>
+      <select id="jMonthFilter"></select>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Date</th><th>Jour</th><th class="num">Théorique</th><th class="num">Réel</th><th class="num">Écart</th><th>Note</th><th></th></tr></thead>
+        <tbody id="journalBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ ENTRETIEN ============ -->
+  <section class="view" id="view-entretien">
+    <div class="section-head" style="margin-top:0;">
+      <h2>Entretien &amp; réparations</h2>
+    </div>
+    <div class="edit-banner" id="editBannerMaintenance" hidden>Modification de la dépense <button type="button" class="btn" data-cancel-edit="maintenance">Annuler</button></div>
+    <form class="entry" id="formEntretien">
+      <div class="field"><label for="mDate">Date</label><input type="date" id="mDate" required></div>
+      <div class="field grow"><label for="mLibelle">Libellé</label><input type="text" id="mLibelle" placeholder="Ex. vidange, pneu…" required></div>
+      <div class="field"><label for="mMontant">Montant (F)</label><input type="number" id="mMontant" class="mono" min="0" step="500" required></div>
+      <div class="field"><label for="mType">Type</label>
+        <select id="mType"><option value="depense">Dépense courante</option><option value="investissement">Investissement initial</option></select>
+      </div>
+      <div class="field grow"><label for="mMode">Mode de paiement</label><input type="text" id="mMode" placeholder="Ex. Wave business, espèces…"></div>
+      <button class="btn primary" type="submit" id="submitMaintenance">Ajouter</button>
+    </form>
+    <div class="subtabs">
+      <button class="subtab active" data-mfilter="all">Tout</button>
+      <button class="subtab" data-mfilter="depense">Dépenses courantes</button>
+      <button class="subtab" data-mfilter="investissement">Investissement initial</button>
+    </div>
+    <div class="stat-strip" id="entretienStrip"></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Date</th><th>Libellé</th><th>Mode</th><th class="num">Montant</th><th></th></tr></thead>
+        <tbody id="entretienBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ DOCUMENTS ============ -->
+  <section class="view" id="view-documents">
+    <div class="section-head" style="margin-top:0;">
+      <h2>Documents du véhicule</h2>
+      <span class="hint">Alerte automatique à 30 jours de l'expiration</span>
+    </div>
+    <div class="edit-banner" id="editBannerDoc" hidden>Modification du document <button type="button" class="btn" data-cancel-edit="doc">Annuler</button></div>
+    <form class="entry" id="formDoc">
+      <div class="field grow"><label for="dType">Type de document</label><input type="text" id="dType" placeholder="Ex. VISITE TECHNIQUE" required></div>
+      <div class="field"><label for="dEmission">Date d'émission</label><input type="date" id="dEmission"></div>
+      <div class="field"><label for="dExpiration">Date d'expiration</label><input type="date" id="dExpiration"></div>
+      <div class="field"><label for="dMontant">Montant (F)</label><input type="number" id="dMontant" class="mono" min="0" step="500"></div>
+      <button class="btn primary" type="submit" id="submitDoc">Enregistrer</button>
+    </form>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Document</th><th>Émission</th><th>Expiration</th><th>Statut</th><th class="num">Montant</th><th></th></tr></thead>
+        <tbody id="docsBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ FINANCEMENT ============ -->
+  <section class="view" id="view-financement">
+    <div class="section-head" style="margin-top:0;">
+      <h2>Créanciers</h2>
+      <span class="hint">Personnes à qui de l'argent est dû pour le démarrage du véhicule</span>
+    </div>
+    <div class="card" id="creditorList" style="margin-bottom:10px;"></div>
+    <div class="edit-banner" id="editBannerCreditor" hidden>Modification du créancier <button type="button" class="btn" data-cancel-edit="creditor">Annuler</button></div>
+    <form class="entry" id="formCreditor">
+      <div class="field"><label for="crNom">Créancier</label><input type="text" id="crNom" placeholder="Nom" required></div>
+      <div class="field"><label for="crSomme">Somme initiale (F)</label><input type="number" id="crSomme" class="mono" min="0" step="500" required></div>
+      <div class="field"><label for="crRembourse">Déjà remboursé (F)</label><input type="number" id="crRembourse" class="mono" min="0" step="500" value="0"></div>
+      <button class="btn primary" type="submit" id="submitCreditor">Ajouter</button>
+    </form>
+
+    <div class="section-head">
+      <h2>Dettes d'exploitation</h2>
+      <span class="hint">Achats à crédit non encore réglés</span>
+    </div>
+    <div class="edit-banner" id="editBannerDette" hidden>Modification de la dette <button type="button" class="btn" data-cancel-edit="dette">Annuler</button></div>
+    <form class="entry" id="formDette">
+      <div class="field"><label for="ddDate">Date</label><input type="date" id="ddDate" required></div>
+      <div class="field grow"><label for="ddLibelle">Libellé</label><input type="text" id="ddLibelle" required></div>
+      <div class="field"><label for="ddMode">Mode</label><input type="text" id="ddMode" placeholder="Ex. À crédit" value="À crédit"></div>
+      <div class="field"><label for="ddMontant">Montant (F)</label><input type="number" id="ddMontant" class="mono" min="0" step="500" required></div>
+      <button class="btn primary" type="submit" id="submitDette">Ajouter</button>
+    </form>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Date</th><th>Libellé</th><th>Mode</th><th class="num">Montant</th><th></th></tr></thead>
+        <tbody id="dettesBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="foot-note">
+    <p>Bord de Route &mdash; suivi pour véhicule en contrat de vente. Les données sont enregistrées automatiquement <b>sur cet appareil</b> (ce navigateur). Fais une sauvegarde régulièrement pour ne rien perdre, ou pour transférer tes données vers un autre appareil.</p>
+    <div class="data-actions">
+      <button class="btn small" id="btnExport">⬇ Télécharger une sauvegarde</button>
+      <button class="btn small" id="btnImport">⬆ Restaurer une sauvegarde</button>
+      <input type="file" id="fileImport" accept="application/json" hidden>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  var fmt = new Intl.NumberFormat('fr-FR', {maximumFractionDigits:0});
+  function money(n){ if(n===undefined||n===null||isNaN(n)) return "—"; var s = fmt.format(Math.round(n)); return (n<0?"-":"")+fmt.format(Math.abs(Math.round(n)))+" F"; }
+  function moneySigned(n){ return (n>0?"+":"") + money(n); }
+  var DOW = ["Dim","Lun","Mar","Mer","Jeu","Ven","Sam"];
+  var MONTH_NAMES = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+  var MONTH_ABBR = ["Jan","Fév","Mar","Avr","Mai","Jun","Jul","Aoû","Sep","Oct","Nov","Déc"];
+
+  function parseDate(s){ // 'YYYY-MM-DD' -> local Date at midnight
+    if(!s) return null;
+    var p = s.split('-'); return new Date(+p[0], +p[1]-1, +p[2]);
+  }
+  function todayStr(){ var d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,'0')+"-"+String(d.getDate()).padStart(2,'0'); }
+  function daysBetween(a,b){ return Math.round((a-b)/86400000); }
+  function theorique(dateStr){
+    var d = parseDate(dateStr); if(!d) return 0;
+    var wd = d.getDay(); // 0 Sun .. 6 Sat
+    if(wd===6) return 17000;
+    if(wd===0) return 0;
+    return 23000;
+  }
+  function monthKey(dateStr){ return dateStr ? dateStr.slice(0,7) : null; }
+  function escapeHtml(s){ return String(s==null?"":s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+
+  function toast(msg){
+    var t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    clearTimeout(toast._h);
+    toast._h = setTimeout(function(){ t.classList.remove('show'); }, 2200);
+  }
+
+  // ---------------- state ----------------
+  var state = { journal:[], maintenance:[], documents:[], dettes:[], creanciers:[], objectifs:{ default:310000, byMonth:{} }, ready:{} };
+  var db = null;
+  var editing = { journal:null, maintenance:null, doc:null, creditor:null, dette:null };
+  var journalMonthFilter = '__all__';
+
+  function sortByDate(arr, field){ arr.sort(function(a,b){ return (a[field]||"").localeCompare(b[field]||""); }); }
+  function findById(arr, id){ for(var i=0;i<arr.length;i++){ if(arr[i].id===id) return arr[i]; } return null; }
+  function slugify(s){ return s.toUpperCase().replace(/[^A-Z0-9]+/g,'_').replace(/^_+|_+$/g,'').slice(0,60); }
+
+  // ---------------- stockage local (fonctionne hors ligne, sans compte) ----------------
+  var LS_KEY = 'bordDeRoute.v1';
+  var SEED_DATA = {"journal": {"2026-04-23": {"date": "2026-04-23", "reel": 10000, "note": "Demi-journée"}, "2026-04-24": {"date": "2026-04-24", "reel": 23000}, "2026-04-25": {"date": "2026-04-25"}, "2026-04-26": {"date": "2026-04-26", "reel": 17000}, "2026-04-27": {"date": "2026-04-27", "reel": 23000}, "2026-04-28": {"date": "2026-04-28", "reel": 23000}, "2026-04-29": {"date": "2026-04-29", "reel": 23000}, "2026-04-30": {"date": "2026-04-30", "reel": 0, "note": "Pas travaillé car le chauffeur était malade"}, "2026-05-01": {"date": "2026-05-01", "reel": 17000, "note": "Écart de 6000 car férié", "rembEmprunt": 77500}, "2026-05-02": {"date": "2026-05-02"}, "2026-05-03": {"date": "2026-05-03", "reel": 17000}, "2026-05-04": {"date": "2026-05-04", "reel": 0, "note": "Pas travaillé pour retrait de carte de stationnement et remplacement du kit d'embrayage "}, "2026-05-05": {"date": "2026-05-05", "reel": 23000}, "2026-05-06": {"date": "2026-05-06", "reel": 22740}, "2026-05-07": {"date": "2026-05-07", "reel": 0, "note": "Pas travaillé pour repos et garage (remplacement de rotule"}, "2026-05-08": {"date": "2026-05-08", "reel": 23000}, "2026-05-09": {"date": "2026-05-09"}, "2026-05-10": {"date": "2026-05-10", "reel": 0, "note": "Pas travaillé car le chauffeur était à la compo ENS"}, "2026-05-11": {"date": "2026-05-11", "reel": 23000}, "2026-05-12": {"date": "2026-05-12", "reel": 23000}, "2026-05-13": {"date": "2026-05-13", "reel": 23000}, "2026-05-14": {"date": "2026-05-14", "reel": 12000, "note": "Demi-journée car le véhicule a été au garage pour chauffage du moteur"}, "2026-05-15": {"date": "2026-05-15", "reel": 0, "note": "Pas travaillé car le véhicule était au garage pour chauffage du mateur"}, "2026-05-16": {"date": "2026-05-16"}, "2026-05-17": {"date": "2026-05-17", "reel": 17000}, "2026-05-18": {"date": "2026-05-18", "reel": 23000}, "2026-05-19": {"date": "2026-05-19", "reel": 23000}, "2026-05-20": {"date": "2026-05-20", "reel": 23000}, "2026-05-21": {"date": "2026-05-21", "reel": 0, "note": "Pas de recette car le chauffeur s'est fait agresser "}, "2026-05-22": {"date": "2026-05-22", "reel": 23000}, "2026-05-23": {"date": "2026-05-23"}, "2026-05-24": {"date": "2026-05-24", "reel": 17000}, "2026-05-25": {"date": "2026-05-25", "reel": 17000, "note": "Écart de 6000 car férié"}, "2026-05-26": {"date": "2026-05-26", "reel": 10000, "note": "demi-journée car le véhicule a été conduit au garage réparation support de radiateur et pare-chocs "}, "2026-05-27": {"date": "2026-05-27", "reel": 16948, "note": "Écart de 6000 car férié"}, "2026-05-28": {"date": "2026-05-28", "reel": 23000}, "2026-05-29": {"date": "2026-05-29", "reel": 23000}, "2026-05-30": {"date": "2026-05-30"}, "2026-05-31": {"date": "2026-05-31", "reel": 17000}, "2026-06-01": {"date": "2026-06-01", "reel": 23000}, "2026-06-02": {"date": "2026-06-02", "reel": 20000, "note": "Le chauffeur a versé 20000 car il était au garage"}, "2026-06-03": {"date": "2026-06-03", "reel": 23000}, "2026-06-04": {"date": "2026-06-04", "reel": 23000, "rembEmprunt": 200000}, "2026-06-05": {"date": "2026-06-05", "reel": 23000}, "2026-06-06": {"date": "2026-06-06"}, "2026-06-07": {"date": "2026-06-07", "reel": 10000, "note": "Demi-journée car le chauffeur avait une urgence familiale"}, "2026-06-08": {"date": "2026-06-08", "reel": 23000, "note": "Le chauffeur doit 6000"}, "2026-06-09": {"date": "2026-06-09", "reel": 23000}, "2026-06-10": {"date": "2026-06-10", "reel": 23000}, "2026-06-11": {"date": "2026-06-11", "reel": 23000}, "2026-06-12": {"date": "2026-06-12", "reel": 23000}, "2026-06-13": {"date": "2026-06-13"}, "2026-06-14": {"date": "2026-06-14", "reel": 17000}, "2026-06-15": {"date": "2026-06-15", "reel": 22997}, "2026-06-16": {"date": "2026-06-16", "reel": 0, "note": "Pas travaille car le vehicule etait au  garage"}, "2026-06-17": {"date": "2026-06-17", "reel": 23000, "note": "Le chauffeur doit 3000"}, "2026-06-18": {"date": "2026-06-18", "reel": 23000}, "2026-06-19": {"date": "2026-06-19", "reel": 23000}, "2026-06-20": {"date": "2026-06-20"}, "2026-06-21": {"date": "2026-06-21", "reel": 10000, "note": "Demi-journée car le véhicule a eu une creuvaison"}, "2026-06-22": {"date": "2026-06-22", "reel": 23000}, "2026-06-23": {"date": "2026-06-23", "reel": 22997}, "2026-06-24": {"date": "2026-06-24", "reel": 23000}, "2026-06-25": {"date": "2026-06-25", "reel": 0, "note": "Pas travaillé car le véhicule était bloqué au parking par un camion."}, "2026-06-26": {"date": "2026-06-26", "reel": 23000}, "2026-06-27": {"date": "2026-06-27"}, "2026-06-28": {"date": "2026-06-28", "reel": 17000}, "2026-06-29": {"date": "2026-06-29", "reel": 23000}, "2026-06-30": {"date": "2026-06-30", "reel": 23000}, "2026-07-01": {"date": "2026-07-01", "reel": 23000}, "2026-07-02": {"date": "2026-07-02", "reel": 23000, "note": "13000 versé car le chauffeur a acheté un pneu"}, "2026-07-03": {"date": "2026-07-03", "reel": 23000, "rembEmprunt": 310000}, "2026-07-04": {"date": "2026-07-04"}, "2026-07-05": {"date": "2026-07-05", "reel": 6999, "note": "Le vehicule est tombe en panne"}, "2026-07-06": {"date": "2026-07-06", "note": "Pas travaille car le vehicule etait au  garage"}, "2026-07-07": {"date": "2026-07-07", "reel": 23000}, "2026-07-08": {"date": "2026-07-08", "reel": 23000}, "2026-07-09": {"date": "2026-07-09", "reel": 22997}, "2026-07-10": {"date": "2026-07-10", "reel": 23000}, "2026-07-11": {"date": "2026-07-11"}, "2026-07-12": {"date": "2026-07-12", "reel": 17000}, "2026-07-13": {"date": "2026-07-13", "reel": 23000}, "2026-07-14": {"date": "2026-07-14", "reel": 0, "note": "Pas travaille car le vehicule etait au  garage"}, "2026-07-15": {"date": "2026-07-15", "reel": 23000}, "2026-07-16": {"date": "2026-07-16", "reel": 23000}, "2026-07-17": {"date": "2026-07-17", "reel": 4660}, "2026-07-18": {"date": "2026-07-18"}, "2026-07-19": {"date": "2026-07-19", "reel": 0, "note": "Pas travaillé car le véhicule était en panne"}, "2026-07-20": {"date": "2026-07-20", "reel": 0, "note": "Pas travaillé car le véhicule était au garage"}, "2026-07-21": {"date": "2026-07-21", "reel": 23000}, "2026-07-22": {"date": "2026-07-22", "reel": 23000}, "2026-07-23": {"date": "2026-07-23", "reel": 23000}, "2026-07-24": {"date": "2026-07-24", "reel": 22998}, "2026-07-25": {"date": "2026-07-25"}, "2026-07-26": {"date": "2026-07-26", "reel": 17000}, "2026-07-27": {"date": "2026-07-27", "reel": 0, "note": "Pas travaillé car le véhicule était au garage pour changement de pare-brise"}, "2026-07-28": {"date": "2026-07-28", "reel": 23000}, "2026-07-29": {"date": "2026-07-29", "reel": 0, "note": "Pas travaillé pour une raison banale. "}, "2026-07-30": {"date": "2026-07-30", "reel": 23000}, "2026-07-31": {"date": "2026-07-31", "reel": 23000}, "2026-08-01": {"date": "2026-08-01"}, "2026-08-02": {"date": "2026-08-02", "reel": 17000}, "2026-08-03": {"date": "2026-08-03", "reel": 0, "note": "Pas travaillé car le véhicule était au garage pour préparation de visite technique"}, "2026-08-04": {"date": "2026-08-04", "reel": 0, "note": "Pas travaillé car le véhicule était au garage pour préparation de visite technique"}, "2026-08-05": {"date": "2026-08-05", "reel": 0, "note": "Pas travaillé car le véhicule était au garage pour préparation de visite technique", "rembEmprunt": 210000}, "2026-08-06": {"date": "2026-08-06", "reel": 0}, "2026-08-07": {"date": "2026-08-07", "reel": 19900, "note": "Le chauffeur a versé 20000 car férié"}, "2026-08-08": {"date": "2026-08-08"}, "2026-08-09": {"date": "2026-08-09", "reel": 14850}, "2026-08-10": {"date": "2026-08-10", "reel": 12870, "note": "Demi-journée car le chauffeur est allé retirer son permis de conduire "}, "2026-08-11": {"date": "2026-08-11", "reel": 24750}, "2026-08-12": {"date": "2026-08-12", "reel": 24750}, "2026-08-13": {"date": "2026-08-13", "reel": 24750}, "2026-08-14": {"date": "2026-08-14", "reel": 24850}, "2026-08-15": {"date": "2026-08-15"}, "2026-08-16": {"date": "2026-08-16", "reel": 14850}, "2026-08-17": {"date": "2026-08-17", "reel": 0, "note": "Pas travaillé pour repos"}, "2026-08-18": {"date": "2026-08-18", "reel": 24750}, "2026-08-19": {"date": "2026-08-19", "reel": 14850}, "2026-08-20": {"date": "2026-08-20", "reel": 23000}, "2026-08-21": {"date": "2026-08-21", "reel": 14850}, "2026-08-22": {"date": "2026-08-22"}, "2026-08-23": {"date": "2026-08-23", "reel": 14850}, "2026-08-24": {"date": "2026-08-24", "reel": 0, "note": "Le véhicule était au garage et en attente de chauffeur"}, "2026-08-25": {"date": "2026-08-25", "reel": 0, "note": "Le véhicule était au garage et en attente de chauffeur"}, "2026-08-26": {"date": "2026-08-26", "reel": 0, "note": "Le véhicule était au garage et en attente de chauffeur"}, "2026-08-27": {"date": "2026-08-27", "reel": 0, "note": "Le véhicule était au garage et en attente de chauffeur"}, "2026-08-28": {"date": "2026-08-28", "reel": 0, "note": "Le véhicule était au garage et en attente de chauffeur"}, "2026-08-29": {"date": "2026-08-29"}, "2026-08-30": {"date": "2026-08-30", "reel": 0, "note": "Le véhicule était au garage et en attente de chauffeur"}, "2026-08-31": {"date": "2026-08-31", "reel": 22770}, "2026-09-01": {"date": "2026-09-01", "reel": 23000}, "2026-09-02": {"date": "2026-09-02", "reel": 15000, "note": "Demi-journée car le véhicule était au garage pour panne de kit d'embrayage"}, "2026-09-03": {"date": "2026-09-03", "reel": 23000}, "2026-09-04": {"date": "2026-09-04", "reel": 23000}, "2026-09-05": {"date": "2026-09-05"}, "2026-09-06": {"date": "2026-09-06", "reel": 17000}, "2026-09-07": {"date": "2026-09-07", "reel": 0, "note": "Le véhicule était au garage pour réparation de climatisation. "}, "2026-09-08": {"date": "2026-09-08", "reel": 23000}, "2026-09-09": {"date": "2026-09-09", "reel": 23000}, "2026-09-10": {"date": "2026-09-10", "reel": 23000}, "2026-09-11": {"date": "2026-09-11", "reel": 23000}}, "maintenance": {"m01": {"date": "2026-04-14", "type": "investissement", "libelle": "Réparations initiales (Kotty)", "note": "Avance 250 000 versée", "montant": 573000}, "m02": {"date": "2026-04-17", "type": "investissement", "libelle": "Main d'oeuvre Mécanicien", "note": "Crédit O P", "montant": 40000}, "m03": {"date": "2026-04-18", "type": "investissement", "libelle": "Accessoires mise en service", "note": "Crédit accesoires", "montant": 50000}, "m04": {"date": "2026-04-21", "type": "investissement", "libelle": "Maintenance climatisation ", "note": "Crédit Wisdon ", "montant": 100000}, "m05": {"date": "2026-05-26", "type": "depense", "libelle": "Achat d'un pneu", "mode": "Payé par Pascal et remboursé via wave business ", "montant": 10100}, "m06": {"date": "2026-05-26", "type": "depense", "libelle": "Achat patente", "mode": "Payé par wave business", "montant": 70700}, "m07": {"date": "2026-05-26", "type": "depense", "libelle": "Parallélisme, réglagle de phare", "mode": "Payé par wave perso", "montant": 6060}, "m08": {"date": "2026-05-26", "type": "depense", "libelle": "Réparation pare-choc", "mode": "Payé par wave perso", "montant": 12120}, "m09": {"date": "2026-05-15", "type": "depense", "libelle": "Réparation radiateur (le moteur chauffe)", "mode": "Payé par wave business ", "montant": 13130}, "m10": {"date": "2026-05-14", "type": "depense", "libelle": "Entretien climatisation", "mode": "Payé par wave business ", "montant": 20200}, "m11": {"date": "2026-05-07", "type": "depense", "libelle": "changement de rotule ", "mode": "Payé par wave business ", "montant": 8000}, "m12": {"date": "2026-05-04", "type": "depense", "libelle": "Réparation du kit d'embrayage complet", "mode": "Payé par Wave business", "montant": 70195}, "m13": {"date": "2026-06-02", "type": "depense", "libelle": "Réparation de support de radiateur", "mode": "Payé par wave business", "montant": 5050}, "m14": {"date": "2026-06-04", "type": "depense", "libelle": "Remboursement du bonus offert par Wave", "mode": "wave", "montant": 1000}, "m15": {"date": "2026-06-16", "type": "depense", "libelle": "Reparation auniveau des suspension", "mode": "Payé par wave business", "montant": 45955, "garage": "Garage Soweto"}, "m16": {"date": "2026-06-21", "type": "depense", "libelle": "Achat de 2 pneus", "mode": "Payé par wave business", "montant": 20705}, "m17": {"date": "2026-06-23", "type": "depense", "libelle": "Vidange complet effectuée", "mode": "Payé par wave perso", "montant": 41000}, "m18": {"date": "2026-06-27", "type": "depense", "libelle": "Réparation de bras et nettoyage du radiateur suite à un choc lorsque le chauffeur est tombé dans un trou.", "mode": "Payé par wave business", "montant": 17000}, "m19": {"date": "2026-07-02", "type": "depense", "libelle": "Achat d'un pneu", "mode": "Paye avec une partie de la recette du 02/07/2026", "montant": 10000}, "m20": {"date": "2026-07-05", "type": "depense", "libelle": "Achat d'un pneu", "mode": "Paye avec une partie de la recette du 02/07/2027", "montant": 10000}, "m21": {"date": "2026-07-06", "type": "depense", "libelle": "Reparation du demareur et nettoyage des plaquettes de frein", "mode": "Paye par wave business", "montant": 20200}, "m22": {"date": "2026-07-10", "type": "depense", "libelle": "Achat d'un pneu", "mode": "Paye avec une partie de la recette du 07/07/2026", "montant": 10000}, "m23": {"date": "2026-07-14", "type": "depense", "libelle": "Reparation des suspension", "mode": "Paye par wave business", "montant": 29290}, "m24": {"date": "2026-07-20", "type": "depense", "libelle": "Réparation cardant", "mode": "Paye par wave business", "montant": 30300}, "m25": {"date": "2026-07-27", "type": "depense", "libelle": "Remplacement de pare-brise", "mode": "Paye par wave business", "montant": 60600}, "m26": {"date": "2026-08-03", "type": "depense", "libelle": "Travaux de tolerie", "mode": "Paye par wave business", "montant": 12000}, "m27": {"date": "2026-08-04", "type": "depense", "libelle": "Réglage de freinage", "mode": "réglé en espèce", "montant": 30000}, "m28": {"date": "2026-08-05", "type": "depense", "libelle": "Achat de radiateur et montage de radiateur", "mode": "réglé en espèce", "montant": 38000}, "m29": {"date": "2026-08-06", "type": "depense", "libelle": "Visite technique", "mode": "Réglé par wave business", "montant": 59186}, "m30": {"date": "2026-08-08", "type": "depense", "libelle": "Achat de pneu", "mode": "Pris directement des recettes du vendredi 07/08/2026", "montant": 10000}, "m31": {"date": "2026-08-15", "type": "depense", "libelle": "Achat de pneu", "mode": "Pris directement des recettes du vendredi 14/08/2027", "montant": 10000}, "m32": {"date": "2026-08-20", "type": "depense", "libelle": "Achat de liquide de refroidissement", "mode": "Pris directement des recettes du jeudi 20/08/2028", "montant": 3000}, "m33": {"date": "2026-08-21", "type": "depense", "libelle": "Réparation de climatisation", "mode": "Paye par wave business", "montant": 10100}, "m34": {"date": "2026-08-26", "type": "depense", "libelle": "Réparation suspension, amortisseur et plaquettes de frein", "mode": "Paye par wave business", "montant": 59590}, "m35": {"date": "2026-08-27", "type": "depense", "libelle": "Vidange simple", "mode": "Paye par wave business", "montant": 18500}, "m36": {"date": "2026-08-28", "type": "depense", "libelle": "Achat de pneu et réparation clim", "mode": "Payé par wave", "montant": 30000}, "m37": {"date": "2026-09-02", "type": "depense", "libelle": "Paiement de la MO de remplacement du kit d'embrayage", "mode": "Pris dans la recette du mercredi 02/08/2026", "montant": 10000}, "m38": {"date": "2026-09-02", "type": "depense", "libelle": "Avance versée sur la facture de climatisation reste 70 000", "mode": "Payé par wave ", "montant": 30300}, "m39": {"date": "2026-09-10", "type": "depense", "libelle": "Achat d'un pneu", "mode": "Pris dans la recette du mercredi 09/09/2026", "montant": 20000}}, "documents": {"VISITE_TECHNIQUE": {"type": "VISITE TECHNIQUE", "dateEmission": "2026-08-06", "dateExpiration": "2027-02-06", "montant": 58600}, "ASSURANCE": {"type": "ASSURANCE", "dateEmission": "2025-10-17", "dateExpiration": "2026-10-16", "montant": 300000}, "CARTE_DE_STATIONNEMENT": {"type": "CARTE DE STATIONNEMENT", "dateEmission": "2026-04-14", "dateExpiration": "2027-03-01", "montant": 18000}, "PATENTE": {"type": "PATENTE", "dateEmission": "2026-02-28", "dateExpiration": "2027-03-01", "montant": 136000}, "CARTE_GRISE": {"type": "CARTE GRISE", "dateEmission": null, "dateExpiration": null, "montant": null}, "PERMIS_DE_CONDUIRE_CHAUFFEUR": {"type": "PERMIS DE CONDUIRE (CHAUFFEUR)", "dateEmission": null, "dateExpiration": null, "montant": null}, "EXTINCTEUR": {"type": "EXTINCTEUR", "dateEmission": null, "dateExpiration": null, "montant": null}, "VIGNETTE": {"type": "VIGNETTE", "dateEmission": null, "dateExpiration": null, "montant": null}}, "dettes": {"d01": {"date": "2026-08-21", "libelle": "Achat de bougies et de batterie", "mode": "A crédit", "montant": 38000}, "d02": {"date": "2026-08-28", "libelle": "Achat de pneu", "mode": "A crédit", "montant": 25000}, "d03": {"date": "2026-09-02", "libelle": "Achat de Kit d'embrayage", "mode": "A crédit", "montant": 57000}}, "creanciers": {"KOTTY": {"nom": "KOTTY", "sommeInitiale": 573000, "rembourse": 360000}, "MAMAN": {"nom": "MAMAN", "sommeInitiale": 100000, "rembourse": 0}, "O_P": {"nom": "O P", "sommeInitiale": 40000, "rembourse": 40000}, "MOI": {"nom": "MOI", "sommeInitiale": 390000, "rembourse": 0}, "WISDON": {"nom": "WISDON", "sommeInitiale": 100000, "rembourse": 0}}, "config": {"objectifs": {"default": 310000, "byMonth": {"2026-04": 77500}}}};
+
+  function loadStore(){
+    try{
+      var raw = localStorage.getItem(LS_KEY);
+      if(raw) return JSON.parse(raw);
+    }catch(e){}
+    return null;
+  }
+  function cloneSeed(){ return JSON.parse(JSON.stringify(SEED_DATA)); }
+  var STORE = loadStore();
+  var isFirstRun = !STORE;
+  if(!STORE) STORE = cloneSeed();
+  function saveStore(){
+    try{ localStorage.setItem(LS_KEY, JSON.stringify(STORE)); }
+    catch(e){ toast('Sauvegarde locale impossible : '+e.message); }
+  }
+  if(isFirstRun) saveStore();
+
+  var listeners = {};
+  function notify(key){ (listeners[key]||[]).slice().forEach(function(cb){ cb(); }); }
+  function onChange(key, cb){ listeners[key] = listeners[key]||[]; listeners[key].push(cb); return function(){ var a=listeners[key]; var i=a.indexOf(cb); if(i>=0) a.splice(i,1); }; }
+
+  function docSnap(col, id){
+    var d = (STORE[col]||{})[id];
+    return { id:id, exists: d!=null, data: function(){ return d ? JSON.parse(JSON.stringify(d)) : undefined; } };
+  }
+  function querySnap(col){
+    var obj = STORE[col]||{};
+    return { docs: Object.keys(obj).map(function(id){ return docSnap(col,id); }) };
+  }
+  var autoIdN = 0;
+  function docRef(col, id){
+    if(id==null) id = 'auto'+Date.now()+'_'+(autoIdN++);
+    return {
+      id:id,
+      get: function(){ return Promise.resolve(docSnap(col,id)); },
+      set: function(data){
+        STORE[col] = STORE[col]||{}; STORE[col][id] = data; saveStore();
+        notify(col); notify(col+'/'+id);
+        return Promise.resolve();
+      },
+      update: function(data){
+        STORE[col] = STORE[col]||{}; STORE[col][id] = Object.assign({}, STORE[col][id]||{}, data); saveStore();
+        notify(col); notify(col+'/'+id);
+        return Promise.resolve();
+      },
+      delete: function(){
+        if(STORE[col]) delete STORE[col][id]; saveStore();
+        notify(col); notify(col+'/'+id);
+        return Promise.resolve();
+      },
+      onSnapshot: function(cb){
+        var off = onChange(col+'/'+id, function(){ cb(docSnap(col,id)); });
+        cb(docSnap(col,id));
+        return off;
+      }
+    };
+  }
+  function colRef(col){
+    return {
+      doc: function(id){ return docRef(col,id); },
+      add: function(data){ var ref = docRef(col,null); return ref.set(data).then(function(){ return ref; }); },
+      onSnapshot: function(cb){
+        var off = onChange(col, function(){ cb(querySnap(col)); });
+        cb(querySnap(col));
+        return off;
+      }
+    };
+  }
+  var LocalDB = {
+    collection: function(path){ return colRef(path); },
+    doc: function(path){ var parts = path.split('/'); return docRef(parts[0], parts[1]); }
+  };
+
+  var CREATE_LABELS = { journal:'Enregistrer', maintenance:'Ajouter', doc:'Enregistrer', creditor:'Ajouter', dette:'Ajouter' };
+  function setEditBanner(key, on, labelEl, labelText){
+    var banner = document.getElementById('editBanner'+key.charAt(0).toUpperCase()+key.slice(1));
+    var submitBtn = document.getElementById('submit'+key.charAt(0).toUpperCase()+key.slice(1));
+    if(banner) banner.hidden = !on;
+    if(labelEl && labelText!=null) document.getElementById(labelEl).textContent = labelText;
+    if(submitBtn) submitBtn.textContent = on ? 'Mettre à jour' : CREATE_LABELS[key];
+  }
+
+  // ---------------- inline number editing (objectifs) ----------------
+  function makeInlineEditable(el, initial, onSave){
+    el.textContent = money(initial);
+    el.onclick = function(){
+      var input = document.createElement('input');
+      input.type = 'number'; input.step = '500'; input.min = '0'; input.className = 'inline-input';
+      input.value = initial;
+      el.replaceWith(input);
+      input.focus(); input.select();
+      var done = false;
+      function commit(){
+        if(done) return; done = true;
+        var v = Number(input.value);
+        if(!isNaN(v) && v>=0 && v!==initial) onSave(v);
+        else input.replaceWith(el);
+      }
+      input.addEventListener('blur', commit);
+      input.addEventListener('keydown', function(ev){
+        if(ev.key==='Enter'){ ev.preventDefault(); commit(); }
+        else if(ev.key==='Escape'){ done=true; input.replaceWith(el); }
+      });
+    };
+  }
+
+  function saveObjectifPatch(patch){
+    if(!db) return;
+    var ref = db.doc('config/objectifs');
+    ref.get().then(function(snap){
+      if(snap.exists) return ref.update(patch);
+      var base = { default:310000, byMonth:{} };
+      if(patch.default!=null) base.default = patch.default;
+      if(patch.byMonth) Object.assign(base.byMonth, patch.byMonth);
+      return ref.set(base);
+    }).then(function(){ toast('Objectif mis à jour'); }).catch(function(err){ toast('Erreur : '+err.message); });
+  }
+
+  // ---------------- render: dashboard ----------------
+  function computeTotals(){
+    var totalRecette = 0, totalRembEmprunt = 0;
+    state.journal.forEach(function(j){ if(j.reel) totalRecette += j.reel; if(j.rembEmprunt) totalRembEmprunt += j.rembEmprunt; });
+    var totalDepenses = 0, totalInvestissement = 0;
+    state.maintenance.forEach(function(m){
+      if(m.type==='investissement') totalInvestissement += (m.montant||0);
+      else totalDepenses += (m.montant||0);
+    });
+    var totalRembCreanciers = 0, totalSommeCreanciers = 0;
+    state.creanciers.forEach(function(c){ totalRembCreanciers += (c.rembourse||0); totalSommeCreanciers += (c.sommeInitiale||0); });
+    var totalDettes = 0;
+    state.dettes.forEach(function(d){ totalDettes += (d.montant||0); });
+
+    var soldeBrut = totalRecette - totalDepenses - totalRembEmprunt;
+    var soldeNet = soldeBrut - totalRembCreanciers;
+    var soldeApresDettes = soldeNet - totalDettes;
+    var resteCreanciers = totalSommeCreanciers - totalRembCreanciers;
+
+    return { totalRecette:totalRecette, totalDepenses:totalDepenses, totalRembEmprunt:totalRembEmprunt,
+      totalInvestissement:totalInvestissement, totalRembCreanciers:totalRembCreanciers, totalSommeCreanciers:totalSommeCreanciers,
+      totalDettes:totalDettes, soldeBrut:soldeBrut, soldeNet:soldeNet, soldeApresDettes:soldeApresDettes, resteCreanciers:resteCreanciers };
+  }
+
+  function docStatus(doc){
+    if(!doc.dateExpiration) return {label:"À compléter", cls:"neutral", days:null};
+    var days = daysBetween(parseDate(doc.dateExpiration), parseDate(todayStr()));
+    if(days < 0) return {label:"Expiré", cls:"bad", days:days};
+    if(days <= 30) return {label:"Recouvrement (< 30 j)", cls:"warn", days:days};
+    return {label:"Valide", cls:"good", days:days};
+  }
+
+  function renderHeaderAlert(){
+    var expired = 0, soon = 0;
+    state.documents.forEach(function(d){ var s = docStatus(d); if(s.cls==='bad') expired++; else if(s.cls==='warn') soon++; });
+    var el = document.getElementById('headerAlert');
+    if(expired>0){
+      el.className = 'alert-pill'; el.style.background='var(--bad-soft)'; el.style.color='var(--bad)';
+      el.querySelector('span').textContent = expired+" document"+(expired>1?"s":"")+" expiré"+(expired>1?"s":"");
+    } else if(soon>0){
+      el.className = 'alert-pill'; el.style.background=''; el.style.color='';
+      el.querySelector('span').textContent = soon+" document"+(soon>1?"s":"")+" à renouveler";
+    } else {
+      el.className = 'alert-pill ok'; el.style.background=''; el.style.color='';
+      el.querySelector('span').textContent = "Tout est à jour";
+    }
+  }
+
+  function objectifFor(mkey){
+    if(state.objectifs.byMonth && state.objectifs.byMonth[mkey]!=null) return state.objectifs.byMonth[mkey];
+    return state.objectifs.default || 310000;
+  }
+
+  function renderDashboard(){
+    var t = computeTotals();
+    document.getElementById('kpiRecette').textContent = money(t.totalRecette);
+    document.getElementById('kpiSolde').textContent = money(t.soldeApresDettes);
+    document.getElementById('kpiSoldeFoot').textContent = t.soldeApresDettes>=0 ? "Après créanciers et dettes" : "Négatif — dépenses > recettes";
+    document.getElementById('kpiSolde').style.color = t.soldeApresDettes>=0 ? "" : "var(--bad)";
+
+    document.getElementById('kpiReste').textContent = money(t.resteCreanciers);
+    document.getElementById('kpiResteFoot').textContent = "Dû aux créanciers (sur "+money(t.totalSommeCreanciers)+")";
+
+    document.getElementById('kpiDettes').textContent = money(t.totalDettes + t.resteCreanciers);
+    document.getElementById('kpiDettesFoot').textContent = money(t.totalDettes)+" exploitation + "+money(t.resteCreanciers)+" créanciers";
+
+    // monthly bars
+    var byMonth = {};
+    state.journal.forEach(function(j){ var mk = monthKey(j.date); if(!mk) return; byMonth[mk] = (byMonth[mk]||0) + (j.reel||0); });
+    var months = Object.keys(byMonth).sort();
+    var barsEl = document.getElementById('monthBars');
+    if(months.length===0){ barsEl.innerHTML = '<div class="row-note">Aucune recette enregistrée.</div>'; }
+    else {
+      barsEl.innerHTML = months.map(function(mk){
+        var reel = byMonth[mk], obj = objectifFor(mk);
+        var pct = obj>0 ? Math.min(100, Math.round(reel/obj*100)) : 0;
+        var hit = reel >= obj;
+        var parts = mk.split('-');
+        var label = MONTH_ABBR[+parts[1]-1];
+        return '<div class="bar-row" data-month="'+mk+'"><div class="m">'+label+' '+parts[0].slice(2)+'</div>' +
+          '<div class="bar-track"><div class="bar-fill '+(hit?'hit':'behind')+'" style="width:'+pct+'%"></div></div>' +
+          '<div class="amt">'+money(reel)+' / <span class="edit-num" data-edit-month="'+mk+'"></span></div></div>';
+      }).join('');
+      months.forEach(function(mk){
+        var span = barsEl.querySelector('[data-edit-month="'+mk+'"]');
+        if(span) makeInlineEditable(span, objectifFor(mk), function(v){
+          var patch = { byMonth:{} }; patch.byMonth[mk] = v; saveObjectifPatch(patch);
+        });
+      });
+    }
+    var objDefaultEl = document.getElementById('objDefault');
+    if(objDefaultEl) makeInlineEditable(objDefaultEl, state.objectifs.default||310000, function(v){ saveObjectifPatch({ default: v }); });
+
+    renderEvolutionChart();
+
+    // alerts
+    var alerts = [];
+    state.documents.forEach(function(d){
+      var s = docStatus(d);
+      if(s.cls==='bad') alerts.push({cls:'bad', title:d.type+" — expiré depuis "+Math.abs(s.days)+" j", sub:"Expiration : "+d.dateExpiration});
+      else if(s.cls==='warn') alerts.push({cls:'warn', title:d.type+" — expire dans "+s.days+" j", sub:"Expiration : "+d.dateExpiration});
+    });
+    if(t.soldeApresDettes < 0) alerts.push({cls:'warn', title:"Solde net négatif", sub:money(t.soldeApresDettes)});
+    if(alerts.length===0){
+      document.getElementById('alertList').innerHTML = '<div class="row-note">Aucune alerte pour le moment.</div>';
+    } else {
+      document.getElementById('alertList').innerHTML = alerts.map(function(a){
+        return '<div class="alert-item"><div class="dot '+a.cls+'"></div><div class="txt"><b>'+escapeHtml(a.title)+'</b><span>'+escapeHtml(a.sub)+'</span></div></div>';
+      }).join('');
+    }
+
+    renderHeaderAlert();
+  }
+
+  // ---------------- render: evolution chart ----------------
+  function niceMax(v){
+    if(v<=0) return 100;
+    var mag = Math.pow(10, Math.floor(Math.log10(v)));
+    var n = v/mag;
+    var step = n<=1?1:n<=2?2:n<=5?5:10;
+    return step*mag;
+  }
+
+  function renderEvolutionChart(){
+    var wrap = document.getElementById('evoChart');
+    if(!wrap) return;
+    var rows = state.journal.slice().sort(function(a,b){ return a.date.localeCompare(b.date); });
+    if(rows.length===0){ wrap.innerHTML = '<div class="row-note">Aucune donnée à afficher.</div>'; return; }
+
+    var cumReel=0, cumTheo=0;
+    var pts = rows.map(function(j){
+      cumReel += (j.reel||0); cumTheo += theorique(j.date);
+      return { date:j.date, reel:cumReel, theo:cumTheo };
+    });
+
+    var W=680, H=220, padL=8, padR=8, padT=14, padB=26;
+    var innerW = W-padL-padR, innerH = H-padT-padB;
+    var maxV = niceMax(Math.max(cumReel, cumTheo) * 1.02);
+    var n = pts.length;
+    function x(i){ return padL + (n===1?0:innerW*i/(n-1)); }
+    function y(v){ return padT + innerH - (innerH*v/maxV); }
+
+    function pathFor(field){
+      return pts.map(function(p,i){ return (i===0?'M':'L')+x(i).toFixed(1)+','+y(p[field]).toFixed(1); }).join(' ');
+    }
+    var reelPath = pathFor('reel'), theoPath = pathFor('theo');
+    var areaPath = reelPath + ' L'+x(n-1).toFixed(1)+','+(padT+innerH)+' L'+x(0).toFixed(1)+','+(padT+innerH)+' Z';
+
+    // gridlines: 4 bands
+    var gridN = 4, gridLines = '';
+    for(var g=0; g<=gridN; g++){
+      var gv = maxV*g/gridN, gy = y(gv);
+      gridLines += '<line x1="'+padL+'" y1="'+gy.toFixed(1)+'" x2="'+(padL+innerW)+'" y2="'+gy.toFixed(1)+'" stroke="var(--line)" stroke-width="1"/>';
+      gridLines += '<text x="0" y="'+(gy+3).toFixed(1)+'" font-size="10" fill="var(--ink-faint)" font-family="IBM Plex Mono">'+fmt.format(Math.round(gv/1000))+'k</text>';
+    }
+    // month tick labels
+    var seenMonths = {}, ticks = '';
+    pts.forEach(function(p,i){
+      var mk = monthKey(p.date);
+      if(!seenMonths[mk]){
+        seenMonths[mk] = true;
+        var parts = mk.split('-');
+        ticks += '<text x="'+x(i).toFixed(1)+'" y="'+(H-6)+'" font-size="10" fill="var(--ink-faint)" font-family=\'IBM Plex Sans\' text-anchor="middle">'+MONTH_ABBR[+parts[1]-1]+'</text>';
+      }
+    });
+
+    var svg = '<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" preserveAspectRatio="none" role="img" aria-label="Évolution de la recette cumulée">' +
+      gridLines +
+      '<path d="'+areaPath+'" fill="var(--deep-soft)" stroke="none"/>' +
+      '<path d="'+theoPath+'" fill="none" stroke="var(--ink-faint)" stroke-width="2" stroke-dasharray="4 4" stroke-linecap="round"/>' +
+      '<path d="'+reelPath+'" fill="none" stroke="var(--deep)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>' +
+      '<circle cx="'+x(n-1).toFixed(1)+'" cy="'+y(cumReel).toFixed(1)+'" r="4" fill="var(--deep)"/>' +
+      ticks +
+      '<g id="evoHover" style="display:none;"><line id="evoHoverLine" x1="0" y1="'+padT+'" x2="0" y2="'+(padT+innerH)+'" stroke="var(--ink-soft)" stroke-width="1" stroke-dasharray="3 3"/>' +
+      '<circle id="evoHoverReel" r="4" fill="var(--deep)" stroke="var(--surface)" stroke-width="2"/>' +
+      '<circle id="evoHoverTheo" r="4" fill="var(--ink-faint)" stroke="var(--surface)" stroke-width="2"/></g>' +
+      '<rect id="evoCapture" x="'+padL+'" y="0" width="'+innerW+'" height="'+H+'" fill="transparent"/>' +
+      '</svg><div class="chart-tip" id="evoTip"></div>';
+    wrap.innerHTML = svg;
+
+    var capture = document.getElementById('evoCapture');
+    var hoverG = document.getElementById('evoHover');
+    var hoverLine = document.getElementById('evoHoverLine');
+    var hoverReel = document.getElementById('evoHoverReel');
+    var hoverTheo = document.getElementById('evoHoverTheo');
+    var tip = document.getElementById('evoTip');
+    var svgEl = wrap.querySelector('svg');
+
+    function showAt(i){
+      var p = pts[i];
+      var px = x(i), pyR = y(p.reel), pyT = y(p.theo);
+      hoverG.style.display = '';
+      hoverLine.setAttribute('x1', px); hoverLine.setAttribute('x2', px);
+      hoverReel.setAttribute('cx', px); hoverReel.setAttribute('cy', pyR);
+      hoverTheo.setAttribute('cx', px); hoverTheo.setAttribute('cy', pyT);
+      var d = parseDate(p.date);
+      tip.innerHTML = '<div class="d">'+DOW[d.getDay()]+' '+d.getDate()+' '+MONTH_ABBR[d.getMonth()]+' '+d.getFullYear()+'</div>' +
+        '<div class="row"><span class="k"><i style="background:var(--deep)"></i>Réel</span><b class="mono">'+money(p.reel)+'</b></div>' +
+        '<div class="row"><span class="k"><i style="background:var(--ink-faint)"></i>Théorique</span><b class="mono">'+money(p.theo)+'</b></div>';
+      var pct = (px/W*100);
+      tip.style.left = pct+'%';
+      tip.style.top = (pyR/H*100)+'%';
+      tip.classList.add('show');
+    }
+    function hide(){ hoverG.style.display='none'; tip.classList.remove('show'); }
+
+    capture.addEventListener('mousemove', function(ev){
+      var rect = svgEl.getBoundingClientRect();
+      var relX = (ev.clientX-rect.left)/rect.width*W;
+      var i = Math.round((relX-padL)/innerW*(n-1));
+      i = Math.max(0, Math.min(n-1, i));
+      showAt(i);
+    });
+    capture.addEventListener('mouseleave', hide);
+    capture.addEventListener('touchstart', function(ev){ ev.preventDefault();
+      var t = ev.touches[0]; var rect = svgEl.getBoundingClientRect();
+      var relX = (t.clientX-rect.left)/rect.width*W;
+      var i = Math.round((relX-padL)/innerW*(n-1));
+      showAt(Math.max(0, Math.min(n-1, i)));
+    }, {passive:false});
+  }
+
+  // ---------------- render: journal ----------------
+  function renderJournal(){
+    document.getElementById('cJournal').textContent = state.journal.length;
+
+    // month filter options
+    var monthsPresent = {};
+    state.journal.forEach(function(j){ var mk = monthKey(j.date); if(mk) monthsPresent[mk]=true; });
+    var monthKeys = Object.keys(monthsPresent).sort().reverse();
+    if(journalMonthFilter!=='__all__' && monthKeys.indexOf(journalMonthFilter)===-1 && monthKeys.length){
+      journalMonthFilter = monthKeys[0];
+    }
+    var sel = document.getElementById('jMonthFilter');
+    sel.innerHTML = '<option value="__all__">Tous les mois</option>' + monthKeys.map(function(mk){
+      var parts = mk.split('-');
+      return '<option value="'+mk+'">'+MONTH_NAMES[+parts[1]-1]+' '+parts[0]+'</option>';
+    }).join('');
+    sel.value = journalMonthFilter;
+
+    var rows = state.journal.slice().sort(function(a,b){ return b.date.localeCompare(a.date); });
+    if(journalMonthFilter!=='__all__') rows = rows.filter(function(j){ return monthKey(j.date)===journalMonthFilter; });
+
+    var totalReel=0, totalTheo=0, count=0;
+    rows.forEach(function(j){ totalReel += (j.reel||0); totalTheo += theorique(j.date); count++; });
+    document.getElementById('journalStrip').innerHTML =
+      '<div class="s">Jours affichés <b>'+count+'</b></div>' +
+      '<div class="s">Recette réelle <b>'+money(totalReel)+'</b></div>' +
+      '<div class="s">Théorique <b>'+money(totalTheo)+'</b></div>' +
+      '<div class="s">Écart <b style="color:'+(totalTheo-totalReel>0?'var(--warn)':'var(--good)')+'">'+money(totalTheo-totalReel)+'</b></div>';
+
+    var body = document.getElementById('journalBody');
+    if(rows.length===0){ body.innerHTML = '<tr class="empty-row"><td colspan="7">Aucune recette enregistrée pour cette période.</td></tr>'; return; }
+    body.innerHTML = rows.slice(0,400).map(function(j){
+      var theo = theorique(j.date), reel = j.reel, ecart = reel==null ? null : reel-theo;
+      var d = parseDate(j.date);
+      return '<tr>' +
+        '<td class="mono">'+j.date+'</td>' +
+        '<td>'+DOW[d.getDay()]+'</td>' +
+        '<td class="num">'+money(theo)+'</td>' +
+        '<td class="num">'+(reel==null?'—':money(reel))+'</td>' +
+        '<td class="num" style="color:'+(ecart<0?'var(--warn)':(ecart>0?'var(--good)':''))+'">'+(ecart==null?'—':moneySigned(ecart))+'</td>' +
+        '<td>'+escapeHtml(j.note||'')+'</td>' +
+        '<td class="row-actions"><button class="btn ghost" data-edit-journal="'+j.date+'">Modifier</button><button class="btn ghost" data-del-journal="'+j.date+'">Suppr.</button></td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  // ---------------- render: entretien ----------------
+  var mFilter = 'all';
+  function renderEntretien(){
+    document.getElementById('cEntretien').textContent = state.maintenance.length;
+    var list = state.maintenance.filter(function(m){ return mFilter==='all' || m.type===mFilter; });
+    sortByDate(list, 'date'); list.reverse();
+    var totalDep=0, totalInv=0;
+    state.maintenance.forEach(function(m){ if(m.type==='investissement') totalInv += (m.montant||0); else totalDep += (m.montant||0); });
+    document.getElementById('entretienStrip').innerHTML =
+      '<div class="s">Dépenses courantes <b>'+money(totalDep)+'</b></div>' +
+      '<div class="s">Investissement initial <b>'+money(totalInv)+'</b></div>' +
+      '<div class="s">Total <b>'+money(totalDep+totalInv)+'</b></div>';
+
+    var body = document.getElementById('entretienBody');
+    if(list.length===0){ body.innerHTML = '<tr class="empty-row"><td colspan="5">Aucune dépense dans cette catégorie.</td></tr>'; return; }
+    body.innerHTML = list.map(function(m){
+      return '<tr>' +
+        '<td class="mono">'+(m.date||'—')+'</td>' +
+        '<td>'+escapeHtml(m.libelle)+(m.type==='investissement'?' <span class="pill neutral">investissement</span>':'')+(m.garage?'<div class="row-note">'+escapeHtml(m.garage)+'</div>':'')+'</td>' +
+        '<td>'+escapeHtml(m.mode||'')+'</td>' +
+        '<td class="num">'+money(m.montant)+'</td>' +
+        '<td class="row-actions"><button class="btn ghost" data-edit-maintenance="'+m.id+'">Modifier</button><button class="btn ghost" data-del-maintenance="'+m.id+'">Suppr.</button></td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  // ---------------- render: documents ----------------
+  function renderDocuments(){
+    document.getElementById('cDocs').textContent = state.documents.length;
+    var list = state.documents.slice().sort(function(a,b){ return (a.dateExpiration||'9999').localeCompare(b.dateExpiration||'9999'); });
+    var body = document.getElementById('docsBody');
+    if(list.length===0){ body.innerHTML = '<tr class="empty-row"><td colspan="6">Aucun document enregistré.</td></tr>'; return; }
+    body.innerHTML = list.map(function(d){
+      var s = docStatus(d);
+      return '<tr>' +
+        '<td>'+escapeHtml(d.type)+'</td>' +
+        '<td class="mono">'+(d.dateEmission||'—')+'</td>' +
+        '<td class="mono">'+(d.dateExpiration||'—')+'</td>' +
+        '<td><span class="pill '+s.cls+'">'+s.label+'</span></td>' +
+        '<td class="num">'+(d.montant?money(d.montant):'—')+'</td>' +
+        '<td class="row-actions"><button class="btn ghost" data-edit-doc="'+d.id+'">Modifier</button><button class="btn ghost" data-del-doc="'+d.id+'">Suppr.</button></td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  // ---------------- render: financement ----------------
+  function renderFinancement(){
+    var list = state.creanciers.slice().sort(function(a,b){ return (b.sommeInitiale||0)-(a.sommeInitiale||0); });
+    var el = document.getElementById('creditorList');
+    if(list.length===0){ el.innerHTML = '<div class="row-note">Aucun créancier enregistré.</div>'; }
+    else {
+      el.innerHTML = list.map(function(c){
+        var reste = (c.sommeInitiale||0) - (c.rembourse||0);
+        var pct = c.sommeInitiale ? Math.min(100, Math.round((c.rembourse||0)/c.sommeInitiale*100)) : 0;
+        return '<div class="creditor-card">' +
+          '<div class="who">'+escapeHtml(c.nom)+'</div>' +
+          '<div class="bars"><div class="track"><div class="fill" style="width:'+pct+'%"></div></div>' +
+          '<div class="nums"><span>Remboursé '+money(c.rembourse||0)+'</span><span>Sur '+money(c.sommeInitiale)+'</span></div></div>' +
+          '<div class="reste"><b style="color:'+(reste>0?'var(--warn)':'var(--good)')+'">'+money(reste)+'</b><div>reste dû</div></div>' +
+          '<div class="actions">' +
+          (reste>0 ? '<button class="btn small" data-open-rembourser="'+c.id+'">+ Rembourser</button>' : '') +
+          '<button class="btn ghost" data-edit-creditor="'+c.id+'">Modifier</button>' +
+          '<button class="btn ghost" data-del-creditor="'+c.id+'" title="Supprimer">✕</button>' +
+          '</div>' +
+          '<div class="rembourser-form" id="remb-'+c.id+'" hidden>' +
+          '<input type="number" min="1" step="500" class="mono" placeholder="Montant" id="rembInput-'+c.id+'">' +
+          '<button class="btn primary small" data-do-rembourser="'+c.id+'">OK</button>' +
+          '</div>' +
+          '</div>';
+      }).join('');
+    }
+
+    var dbody = document.getElementById('dettesBody');
+    var dlist = state.dettes.slice().sort(function(a,b){ return (b.date||'').localeCompare(a.date||''); });
+    if(dlist.length===0){ dbody.innerHTML = '<tr class="empty-row"><td colspan="5">Aucune dette d\'exploitation en cours.</td></tr>'; }
+    else {
+      dbody.innerHTML = dlist.map(function(d){
+        return '<tr>' +
+          '<td class="mono">'+(d.date||'—')+'</td>' +
+          '<td>'+escapeHtml(d.libelle)+'</td>' +
+          '<td>'+escapeHtml(d.mode||'')+'</td>' +
+          '<td class="num">'+money(d.montant)+'</td>' +
+          '<td class="row-actions"><button class="btn ghost" data-edit-dette="'+d.id+'">Modifier</button><button class="btn small" data-pay-dette="'+d.id+'">Marquer payée</button></td>' +
+          '</tr>';
+      }).join('');
+    }
+  }
+
+  function renderAll(){ renderDashboard(); renderJournal(); renderEntretien(); renderDocuments(); renderFinancement(); }
+
+  // ---------------- tabs ----------------
+  document.getElementById('tabs').addEventListener('click', function(e){
+    var btn = e.target.closest('.tab'); if(!btn) return;
+    document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+    document.querySelectorAll('.view').forEach(function(v){ v.classList.remove('active'); });
+    btn.classList.add('active');
+    document.getElementById('view-'+btn.dataset.tab).classList.add('active');
+  });
+  document.querySelectorAll('.subtab').forEach(function(b){
+    b.addEventListener('click', function(){
+      document.querySelectorAll('.subtab').forEach(function(s){ s.classList.remove('active'); });
+      b.classList.add('active'); mFilter = b.dataset.mfilter; renderEntretien();
+    });
+  });
+  document.getElementById('jMonthFilter').addEventListener('change', function(){
+    journalMonthFilter = this.value; renderJournal();
+  });
+
+  // ---------------- forms ----------------
+  function withDb(fn){
+    if(!db){ toast("Connexion aux données indisponible dans cet aperçu."); return; }
+    fn();
+  }
+
+  document.getElementById('formJournal').addEventListener('submit', function(e){
+    e.preventDefault();
+    var date = document.getElementById('jDate').value;
+    if(!date) return;
+    var reel = document.getElementById('jReel').value;
+    var note = document.getElementById('jNote').value.trim();
+    var data = { date: date };
+    if(reel !== '') data.reel = Number(reel);
+    if(note) data.note = note;
+    var wasEditing = editing.journal;
+    withDb(function(){
+      var p = (wasEditing && wasEditing!==date) ? db.collection('journal').doc(wasEditing).delete() : Promise.resolve();
+      p.then(function(){ return db.collection('journal').doc(date).set(data); }).then(function(){
+        toast(wasEditing ? 'Recette mise à jour' : 'Recette enregistrée');
+        e.target.reset(); document.getElementById('jDate').value = todayStr();
+        editing.journal = null; setEditBanner('journal', false);
+      }).catch(function(err){ toast('Erreur : '+err.message); });
+    });
+  });
+
+  document.getElementById('formEntretien').addEventListener('submit', function(e){
+    e.preventDefault();
+    var data = {
+      date: document.getElementById('mDate').value,
+      libelle: document.getElementById('mLibelle').value.trim(),
+      montant: Number(document.getElementById('mMontant').value),
+      type: document.getElementById('mType').value,
+      mode: document.getElementById('mMode').value.trim()
+    };
+    if(!data.libelle || !data.montant) return;
+    var id = editing.maintenance;
+    withDb(function(){
+      var ref = id ? db.collection('maintenance').doc(id) : db.collection('maintenance').doc();
+      ref.set(data).then(function(){
+        toast(id ? 'Dépense mise à jour' : 'Dépense ajoutée');
+        e.target.reset(); document.getElementById('mType').value='depense'; document.getElementById('mDate').value = todayStr();
+        editing.maintenance = null; setEditBanner('maintenance', false);
+      }).catch(function(err){ toast('Erreur : '+err.message); });
+    });
+  });
+
+  document.getElementById('formDoc').addEventListener('submit', function(e){
+    e.preventDefault();
+    var type = document.getElementById('dType').value.trim();
+    if(!type) return;
+    var id = slugify(type) || ('DOC_'+Date.now());
+    var oldId = editing.doc;
+    var data = {
+      type: type,
+      dateEmission: document.getElementById('dEmission').value || null,
+      dateExpiration: document.getElementById('dExpiration').value || null,
+      montant: document.getElementById('dMontant').value ? Number(document.getElementById('dMontant').value) : null
+    };
+    withDb(function(){
+      var p = (oldId && oldId!==id) ? db.collection('documents').doc(oldId).delete() : Promise.resolve();
+      p.then(function(){ return db.collection('documents').doc(id).set(data); }).then(function(){
+        toast(oldId ? 'Document mis à jour' : 'Document enregistré');
+        e.target.reset(); editing.doc = null; setEditBanner('doc', false);
+      }).catch(function(err){ toast('Erreur : '+err.message); });
+    });
+  });
+
+  document.getElementById('formCreditor').addEventListener('submit', function(e){
+    e.preventDefault();
+    var nom = document.getElementById('crNom').value.trim();
+    if(!nom) return;
+    var id = slugify(nom) || ('CR_'+Date.now());
+    var oldId = editing.creditor;
+    var data = { nom: nom, sommeInitiale: Number(document.getElementById('crSomme').value)||0, rembourse: Number(document.getElementById('crRembourse').value)||0 };
+    withDb(function(){
+      var p = (oldId && oldId!==id) ? db.collection('creanciers').doc(oldId).delete() : Promise.resolve();
+      p.then(function(){ return db.collection('creanciers').doc(id).set(data); }).then(function(){
+        toast(oldId ? 'Créancier mis à jour' : 'Créancier ajouté');
+        e.target.reset(); document.getElementById('crRembourse').value='0';
+        editing.creditor = null; setEditBanner('creditor', false);
+      }).catch(function(err){ toast('Erreur : '+err.message); });
+    });
+  });
+
+  document.getElementById('formDette').addEventListener('submit', function(e){
+    e.preventDefault();
+    var data = {
+      date: document.getElementById('ddDate').value,
+      libelle: document.getElementById('ddLibelle').value.trim(),
+      mode: document.getElementById('ddMode').value.trim(),
+      montant: Number(document.getElementById('ddMontant').value)
+    };
+    if(!data.libelle || !data.montant) return;
+    var id = editing.dette;
+    withDb(function(){
+      var ref = id ? db.collection('dettes').doc(id) : db.collection('dettes').doc();
+      ref.set(data).then(function(){
+        toast(id ? 'Dette mise à jour' : 'Dette ajoutée');
+        e.target.reset(); document.getElementById('ddMode').value='À crédit'; document.getElementById('ddDate').value = todayStr();
+        editing.dette = null; setEditBanner('dette', false);
+      }).catch(function(err){ toast('Erreur : '+err.message); });
+    });
+  });
+
+  document.querySelectorAll('[data-cancel-edit]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var key = btn.dataset.cancelEdit;
+      editing[key] = null; setEditBanner(key, false);
+      var forms = { journal:'formJournal', maintenance:'formEntretien', doc:'formDoc', creditor:'formCreditor', dette:'formDette' };
+      var f = document.getElementById(forms[key]); if(f) f.reset();
+      if(key==='journal') document.getElementById('jDate').value = todayStr();
+      if(key==='maintenance') document.getElementById('mDate').value = todayStr();
+      if(key==='dette') document.getElementById('ddDate').value = todayStr();
+    });
+  });
+
+  // ---------------- edit / delete / action handlers (delegated) ----------------
+  document.addEventListener('click', function(e){
+    var t = e.target;
+    if(t.dataset.delJournal){ withDb(function(){ db.collection('journal').doc(t.dataset.delJournal).delete().then(function(){ toast('Ligne supprimée'); }); }); }
+    else if(t.dataset.delMaintenance){ withDb(function(){ db.collection('maintenance').doc(t.dataset.delMaintenance).delete().then(function(){ toast('Ligne supprimée'); }); }); }
+    else if(t.dataset.delDoc){ withDb(function(){ db.collection('documents').doc(t.dataset.delDoc).delete().then(function(){ toast('Document supprimé'); }); }); }
+    else if(t.dataset.delCreditor){ if(confirm('Supprimer ce créancier ?')) withDb(function(){ db.collection('creanciers').doc(t.dataset.delCreditor).delete().then(function(){ toast('Créancier supprimé'); }); }); }
+    else if(t.dataset.payDette){ withDb(function(){ db.collection('dettes').doc(t.dataset.payDette).delete().then(function(){ toast('Dette marquée payée'); }); }); }
+
+    else if(t.dataset.editJournal){
+      var j = findById(state.journal, t.dataset.editJournal) || state.journal.filter(function(x){return x.date===t.dataset.editJournal;})[0];
+      if(!j) return;
+      document.getElementById('jDate').value = j.date;
+      document.getElementById('jReel').value = j.reel!=null ? j.reel : '';
+      document.getElementById('jNote').value = j.note||'';
+      editing.journal = j.date; setEditBanner('journal', true, 'editBannerJournalDate', j.date);
+      document.getElementById('view-journal').scrollIntoView({block:'start', behavior:'smooth'});
+    }
+    else if(t.dataset.editMaintenance){
+      var m = findById(state.maintenance, t.dataset.editMaintenance);
+      if(!m) return;
+      document.getElementById('mDate').value = m.date||'';
+      document.getElementById('mLibelle').value = m.libelle||'';
+      document.getElementById('mMontant').value = m.montant||'';
+      document.getElementById('mType').value = m.type||'depense';
+      document.getElementById('mMode').value = m.mode||'';
+      editing.maintenance = m.id; setEditBanner('maintenance', true);
+      document.getElementById('view-entretien').scrollIntoView({block:'start', behavior:'smooth'});
+    }
+    else if(t.dataset.editDoc){
+      var doc = findById(state.documents, t.dataset.editDoc);
+      if(!doc) return;
+      document.getElementById('dType').value = doc.type||'';
+      document.getElementById('dEmission').value = doc.dateEmission||'';
+      document.getElementById('dExpiration').value = doc.dateExpiration||'';
+      document.getElementById('dMontant').value = doc.montant!=null ? doc.montant : '';
+      editing.doc = doc.id; setEditBanner('doc', true);
+      document.getElementById('view-documents').scrollIntoView({block:'start', behavior:'smooth'});
+    }
+    else if(t.dataset.editCreditor){
+      var c = findById(state.creanciers, t.dataset.editCreditor);
+      if(!c) return;
+      document.getElementById('crNom').value = c.nom||'';
+      document.getElementById('crSomme').value = c.sommeInitiale||0;
+      document.getElementById('crRembourse').value = c.rembourse||0;
+      editing.creditor = c.id; setEditBanner('creditor', true);
+      document.getElementById('formCreditor').scrollIntoView({block:'center', behavior:'smooth'});
+    }
+    else if(t.dataset.editDette){
+      var dd = findById(state.dettes, t.dataset.editDette);
+      if(!dd) return;
+      document.getElementById('ddDate').value = dd.date||'';
+      document.getElementById('ddLibelle').value = dd.libelle||'';
+      document.getElementById('ddMode').value = dd.mode||'';
+      document.getElementById('ddMontant').value = dd.montant||'';
+      editing.dette = dd.id; setEditBanner('dette', true);
+      document.getElementById('formDette').scrollIntoView({block:'center', behavior:'smooth'});
+    }
+    else if(t.dataset.openRembourser){
+      var box = document.getElementById('remb-'+t.dataset.openRembourser);
+      if(box){ box.hidden = !box.hidden; if(!box.hidden) box.querySelector('input').focus(); }
+    }
+    else if(t.dataset.doRembourser){
+      var cid = t.dataset.doRembourser;
+      var input = document.getElementById('rembInput-'+cid);
+      var amt = Number(input.value);
+      if(!amt || amt<=0) return;
+      var cred = findById(state.creanciers, cid);
+      if(!cred) return;
+      withDb(function(){
+        db.collection('creanciers').doc(cid).update({ rembourse: (cred.rembourse||0) + amt }).then(function(){
+          toast('Remboursement enregistré');
+        }).catch(function(err){ toast('Erreur : '+err.message); });
+      });
+    }
+  });
+
+  // ---------------- boot ----------------
+  document.getElementById('jDate').value = todayStr();
+  document.getElementById('mDate').value = todayStr();
+  document.getElementById('ddDate').value = todayStr();
+  renderAll();
+
+  function boot(){
+    db = LocalDB;
+    function watch(col, arrName, render){
+      db.collection(col).onSnapshot(function(snap){
+        state[arrName] = snap.docs.map(function(d){ var data = d.data()||{}; data.id = d.id; return data; });
+        render();
+      });
+    }
+    watch('journal', 'journal', renderAll);
+    watch('maintenance', 'maintenance', renderAll);
+    watch('documents', 'documents', renderAll);
+    watch('dettes', 'dettes', renderAll);
+    watch('creanciers', 'creanciers', renderAll);
+    db.doc('config/objectifs').onSnapshot(function(snap){
+      if(snap.exists) state.objectifs = snap.data();
+      renderAll();
+    });
+    if(isFirstRun) toast('Données de départ chargées — modifie-les librement, tout est enregistré sur cet appareil.');
+  }
+  boot();
+
+  // ---------------- sauvegarde / restauration (fichier) ----------------
+  document.getElementById('btnExport').addEventListener('click', function(){
+    var blob = new Blob([JSON.stringify(STORE, null, 2)], {type:'application/json'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = 'bord-de-route-sauvegarde-'+todayStr()+'.json';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+    toast('Sauvegarde téléchargée');
+  });
+  document.getElementById('btnImport').addEventListener('click', function(){
+    document.getElementById('fileImport').click();
+  });
+  document.getElementById('fileImport').addEventListener('change', function(e){
+    var file = e.target.files[0]; if(!file) return;
+    var reader = new FileReader();
+    reader.onload = function(){
+      try{
+        var data = JSON.parse(reader.result);
+        if(!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('format inattendu');
+        if(!confirm('Remplacer toutes les données actuelles de cet appareil par celles de ce fichier ? Cette action est irréversible.')) return;
+        STORE = data;
+        saveStore();
+        ['journal','maintenance','documents','dettes','creanciers'].forEach(notify);
+        notify('config/objectifs');
+        toast('Sauvegarde restaurée');
+      }catch(err){ toast('Fichier invalide : '+err.message); }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  });
+
+})();
+</script>
+</body>
+</html>
