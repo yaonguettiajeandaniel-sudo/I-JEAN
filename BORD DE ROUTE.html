@@ -11,6 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Bord de Route">
 <meta name="mobile-web-app-capable" content="yes">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <title>Bord de Route</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
@@ -322,11 +323,52 @@
   .foot-note p{ margin:0 0 10px; max-width:60ch; }
 
   .data-actions{ display:flex; gap:8px; flex-wrap:wrap; }
+
+  /* ---------- Auth screen ---------- */
+  .auth-wrap{
+    min-height:100%; display:flex; align-items:center; justify-content:center;
+    padding: calc(env(safe-area-inset-top,0px) + 24px) 16px calc(env(safe-area-inset-bottom,0px) + 24px);
+  }
+  .auth-card{ width:100%; max-width:360px; background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:28px 24px; box-shadow:var(--shadow); }
+  .auth-card .plate{ display:inline-flex; margin-bottom:14px; }
+  .auth-card h1{ font-size:22px; margin-bottom:4px; }
+  .auth-card .sub{ font-size:13px; color:var(--ink-faint); margin-bottom:22px; }
+  .auth-card form{ display:flex; flex-direction:column; gap:14px; }
+  .auth-card label{ display:block; margin-bottom:5px; }
+  .auth-card .btn{ width:100%; justify-content:center; padding:11px; }
+  .auth-error{ font-size:13px; color:var(--bad); background:var(--bad-soft); border-radius:8px; padding:8px 12px; display:none; }
+  .auth-error.show{ display:block; }
+  .auth-foot{ margin-top:16px; font-size:12px; color:var(--ink-faint); text-align:center; }
+
+  .account-pill{
+    display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--ink-soft);
+    background:var(--surface-2); border-radius:999px; padding:6px 12px; white-space:nowrap;
+  }
+  .account-pill button{ background:none; border:none; color:var(--ink-faint); font-size:12.5px; font-weight:600; cursor:pointer; padding:0; }
+  .account-pill button:hover{ color:var(--bad); }
+  .sync-dot{ width:7px; height:7px; border-radius:50%; background:var(--good); flex-shrink:0; }
+  .sync-dot.off{ background:var(--ink-faint); }
+  .sync-dot.err{ background:var(--bad); }
 </style>
 </head>
 <body>
 
-<div class="app">
+<div class="auth-wrap" id="authScreen">
+  <div class="auth-card">
+    <span class="plate">AA-395-AD</span>
+    <h1>Bord de Route</h1>
+    <div class="sub">Connecte-toi pour accéder à tes données, synchronisées entre tes appareils.</div>
+    <div class="auth-error" id="authError"></div>
+    <form id="formAuth">
+      <div class="field"><label for="authEmail">Email</label><input type="email" id="authEmail" autocomplete="username" required></div>
+      <div class="field"><label for="authPassword">Mot de passe</label><input type="password" id="authPassword" autocomplete="current-password" required></div>
+      <button class="btn primary" type="submit" id="submitAuth">Se connecter</button>
+    </form>
+    <div class="auth-foot" id="authFoot">Connexion à la base de données&hellip;</div>
+  </div>
+</div>
+
+<div class="app" id="app" hidden>
 
   <header class="page-head">
     <div class="topbar">
@@ -336,6 +378,11 @@
           <h1>Bord de Route</h1>
           <div class="sub">Suivi véhicule &mdash; contrat de vente</div>
         </div>
+      </div>
+      <div class="account-pill" id="accountPill">
+        <span class="sync-dot" id="syncDot"></span>
+        <span id="accountEmail"></span>
+        <button type="button" id="btnLogout">Déconnexion</button>
       </div>
       <div id="headerAlert" class="alert-pill ok">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg>
@@ -680,6 +727,184 @@
     collection: function(path){ return colRef(path); },
     doc: function(path){ var parts = path.split('/'); return docRef(parts[0], parts[1]); }
   };
+
+  // ---------------- synchronisation Supabase (multi-appareils) ----------------
+  var SUPABASE_URL = 'https://akyfnanyukhlqtawgskj.supabase.co';
+  var SUPABASE_KEY = 'sb_publishable__5B_yoVFguUyl4PzRuF9Qw_staH7s72';
+  var TABLE = 'bord_de_route';
+  var sb = (window.supabase && window.supabase.createClient) ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+
+  function createSupabaseDB(uid){
+    var cache = {};
+    var listeners = {};
+    function notify(key){ (listeners[key]||[]).slice().forEach(function(cb){ cb(); }); }
+    function onChange(key, cb){ listeners[key] = listeners[key]||[]; listeners[key].push(cb); return function(){ var a=listeners[key]; var i=a.indexOf(cb); if(i>=0) a.splice(i,1); }; }
+    function docSnap(col,id){
+      var d = (cache[col]||{})[id];
+      return { id:id, exists: d!=null, data: function(){ return d ? JSON.parse(JSON.stringify(d)) : undefined; } };
+    }
+    function querySnap(col){
+      var obj = cache[col]||{};
+      return { docs: Object.keys(obj).map(function(id){ return docSnap(col,id); }) };
+    }
+    function upsertLocal(col,id,data){ cache[col]=cache[col]||{}; cache[col][id]=data; notify(col); notify(col+'/'+id); }
+    function removeLocal(col,id){ if(cache[col]) delete cache[col][id]; notify(col); notify(col+'/'+id); }
+
+    function docRef(col, id){
+      if(id==null) id = 'auto'+Date.now()+'_'+Math.random().toString(36).slice(2);
+      return {
+        id:id,
+        get: function(){ return Promise.resolve(docSnap(col,id)); },
+        set: function(data){
+          return sb.from(TABLE).upsert(
+            { user_id:uid, collection:col, doc_id:id, data:data, updated_at:new Date().toISOString() },
+            { onConflict:'user_id,collection,doc_id' }
+          ).then(function(res){ if(res.error) throw res.error; upsertLocal(col,id,data); });
+        },
+        update: function(patch){
+          var merged = Object.assign({}, (cache[col]||{})[id]||{}, patch);
+          return this.set(merged);
+        },
+        delete: function(){
+          return sb.from(TABLE).delete().eq('user_id',uid).eq('collection',col).eq('doc_id',id)
+            .then(function(res){ if(res.error) throw res.error; removeLocal(col,id); });
+        },
+        onSnapshot: function(cb){
+          var off = onChange(col+'/'+id, function(){ cb(docSnap(col,id)); });
+          cb(docSnap(col,id));
+          return off;
+        }
+      };
+    }
+    function colRef(col){
+      return {
+        doc: function(id){ return docRef(col,id); },
+        add: function(data){ var ref = docRef(col,null); return ref.set(data).then(function(){ return ref; }); },
+        onSnapshot: function(cb){
+          var off = onChange(col, function(){ cb(querySnap(col)); });
+          cb(querySnap(col));
+          return off;
+        }
+      };
+    }
+
+    return {
+      collection: function(p){ return colRef(p); },
+      doc: function(p){ var parts=p.split('/'); return docRef(parts[0],parts[1]); },
+      _bootstrapFromRows: function(rows){ rows.forEach(function(r){ upsertLocal(r.collection, r.doc_id, r.data); }); },
+      _applyRealtimeChange: function(evt){
+        var row = evt.new || evt.old;
+        if(!row) return;
+        if(evt.eventType === 'DELETE') removeLocal(row.collection, row.doc_id);
+        else upsertLocal(row.collection, row.doc_id, row.data);
+      }
+    };
+  }
+
+  function setSyncStatus(status){ // 'ok' | 'off' | 'err'
+    var dot = document.getElementById('syncDot');
+    if(dot) dot.className = 'sync-dot' + (status==='ok' ? '' : ' '+status);
+  }
+
+  function migrateLocalToSupabase(uid){
+    var rows = [];
+    ['journal','maintenance','documents','dettes','creanciers','emprunt'].forEach(function(col){
+      Object.keys(STORE[col]||{}).forEach(function(id){
+        rows.push({ user_id:uid, collection:col, doc_id:id, data:STORE[col][id], updated_at:new Date().toISOString() });
+      });
+    });
+    Object.keys(STORE.config||{}).forEach(function(id){
+      rows.push({ user_id:uid, collection:'config', doc_id:id, data:STORE.config[id], updated_at:new Date().toISOString() });
+    });
+    if(rows.length===0) return Promise.resolve();
+    return sb.from(TABLE).upsert(rows, { onConflict:'user_id,collection,doc_id' }).then(function(res){ if(res.error) throw res.error; });
+  }
+
+  function startSupabaseSession(session){
+    var uid = session.user.id;
+    db = createSupabaseDB(uid);
+    document.getElementById('accountEmail').textContent = session.user.email;
+    document.getElementById('authScreen').hidden = true;
+    document.getElementById('app').hidden = false;
+
+    sb.from(TABLE).select('*').eq('user_id', uid).then(function(res){
+      if(res.error){ setSyncStatus('err'); toast('Erreur de synchronisation : '+res.error.message); return; }
+      var proceed = res.data.length===0 ? migrateLocalToSupabase(uid) : Promise.resolve();
+      proceed.then(function(){
+        return sb.from(TABLE).select('*').eq('user_id', uid);
+      }).then(function(res2){
+        if(res2.error){ setSyncStatus('err'); return; }
+        db._bootstrapFromRows(res2.data);
+        wireRenderWatchers();
+        setSyncStatus('ok');
+
+        sb.channel('bord_de_route_'+uid)
+          .on('postgres_changes', { event:'*', schema:'public', table:TABLE, filter:'user_id=eq.'+uid }, function(payload){
+            db._applyRealtimeChange(payload);
+          })
+          .subscribe(function(status){
+            if(status==='SUBSCRIBED') setSyncStatus('ok');
+            else if(status==='CHANNEL_ERROR' || status==='TIMED_OUT') setSyncStatus('err');
+          });
+      }).catch(function(err){ setSyncStatus('err'); toast('Erreur : '+err.message); });
+    });
+  }
+
+  function wireRenderWatchers(){
+    function watch(col, arrName, render){
+      db.collection(col).onSnapshot(function(snap){
+        state[arrName] = snap.docs.map(function(d){ var data = d.data()||{}; data.id = d.id; return data; });
+        render();
+      });
+    }
+    watch('journal', 'journal', renderAll);
+    watch('maintenance', 'maintenance', renderAll);
+    watch('documents', 'documents', renderAll);
+    watch('dettes', 'dettes', renderAll);
+    watch('creanciers', 'creanciers', renderAll);
+    watch('emprunt', 'emprunt', renderAll);
+    db.doc('config/objectifs').onSnapshot(function(snap){
+      if(snap.exists) state.objectifs = snap.data();
+      renderAll();
+    });
+    db.doc('config/vehicule').onSnapshot(function(snap){
+      if(snap.exists) state.vehicule = snap.data();
+      renderAll();
+    });
+  }
+
+  document.getElementById('formAuth').addEventListener('submit', function(e){
+    e.preventDefault();
+    var email = document.getElementById('authEmail').value.trim();
+    var password = document.getElementById('authPassword').value;
+    var errEl = document.getElementById('authError');
+    errEl.classList.remove('show');
+    if(!sb){ errEl.textContent = 'Connexion au service indisponible.'; errEl.classList.add('show'); return; }
+    var btn = document.getElementById('submitAuth');
+    btn.disabled = true; btn.textContent = 'Connexion…';
+    sb.auth.signInWithPassword({ email:email, password:password }).then(function(res){
+      btn.disabled = false; btn.textContent = 'Se connecter';
+      if(res.error){ errEl.textContent = 'Email ou mot de passe incorrect.'; errEl.classList.add('show'); return; }
+      startSupabaseSession(res.data.session);
+    });
+  });
+
+  document.getElementById('btnLogout').addEventListener('click', function(){
+    if(!sb) return;
+    sb.auth.signOut().then(function(){ location.reload(); });
+  });
+
+  function bootAuth(){
+    if(!sb){
+      document.getElementById('authFoot').textContent = 'Service de connexion indisponible — vérifie ta connexion internet.';
+      return;
+    }
+    sb.auth.getSession().then(function(res){
+      var session = res.data && res.data.session;
+      if(session){ startSupabaseSession(session); }
+      else { document.getElementById('authFoot').textContent = ''; }
+    });
+  }
 
   var CREATE_LABELS = { journal:'Enregistrer', maintenance:'Ajouter', doc:'Enregistrer', creditor:'Ajouter', dette:'Ajouter' };
   function setEditBanner(key, on, labelEl, labelText){
@@ -1364,31 +1589,7 @@
   document.getElementById('veDate').value = todayStr();
   renderAll();
 
-  function boot(){
-    db = LocalDB;
-    function watch(col, arrName, render){
-      db.collection(col).onSnapshot(function(snap){
-        state[arrName] = snap.docs.map(function(d){ var data = d.data()||{}; data.id = d.id; return data; });
-        render();
-      });
-    }
-    watch('journal', 'journal', renderAll);
-    watch('maintenance', 'maintenance', renderAll);
-    watch('documents', 'documents', renderAll);
-    watch('dettes', 'dettes', renderAll);
-    watch('creanciers', 'creanciers', renderAll);
-    watch('emprunt', 'emprunt', renderAll);
-    db.doc('config/objectifs').onSnapshot(function(snap){
-      if(snap.exists) state.objectifs = snap.data();
-      renderAll();
-    });
-    db.doc('config/vehicule').onSnapshot(function(snap){
-      if(snap.exists) state.vehicule = snap.data();
-      renderAll();
-    });
-    if(isFirstRun) toast('Données de départ chargées — modifie-les librement, tout est enregistré sur cet appareil.');
-  }
-  boot();
+  bootAuth();
 
   // ---------------- sauvegarde / restauration (fichier) ----------------
   document.getElementById('btnExport').addEventListener('click', function(){
