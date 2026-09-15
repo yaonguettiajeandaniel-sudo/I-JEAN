@@ -141,6 +141,13 @@
   .alert-pill.ok{ background:var(--good-soft); color:var(--good); }
   .alert-pill svg{ width:14px; height:14px; }
 
+  /* ---------- Frozen header ---------- */
+  .page-head{
+    position: sticky; top: env(safe-area-inset-top, 0px); z-index: 30;
+    background: var(--paper); margin-inline: -16px; padding-inline: 16px;
+    box-shadow: 0 1px 0 var(--line);
+  }
+
   /* ---------- Tabs ---------- */
   .tabs{
     display:flex; gap:4px; overflow-x:auto; -webkit-overflow-scrolling:touch;
@@ -321,27 +328,29 @@
 
 <div class="app">
 
-  <div class="topbar">
-    <div class="brand">
-      <span class="plate">AA-395-AD</span>
-      <div style="min-width:0;">
-        <h1>Bord de Route</h1>
-        <div class="sub">Suivi véhicule &mdash; contrat de vente</div>
+  <header class="page-head">
+    <div class="topbar">
+      <div class="brand">
+        <span class="plate">AA-395-AD</span>
+        <div style="min-width:0;">
+          <h1>Bord de Route</h1>
+          <div class="sub">Suivi véhicule &mdash; contrat de vente</div>
+        </div>
+      </div>
+      <div id="headerAlert" class="alert-pill ok">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg>
+        <span>Chargement…</span>
       </div>
     </div>
-    <div id="headerAlert" class="alert-pill ok">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg>
-      <span>Chargement…</span>
-    </div>
-  </div>
 
-  <nav class="tabs" id="tabs">
-    <button class="tab active" data-tab="dash">Tableau de bord</button>
-    <button class="tab" data-tab="journal">Recettes <span class="n" id="cJournal">0</span></button>
-    <button class="tab" data-tab="entretien">Entretien <span class="n" id="cEntretien">0</span></button>
-    <button class="tab" data-tab="documents">Documents <span class="n" id="cDocs">0</span></button>
-    <button class="tab" data-tab="financement">Financement</button>
-  </nav>
+    <nav class="tabs" id="tabs">
+      <button class="tab active" data-tab="dash">Tableau de bord</button>
+      <button class="tab" data-tab="journal">Recettes <span class="n" id="cJournal">0</span></button>
+      <button class="tab" data-tab="entretien">Entretien <span class="n" id="cEntretien">0</span></button>
+      <button class="tab" data-tab="documents">Documents <span class="n" id="cDocs">0</span></button>
+      <button class="tab" data-tab="financement">Financement</button>
+    </nav>
+  </header>
 
   <!-- ============ DASHBOARD ============ -->
   <section class="view active" id="view-dash">
@@ -357,12 +366,12 @@
         <div class="foot" id="kpiSoldeFoot">Après remboursements créanciers</div>
       </div>
       <div class="card kpi">
-        <div class="label">Reste à verser (vente)</div>
+        <div class="label">Reste à verser (achat véhicule)</div>
         <div class="value mono" id="kpiReste">—</div>
         <div class="foot" id="kpiResteFoot">&nbsp;</div>
       </div>
       <div class="card kpi">
-        <div class="label">Dettes en cours</div>
+        <div class="label">Autres charges en cours</div>
         <div class="value mono" id="kpiDettes">—</div>
         <div class="foot" id="kpiDettesFoot">Exploitation + créanciers</div>
       </div>
@@ -404,7 +413,7 @@
   <section class="view" id="view-journal">
     <div class="section-head" style="margin-top:0;">
       <h2>Recette quotidienne</h2>
-      <span class="hint">Théorique : 23 000 F (lun&ndash;ven), 17 000 F (sam), 0 F (dim)</span>
+      <span class="hint">Théorique : 23 000 F (lun&ndash;ven), 17 000 F (dim), 0 F (sam, repos)</span>
     </div>
     <div class="edit-banner" id="editBannerJournal" hidden>Modification du <b id="editBannerJournalDate"></b> <button type="button" class="btn" data-cancel-edit="journal">Annuler</button></div>
     <form class="entry" id="formJournal">
@@ -481,8 +490,34 @@
   <!-- ============ FINANCEMENT ============ -->
   <section class="view" id="view-financement">
     <div class="section-head" style="margin-top:0;">
+      <h2>Achat du véhicule</h2>
+      <span class="hint">Remboursement du crédit initial (3 720 000 F) &mdash; suivi séparé des autres charges</span>
+    </div>
+    <div class="card" style="margin-bottom:16px;">
+      <div class="creditor-card" style="border-bottom:none; padding-bottom:0;">
+        <div class="who" style="width:auto; margin-right:8px;">Crédit véhicule</div>
+        <div class="bars">
+          <div class="track"><div class="fill" id="vehFill"></div></div>
+          <div class="nums"><span id="vehRembTxt"></span><span>Sur <span class="edit-num" id="vehMontant"></span> F</span></div>
+        </div>
+        <div class="reste"><b id="vehResteTxt"></b><div>reste dû</div></div>
+      </div>
+    </div>
+    <form class="entry" id="formEmprunt">
+      <div class="field"><label for="veDate">Date du versement</label><input type="date" id="veDate" required></div>
+      <div class="field"><label for="veMontant">Montant versé (F)</label><input type="number" id="veMontant" class="mono" min="0" step="500" required></div>
+      <button class="btn primary" type="submit" id="submitEmprunt">Enregistrer</button>
+    </form>
+    <div class="table-wrap" style="margin-bottom:10px;">
+      <table>
+        <thead><tr><th>Date</th><th class="num">Montant versé</th><th></th></tr></thead>
+        <tbody id="empruntBody"></tbody>
+      </table>
+    </div>
+
+    <div class="section-head">
       <h2>Créanciers</h2>
-      <span class="hint">Personnes à qui de l'argent est dû pour le démarrage du véhicule</span>
+      <span class="hint">Personnes à qui de l'argent est dû pour le démarrage du véhicule (investissement, hors achat véhicule)</span>
     </div>
     <div class="card" id="creditorList" style="margin-bottom:10px;"></div>
     <div class="edit-banner" id="editBannerCreditor" hidden>Modification du créancier <button type="button" class="btn" data-cancel-edit="creditor">Annuler</button></div>
@@ -545,9 +580,9 @@
   function theorique(dateStr){
     var d = parseDate(dateStr); if(!d) return 0;
     var wd = d.getDay(); // 0 Sun .. 6 Sat
-    if(wd===6) return 17000;
-    if(wd===0) return 0;
-    return 23000;
+    if(wd===6) return 0;      // samedi : repos
+    if(wd===0) return 17000;  // dimanche : demi-activite
+    return 23000;             // lundi-vendredi
   }
   function monthKey(dateStr){ return dateStr ? dateStr.slice(0,7) : null; }
   function escapeHtml(s){ return String(s==null?"":s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
@@ -560,7 +595,7 @@
   }
 
   // ---------------- state ----------------
-  var state = { journal:[], maintenance:[], documents:[], dettes:[], creanciers:[], objectifs:{ default:310000, byMonth:{} }, ready:{} };
+  var state = { journal:[], maintenance:[], documents:[], dettes:[], creanciers:[], emprunt:[], objectifs:{ default:310000, byMonth:{} }, vehicule:{ montantInitial:3720000 }, ready:{} };
   var db = null;
   var editing = { journal:null, maintenance:null, doc:null, creditor:null, dette:null };
   var journalMonthFilter = '__all__';
@@ -571,7 +606,7 @@
 
   // ---------------- stockage local (fonctionne hors ligne, sans compte) ----------------
   var LS_KEY = 'bordDeRoute.v1';
-  var SEED_DATA = {"journal": {"2026-04-23": {"date": "2026-04-23", "reel": 10000, "note": "Demi-journée"}, "2026-04-24": {"date": "2026-04-24", "reel": 23000}, "2026-04-25": {"date": "2026-04-25"}, "2026-04-26": {"date": "2026-04-26", "reel": 17000}, "2026-04-27": {"date": "2026-04-27", "reel": 23000}, "2026-04-28": {"date": "2026-04-28", "reel": 23000}, "2026-04-29": {"date": "2026-04-29", "reel": 23000}, "2026-04-30": {"date": "2026-04-30", "reel": 0, "note": "Pas travaillé car le chauffeur était malade"}, "2026-05-01": {"date": "2026-05-01", "reel": 17000, "note": "Écart de 6000 car férié", "rembEmprunt": 77500}, "2026-05-02": {"date": "2026-05-02"}, "2026-05-03": {"date": "2026-05-03", "reel": 17000}, "2026-05-04": {"date": "2026-05-04", "reel": 0, "note": "Pas travaillé pour retrait de carte de stationnement et remplacement du kit d'embrayage "}, "2026-05-05": {"date": "2026-05-05", "reel": 23000}, "2026-05-06": {"date": "2026-05-06", "reel": 22740}, "2026-05-07": {"date": "2026-05-07", "reel": 0, "note": "Pas travaillé pour repos et garage (remplacement de rotule"}, "2026-05-08": {"date": "2026-05-08", "reel": 23000}, "2026-05-09": {"date": "2026-05-09"}, "2026-05-10": {"date": "2026-05-10", "reel": 0, "note": "Pas travaillé car le chauffeur était à la compo ENS"}, "2026-05-11": {"date": "2026-05-11", "reel": 23000}, "2026-05-12": {"date": "2026-05-12", "reel": 23000}, "2026-05-13": {"date": "2026-05-13", "reel": 23000}, "2026-05-14": {"date": "2026-05-14", "reel": 12000, "note": "Demi-journée car le véhicule a été au garage pour chauffage du moteur"}, "2026-05-15": {"date": "2026-05-15", "reel": 0, "note": "Pas travaillé car le véhicule était au garage pour chauffage du mateur"}, "2026-05-16": {"date": "2026-05-16"}, "2026-05-17": {"date": "2026-05-17", "reel": 17000}, "2026-05-18": {"date": "2026-05-18", "reel": 23000}, "2026-05-19": {"date": "2026-05-19", "reel": 23000}, "2026-05-20": {"date": "2026-05-20", "reel": 23000}, "2026-05-21": {"date": "2026-05-21", "reel": 0, "note": "Pas de recette car le chauffeur s'est fait agresser "}, "2026-05-22": {"date": "2026-05-22", "reel": 23000}, "2026-05-23": {"date": "2026-05-23"}, "2026-05-24": {"date": "2026-05-24", "reel": 17000}, "2026-05-25": {"date": "2026-05-25", "reel": 17000, "note": "Écart de 6000 car férié"}, "2026-05-26": {"date": "2026-05-26", "reel": 10000, "note": "demi-journée car le véhicule a été conduit au garage réparation support de radiateur et pare-chocs "}, "2026-05-27": {"date": "2026-05-27", "reel": 16948, "note": "Écart de 6000 car férié"}, "2026-05-28": {"date": "2026-05-28", "reel": 23000}, "2026-05-29": {"date": "2026-05-29", "reel": 23000}, "2026-05-30": {"date": "2026-05-30"}, "2026-05-31": {"date": "2026-05-31", "reel": 17000}, "2026-06-01": {"date": "2026-06-01", "reel": 23000}, "2026-06-02": {"date": "2026-06-02", "reel": 20000, "note": "Le chauffeur a versé 20000 car il était au garage"}, "2026-06-03": {"date": "2026-06-03", "reel": 23000}, "2026-06-04": {"date": "2026-06-04", "reel": 23000, "rembEmprunt": 200000}, "2026-06-05": {"date": "2026-06-05", "reel": 23000}, "2026-06-06": {"date": "2026-06-06"}, "2026-06-07": {"date": "2026-06-07", "reel": 10000, "note": "Demi-journée car le chauffeur avait une urgence familiale"}, "2026-06-08": {"date": "2026-06-08", "reel": 23000, "note": "Le chauffeur doit 6000"}, "2026-06-09": {"date": "2026-06-09", "reel": 23000}, "2026-06-10": {"date": "2026-06-10", "reel": 23000}, "2026-06-11": {"date": "2026-06-11", "reel": 23000}, "2026-06-12": {"date": "2026-06-12", "reel": 23000}, "2026-06-13": {"date": "2026-06-13"}, "2026-06-14": {"date": "2026-06-14", "reel": 17000}, "2026-06-15": {"date": "2026-06-15", "reel": 22997}, "2026-06-16": {"date": "2026-06-16", "reel": 0, "note": "Pas travaille car le vehicule etait au  garage"}, "2026-06-17": {"date": "2026-06-17", "reel": 23000, "note": "Le chauffeur doit 3000"}, "2026-06-18": {"date": "2026-06-18", "reel": 23000}, "2026-06-19": {"date": "2026-06-19", "reel": 23000}, "2026-06-20": {"date": "2026-06-20"}, "2026-06-21": {"date": "2026-06-21", "reel": 10000, "note": "Demi-journée car le véhicule a eu une creuvaison"}, "2026-06-22": {"date": "2026-06-22", "reel": 23000}, "2026-06-23": {"date": "2026-06-23", "reel": 22997}, "2026-06-24": {"date": "2026-06-24", "reel": 23000}, "2026-06-25": {"date": "2026-06-25", "reel": 0, "note": "Pas travaillé car le véhicule était bloqué au parking par un camion."}, "2026-06-26": {"date": "2026-06-26", "reel": 23000}, "2026-06-27": {"date": "2026-06-27"}, "2026-06-28": {"date": "2026-06-28", "reel": 17000}, "2026-06-29": {"date": "2026-06-29", "reel": 23000}, "2026-06-30": {"date": "2026-06-30", "reel": 23000}, "2026-07-01": {"date": "2026-07-01", "reel": 23000}, "2026-07-02": {"date": "2026-07-02", "reel": 23000, "note": "13000 versé car le chauffeur a acheté un pneu"}, "2026-07-03": {"date": "2026-07-03", "reel": 23000, "rembEmprunt": 310000}, "2026-07-04": {"date": "2026-07-04"}, "2026-07-05": {"date": "2026-07-05", "reel": 6999, "note": "Le vehicule est tombe en panne"}, "2026-07-06": {"date": "2026-07-06", "note": "Pas travaille car le vehicule etait au  garage"}, "2026-07-07": {"date": "2026-07-07", "reel": 23000}, "2026-07-08": {"date": "2026-07-08", "reel": 23000}, "2026-07-09": {"date": "2026-07-09", "reel": 22997}, "2026-07-10": {"date": "2026-07-10", "reel": 23000}, "2026-07-11": {"date": "2026-07-11"}, "2026-07-12": {"date": "2026-07-12", "reel": 17000}, "2026-07-13": {"date": "2026-07-13", "reel": 23000}, "2026-07-14": {"date": "2026-07-14", "reel": 0, "note": "Pas travaille car le vehicule etait au  garage"}, "2026-07-15": {"date": "2026-07-15", "reel": 23000}, "2026-07-16": {"date": "2026-07-16", "reel": 23000}, "2026-07-17": {"date": "2026-07-17", "reel": 4660}, "2026-07-18": {"date": "2026-07-18"}, "2026-07-19": {"date": "2026-07-19", "reel": 0, "note": "Pas travaillé car le véhicule était en panne"}, "2026-07-20": {"date": "2026-07-20", "reel": 0, "note": "Pas travaillé car le véhicule était au garage"}, "2026-07-21": {"date": "2026-07-21", "reel": 23000}, "2026-07-22": {"date": "2026-07-22", "reel": 23000}, "2026-07-23": {"date": "2026-07-23", "reel": 23000}, "2026-07-24": {"date": "2026-07-24", "reel": 22998}, "2026-07-25": {"date": "2026-07-25"}, "2026-07-26": {"date": "2026-07-26", "reel": 17000}, "2026-07-27": {"date": "2026-07-27", "reel": 0, "note": "Pas travaillé car le véhicule était au garage pour changement de pare-brise"}, "2026-07-28": {"date": "2026-07-28", "reel": 23000}, "2026-07-29": {"date": "2026-07-29", "reel": 0, "note": "Pas travaillé pour une raison banale. "}, "2026-07-30": {"date": "2026-07-30", "reel": 23000}, "2026-07-31": {"date": "2026-07-31", "reel": 23000}, "2026-08-01": {"date": "2026-08-01"}, "2026-08-02": {"date": "2026-08-02", "reel": 17000}, "2026-08-03": {"date": "2026-08-03", "reel": 0, "note": "Pas travaillé car le véhicule était au garage pour préparation de visite technique"}, "2026-08-04": {"date": "2026-08-04", "reel": 0, "note": "Pas travaillé car le véhicule était au garage pour préparation de visite technique"}, "2026-08-05": {"date": "2026-08-05", "reel": 0, "note": "Pas travaillé car le véhicule était au garage pour préparation de visite technique", "rembEmprunt": 210000}, "2026-08-06": {"date": "2026-08-06", "reel": 0}, "2026-08-07": {"date": "2026-08-07", "reel": 19900, "note": "Le chauffeur a versé 20000 car férié"}, "2026-08-08": {"date": "2026-08-08"}, "2026-08-09": {"date": "2026-08-09", "reel": 14850}, "2026-08-10": {"date": "2026-08-10", "reel": 12870, "note": "Demi-journée car le chauffeur est allé retirer son permis de conduire "}, "2026-08-11": {"date": "2026-08-11", "reel": 24750}, "2026-08-12": {"date": "2026-08-12", "reel": 24750}, "2026-08-13": {"date": "2026-08-13", "reel": 24750}, "2026-08-14": {"date": "2026-08-14", "reel": 24850}, "2026-08-15": {"date": "2026-08-15"}, "2026-08-16": {"date": "2026-08-16", "reel": 14850}, "2026-08-17": {"date": "2026-08-17", "reel": 0, "note": "Pas travaillé pour repos"}, "2026-08-18": {"date": "2026-08-18", "reel": 24750}, "2026-08-19": {"date": "2026-08-19", "reel": 14850}, "2026-08-20": {"date": "2026-08-20", "reel": 23000}, "2026-08-21": {"date": "2026-08-21", "reel": 14850}, "2026-08-22": {"date": "2026-08-22"}, "2026-08-23": {"date": "2026-08-23", "reel": 14850}, "2026-08-24": {"date": "2026-08-24", "reel": 0, "note": "Le véhicule était au garage et en attente de chauffeur"}, "2026-08-25": {"date": "2026-08-25", "reel": 0, "note": "Le véhicule était au garage et en attente de chauffeur"}, "2026-08-26": {"date": "2026-08-26", "reel": 0, "note": "Le véhicule était au garage et en attente de chauffeur"}, "2026-08-27": {"date": "2026-08-27", "reel": 0, "note": "Le véhicule était au garage et en attente de chauffeur"}, "2026-08-28": {"date": "2026-08-28", "reel": 0, "note": "Le véhicule était au garage et en attente de chauffeur"}, "2026-08-29": {"date": "2026-08-29"}, "2026-08-30": {"date": "2026-08-30", "reel": 0, "note": "Le véhicule était au garage et en attente de chauffeur"}, "2026-08-31": {"date": "2026-08-31", "reel": 22770}, "2026-09-01": {"date": "2026-09-01", "reel": 23000}, "2026-09-02": {"date": "2026-09-02", "reel": 15000, "note": "Demi-journée car le véhicule était au garage pour panne de kit d'embrayage"}, "2026-09-03": {"date": "2026-09-03", "reel": 23000}, "2026-09-04": {"date": "2026-09-04", "reel": 23000}, "2026-09-05": {"date": "2026-09-05"}, "2026-09-06": {"date": "2026-09-06", "reel": 17000}, "2026-09-07": {"date": "2026-09-07", "reel": 0, "note": "Le véhicule était au garage pour réparation de climatisation. "}, "2026-09-08": {"date": "2026-09-08", "reel": 23000}, "2026-09-09": {"date": "2026-09-09", "reel": 23000}, "2026-09-10": {"date": "2026-09-10", "reel": 23000}, "2026-09-11": {"date": "2026-09-11", "reel": 23000}}, "maintenance": {"m01": {"date": "2026-04-14", "type": "investissement", "libelle": "Réparations initiales (Kotty)", "note": "Avance 250 000 versée", "montant": 573000}, "m02": {"date": "2026-04-17", "type": "investissement", "libelle": "Main d'oeuvre Mécanicien", "note": "Crédit O P", "montant": 40000}, "m03": {"date": "2026-04-18", "type": "investissement", "libelle": "Accessoires mise en service", "note": "Crédit accesoires", "montant": 50000}, "m04": {"date": "2026-04-21", "type": "investissement", "libelle": "Maintenance climatisation ", "note": "Crédit Wisdon ", "montant": 100000}, "m05": {"date": "2026-05-26", "type": "depense", "libelle": "Achat d'un pneu", "mode": "Payé par Pascal et remboursé via wave business ", "montant": 10100}, "m06": {"date": "2026-05-26", "type": "depense", "libelle": "Achat patente", "mode": "Payé par wave business", "montant": 70700}, "m07": {"date": "2026-05-26", "type": "depense", "libelle": "Parallélisme, réglagle de phare", "mode": "Payé par wave perso", "montant": 6060}, "m08": {"date": "2026-05-26", "type": "depense", "libelle": "Réparation pare-choc", "mode": "Payé par wave perso", "montant": 12120}, "m09": {"date": "2026-05-15", "type": "depense", "libelle": "Réparation radiateur (le moteur chauffe)", "mode": "Payé par wave business ", "montant": 13130}, "m10": {"date": "2026-05-14", "type": "depense", "libelle": "Entretien climatisation", "mode": "Payé par wave business ", "montant": 20200}, "m11": {"date": "2026-05-07", "type": "depense", "libelle": "changement de rotule ", "mode": "Payé par wave business ", "montant": 8000}, "m12": {"date": "2026-05-04", "type": "depense", "libelle": "Réparation du kit d'embrayage complet", "mode": "Payé par Wave business", "montant": 70195}, "m13": {"date": "2026-06-02", "type": "depense", "libelle": "Réparation de support de radiateur", "mode": "Payé par wave business", "montant": 5050}, "m14": {"date": "2026-06-04", "type": "depense", "libelle": "Remboursement du bonus offert par Wave", "mode": "wave", "montant": 1000}, "m15": {"date": "2026-06-16", "type": "depense", "libelle": "Reparation auniveau des suspension", "mode": "Payé par wave business", "montant": 45955, "garage": "Garage Soweto"}, "m16": {"date": "2026-06-21", "type": "depense", "libelle": "Achat de 2 pneus", "mode": "Payé par wave business", "montant": 20705}, "m17": {"date": "2026-06-23", "type": "depense", "libelle": "Vidange complet effectuée", "mode": "Payé par wave perso", "montant": 41000}, "m18": {"date": "2026-06-27", "type": "depense", "libelle": "Réparation de bras et nettoyage du radiateur suite à un choc lorsque le chauffeur est tombé dans un trou.", "mode": "Payé par wave business", "montant": 17000}, "m19": {"date": "2026-07-02", "type": "depense", "libelle": "Achat d'un pneu", "mode": "Paye avec une partie de la recette du 02/07/2026", "montant": 10000}, "m20": {"date": "2026-07-05", "type": "depense", "libelle": "Achat d'un pneu", "mode": "Paye avec une partie de la recette du 02/07/2027", "montant": 10000}, "m21": {"date": "2026-07-06", "type": "depense", "libelle": "Reparation du demareur et nettoyage des plaquettes de frein", "mode": "Paye par wave business", "montant": 20200}, "m22": {"date": "2026-07-10", "type": "depense", "libelle": "Achat d'un pneu", "mode": "Paye avec une partie de la recette du 07/07/2026", "montant": 10000}, "m23": {"date": "2026-07-14", "type": "depense", "libelle": "Reparation des suspension", "mode": "Paye par wave business", "montant": 29290}, "m24": {"date": "2026-07-20", "type": "depense", "libelle": "Réparation cardant", "mode": "Paye par wave business", "montant": 30300}, "m25": {"date": "2026-07-27", "type": "depense", "libelle": "Remplacement de pare-brise", "mode": "Paye par wave business", "montant": 60600}, "m26": {"date": "2026-08-03", "type": "depense", "libelle": "Travaux de tolerie", "mode": "Paye par wave business", "montant": 12000}, "m27": {"date": "2026-08-04", "type": "depense", "libelle": "Réglage de freinage", "mode": "réglé en espèce", "montant": 30000}, "m28": {"date": "2026-08-05", "type": "depense", "libelle": "Achat de radiateur et montage de radiateur", "mode": "réglé en espèce", "montant": 38000}, "m29": {"date": "2026-08-06", "type": "depense", "libelle": "Visite technique", "mode": "Réglé par wave business", "montant": 59186}, "m30": {"date": "2026-08-08", "type": "depense", "libelle": "Achat de pneu", "mode": "Pris directement des recettes du vendredi 07/08/2026", "montant": 10000}, "m31": {"date": "2026-08-15", "type": "depense", "libelle": "Achat de pneu", "mode": "Pris directement des recettes du vendredi 14/08/2027", "montant": 10000}, "m32": {"date": "2026-08-20", "type": "depense", "libelle": "Achat de liquide de refroidissement", "mode": "Pris directement des recettes du jeudi 20/08/2028", "montant": 3000}, "m33": {"date": "2026-08-21", "type": "depense", "libelle": "Réparation de climatisation", "mode": "Paye par wave business", "montant": 10100}, "m34": {"date": "2026-08-26", "type": "depense", "libelle": "Réparation suspension, amortisseur et plaquettes de frein", "mode": "Paye par wave business", "montant": 59590}, "m35": {"date": "2026-08-27", "type": "depense", "libelle": "Vidange simple", "mode": "Paye par wave business", "montant": 18500}, "m36": {"date": "2026-08-28", "type": "depense", "libelle": "Achat de pneu et réparation clim", "mode": "Payé par wave", "montant": 30000}, "m37": {"date": "2026-09-02", "type": "depense", "libelle": "Paiement de la MO de remplacement du kit d'embrayage", "mode": "Pris dans la recette du mercredi 02/08/2026", "montant": 10000}, "m38": {"date": "2026-09-02", "type": "depense", "libelle": "Avance versée sur la facture de climatisation reste 70 000", "mode": "Payé par wave ", "montant": 30300}, "m39": {"date": "2026-09-10", "type": "depense", "libelle": "Achat d'un pneu", "mode": "Pris dans la recette du mercredi 09/09/2026", "montant": 20000}}, "documents": {"VISITE_TECHNIQUE": {"type": "VISITE TECHNIQUE", "dateEmission": "2026-08-06", "dateExpiration": "2027-02-06", "montant": 58600}, "ASSURANCE": {"type": "ASSURANCE", "dateEmission": "2025-10-17", "dateExpiration": "2026-10-16", "montant": 300000}, "CARTE_DE_STATIONNEMENT": {"type": "CARTE DE STATIONNEMENT", "dateEmission": "2026-04-14", "dateExpiration": "2027-03-01", "montant": 18000}, "PATENTE": {"type": "PATENTE", "dateEmission": "2026-02-28", "dateExpiration": "2027-03-01", "montant": 136000}, "CARTE_GRISE": {"type": "CARTE GRISE", "dateEmission": null, "dateExpiration": null, "montant": null}, "PERMIS_DE_CONDUIRE_CHAUFFEUR": {"type": "PERMIS DE CONDUIRE (CHAUFFEUR)", "dateEmission": null, "dateExpiration": null, "montant": null}, "EXTINCTEUR": {"type": "EXTINCTEUR", "dateEmission": null, "dateExpiration": null, "montant": null}, "VIGNETTE": {"type": "VIGNETTE", "dateEmission": null, "dateExpiration": null, "montant": null}}, "dettes": {"d01": {"date": "2026-08-21", "libelle": "Achat de bougies et de batterie", "mode": "A crédit", "montant": 38000}, "d02": {"date": "2026-08-28", "libelle": "Achat de pneu", "mode": "A crédit", "montant": 25000}, "d03": {"date": "2026-09-02", "libelle": "Achat de Kit d'embrayage", "mode": "A crédit", "montant": 57000}}, "creanciers": {"KOTTY": {"nom": "KOTTY", "sommeInitiale": 573000, "rembourse": 360000}, "MAMAN": {"nom": "MAMAN", "sommeInitiale": 100000, "rembourse": 0}, "O_P": {"nom": "O P", "sommeInitiale": 40000, "rembourse": 40000}, "MOI": {"nom": "MOI", "sommeInitiale": 390000, "rembourse": 0}, "WISDON": {"nom": "WISDON", "sommeInitiale": 100000, "rembourse": 0}}, "config": {"objectifs": {"default": 310000, "byMonth": {"2026-04": 77500}}}};
+  var SEED_DATA = {"journal": {"2026-04-23": {"date": "2026-04-23", "reel": 10000, "note": "Demi-journée"}, "2026-04-24": {"date": "2026-04-24", "reel": 23000}, "2026-04-25": {"date": "2026-04-25"}, "2026-04-26": {"date": "2026-04-26", "reel": 17000}, "2026-04-27": {"date": "2026-04-27", "reel": 23000}, "2026-04-28": {"date": "2026-04-28", "reel": 23000}, "2026-04-29": {"date": "2026-04-29", "reel": 23000}, "2026-04-30": {"date": "2026-04-30", "reel": 0, "note": "Pas travaillé car le chauffeur était malade"}, "2026-05-01": {"date": "2026-05-01", "reel": 17000, "note": "Écart de 6000 car férié", "rembEmprunt": 77500}, "2026-05-02": {"date": "2026-05-02"}, "2026-05-03": {"date": "2026-05-03", "reel": 17000}, "2026-05-04": {"date": "2026-05-04", "reel": 0, "note": "Pas travaillé pour retrait de carte de stationnement et remplacement du kit d'embrayage "}, "2026-05-05": {"date": "2026-05-05", "reel": 23000}, "2026-05-06": {"date": "2026-05-06", "reel": 22740}, "2026-05-07": {"date": "2026-05-07", "reel": 0, "note": "Pas travaillé pour repos et garage (remplacement de rotule"}, "2026-05-08": {"date": "2026-05-08", "reel": 23000}, "2026-05-09": {"date": "2026-05-09"}, "2026-05-10": {"date": "2026-05-10", "reel": 0, "note": "Pas travaillé car le chauffeur était à la compo ENS"}, "2026-05-11": {"date": "2026-05-11", "reel": 23000}, "2026-05-12": {"date": "2026-05-12", "reel": 23000}, "2026-05-13": {"date": "2026-05-13", "reel": 23000}, "2026-05-14": {"date": "2026-05-14", "reel": 12000, "note": "Demi-journée car le véhicule a été au garage pour chauffage du moteur"}, "2026-05-15": {"date": "2026-05-15", "reel": 0, "note": "Pas travaillé car le véhicule était au garage pour chauffage du mateur"}, "2026-05-16": {"date": "2026-05-16"}, "2026-05-17": {"date": "2026-05-17", "reel": 17000}, "2026-05-18": {"date": "2026-05-18", "reel": 23000}, "2026-05-19": {"date": "2026-05-19", "reel": 23000}, "2026-05-20": {"date": "2026-05-20", "reel": 23000}, "2026-05-21": {"date": "2026-05-21", "reel": 0, "note": "Pas de recette car le chauffeur s'est fait agresser "}, "2026-05-22": {"date": "2026-05-22", "reel": 23000}, "2026-05-23": {"date": "2026-05-23"}, "2026-05-24": {"date": "2026-05-24", "reel": 17000}, "2026-05-25": {"date": "2026-05-25", "reel": 17000, "note": "Écart de 6000 car férié"}, "2026-05-26": {"date": "2026-05-26", "reel": 10000, "note": "demi-journée car le véhicule a été conduit au garage réparation support de radiateur et pare-chocs "}, "2026-05-27": {"date": "2026-05-27", "reel": 16948, "note": "Écart de 6000 car férié"}, "2026-05-28": {"date": "2026-05-28", "reel": 23000}, "2026-05-29": {"date": "2026-05-29", "reel": 23000}, "2026-05-30": {"date": "2026-05-30"}, "2026-05-31": {"date": "2026-05-31", "reel": 17000}, "2026-06-01": {"date": "2026-06-01", "reel": 23000}, "2026-06-02": {"date": "2026-06-02", "reel": 20000, "note": "Le chauffeur a versé 20000 car il était au garage"}, "2026-06-03": {"date": "2026-06-03", "reel": 23000}, "2026-06-04": {"date": "2026-06-04", "reel": 23000, "rembEmprunt": 200000}, "2026-06-05": {"date": "2026-06-05", "reel": 23000}, "2026-06-06": {"date": "2026-06-06"}, "2026-06-07": {"date": "2026-06-07", "reel": 10000, "note": "Demi-journée car le chauffeur avait une urgence familiale"}, "2026-06-08": {"date": "2026-06-08", "reel": 23000, "note": "Le chauffeur doit 6000"}, "2026-06-09": {"date": "2026-06-09", "reel": 23000}, "2026-06-10": {"date": "2026-06-10", "reel": 23000}, "2026-06-11": {"date": "2026-06-11", "reel": 23000}, "2026-06-12": {"date": "2026-06-12", "reel": 23000}, "2026-06-13": {"date": "2026-06-13"}, "2026-06-14": {"date": "2026-06-14", "reel": 17000}, "2026-06-15": {"date": "2026-06-15", "reel": 22997}, "2026-06-16": {"date": "2026-06-16", "reel": 0, "note": "Pas travaille car le vehicule etait au  garage"}, "2026-06-17": {"date": "2026-06-17", "reel": 23000, "note": "Le chauffeur doit 3000"}, "2026-06-18": {"date": "2026-06-18", "reel": 23000}, "2026-06-19": {"date": "2026-06-19", "reel": 23000}, "2026-06-20": {"date": "2026-06-20"}, "2026-06-21": {"date": "2026-06-21", "reel": 10000, "note": "Demi-journée car le véhicule a eu une creuvaison"}, "2026-06-22": {"date": "2026-06-22", "reel": 23000}, "2026-06-23": {"date": "2026-06-23", "reel": 22997}, "2026-06-24": {"date": "2026-06-24", "reel": 23000}, "2026-06-25": {"date": "2026-06-25", "reel": 0, "note": "Pas travaillé car le véhicule était bloqué au parking par un camion."}, "2026-06-26": {"date": "2026-06-26", "reel": 23000}, "2026-06-27": {"date": "2026-06-27"}, "2026-06-28": {"date": "2026-06-28", "reel": 17000}, "2026-06-29": {"date": "2026-06-29", "reel": 23000}, "2026-06-30": {"date": "2026-06-30", "reel": 23000}, "2026-07-01": {"date": "2026-07-01", "reel": 23000}, "2026-07-02": {"date": "2026-07-02", "reel": 23000, "note": "13000 versé car le chauffeur a acheté un pneu"}, "2026-07-03": {"date": "2026-07-03", "reel": 23000, "rembEmprunt": 310000}, "2026-07-04": {"date": "2026-07-04"}, "2026-07-05": {"date": "2026-07-05", "reel": 6999, "note": "Le vehicule est tombe en panne"}, "2026-07-06": {"date": "2026-07-06", "note": "Pas travaille car le vehicule etait au  garage"}, "2026-07-07": {"date": "2026-07-07", "reel": 23000}, "2026-07-08": {"date": "2026-07-08", "reel": 23000}, "2026-07-09": {"date": "2026-07-09", "reel": 22997}, "2026-07-10": {"date": "2026-07-10", "reel": 23000}, "2026-07-11": {"date": "2026-07-11"}, "2026-07-12": {"date": "2026-07-12", "reel": 17000}, "2026-07-13": {"date": "2026-07-13", "reel": 23000}, "2026-07-14": {"date": "2026-07-14", "reel": 0, "note": "Pas travaille car le vehicule etait au  garage"}, "2026-07-15": {"date": "2026-07-15", "reel": 23000}, "2026-07-16": {"date": "2026-07-16", "reel": 23000}, "2026-07-17": {"date": "2026-07-17", "reel": 4660}, "2026-07-18": {"date": "2026-07-18"}, "2026-07-19": {"date": "2026-07-19", "reel": 0, "note": "Pas travaillé car le véhicule était en panne"}, "2026-07-20": {"date": "2026-07-20", "reel": 0, "note": "Pas travaillé car le véhicule était au garage"}, "2026-07-21": {"date": "2026-07-21", "reel": 23000}, "2026-07-22": {"date": "2026-07-22", "reel": 23000}, "2026-07-23": {"date": "2026-07-23", "reel": 23000}, "2026-07-24": {"date": "2026-07-24", "reel": 22998}, "2026-07-25": {"date": "2026-07-25"}, "2026-07-26": {"date": "2026-07-26", "reel": 17000}, "2026-07-27": {"date": "2026-07-27", "reel": 0, "note": "Pas travaillé car le véhicule était au garage pour changement de pare-brise"}, "2026-07-28": {"date": "2026-07-28", "reel": 23000}, "2026-07-29": {"date": "2026-07-29", "reel": 0, "note": "Pas travaillé pour une raison banale. "}, "2026-07-30": {"date": "2026-07-30", "reel": 23000}, "2026-07-31": {"date": "2026-07-31", "reel": 23000}, "2026-08-01": {"date": "2026-08-01"}, "2026-08-02": {"date": "2026-08-02", "reel": 17000}, "2026-08-03": {"date": "2026-08-03", "reel": 0, "note": "Pas travaillé car le véhicule était au garage pour préparation de visite technique"}, "2026-08-04": {"date": "2026-08-04", "reel": 0, "note": "Pas travaillé car le véhicule était au garage pour préparation de visite technique"}, "2026-08-05": {"date": "2026-08-05", "reel": 0, "note": "Pas travaillé car le véhicule était au garage pour préparation de visite technique", "rembEmprunt": 210000}, "2026-08-06": {"date": "2026-08-06", "reel": 0}, "2026-08-07": {"date": "2026-08-07", "reel": 19900, "note": "Le chauffeur a versé 20000 car férié"}, "2026-08-08": {"date": "2026-08-08"}, "2026-08-09": {"date": "2026-08-09", "reel": 14850}, "2026-08-10": {"date": "2026-08-10", "reel": 12870, "note": "Demi-journée car le chauffeur est allé retirer son permis de conduire "}, "2026-08-11": {"date": "2026-08-11", "reel": 24750}, "2026-08-12": {"date": "2026-08-12", "reel": 24750}, "2026-08-13": {"date": "2026-08-13", "reel": 24750}, "2026-08-14": {"date": "2026-08-14", "reel": 24850}, "2026-08-15": {"date": "2026-08-15"}, "2026-08-16": {"date": "2026-08-16", "reel": 14850}, "2026-08-17": {"date": "2026-08-17", "reel": 0, "note": "Pas travaillé pour repos"}, "2026-08-18": {"date": "2026-08-18", "reel": 24750}, "2026-08-19": {"date": "2026-08-19", "reel": 14850}, "2026-08-20": {"date": "2026-08-20", "reel": 23000}, "2026-08-21": {"date": "2026-08-21", "reel": 14850}, "2026-08-22": {"date": "2026-08-22"}, "2026-08-23": {"date": "2026-08-23", "reel": 14850}, "2026-08-24": {"date": "2026-08-24", "reel": 0, "note": "Le véhicule était au garage et en attente de chauffeur"}, "2026-08-25": {"date": "2026-08-25", "reel": 0, "note": "Le véhicule était au garage et en attente de chauffeur"}, "2026-08-26": {"date": "2026-08-26", "reel": 0, "note": "Le véhicule était au garage et en attente de chauffeur"}, "2026-08-27": {"date": "2026-08-27", "reel": 0, "note": "Le véhicule était au garage et en attente de chauffeur"}, "2026-08-28": {"date": "2026-08-28", "reel": 0, "note": "Le véhicule était au garage et en attente de chauffeur"}, "2026-08-29": {"date": "2026-08-29"}, "2026-08-30": {"date": "2026-08-30", "reel": 0, "note": "Le véhicule était au garage et en attente de chauffeur"}, "2026-08-31": {"date": "2026-08-31", "reel": 22770}, "2026-09-01": {"date": "2026-09-01", "reel": 23000}, "2026-09-02": {"date": "2026-09-02", "reel": 15000, "note": "Demi-journée car le véhicule était au garage pour panne de kit d'embrayage"}, "2026-09-03": {"date": "2026-09-03", "reel": 23000}, "2026-09-04": {"date": "2026-09-04", "reel": 23000}, "2026-09-05": {"date": "2026-09-05"}, "2026-09-06": {"date": "2026-09-06", "reel": 17000}, "2026-09-07": {"date": "2026-09-07", "reel": 0, "note": "Le véhicule était au garage pour réparation de climatisation. "}, "2026-09-08": {"date": "2026-09-08", "reel": 23000}, "2026-09-09": {"date": "2026-09-09", "reel": 23000}, "2026-09-10": {"date": "2026-09-10", "reel": 23000}, "2026-09-11": {"date": "2026-09-11", "reel": 23000}}, "maintenance": {"m01": {"date": "2026-04-14", "type": "investissement", "libelle": "Réparations initiales (Kotty)", "note": "Avance 250 000 versée", "montant": 573000}, "m02": {"date": "2026-04-17", "type": "investissement", "libelle": "Main d'oeuvre Mécanicien", "note": "Crédit O P", "montant": 40000}, "m03": {"date": "2026-04-18", "type": "investissement", "libelle": "Accessoires mise en service", "note": "Crédit accesoires", "montant": 50000}, "m04": {"date": "2026-04-21", "type": "investissement", "libelle": "Maintenance climatisation ", "note": "Crédit Wisdon ", "montant": 100000}, "m05": {"date": "2026-05-26", "type": "depense", "libelle": "Achat d'un pneu", "mode": "Payé par Pascal et remboursé via wave business ", "montant": 10100}, "m06": {"date": "2026-05-26", "type": "depense", "libelle": "Achat patente", "mode": "Payé par wave business", "montant": 70700}, "m07": {"date": "2026-05-26", "type": "depense", "libelle": "Parallélisme, réglagle de phare", "mode": "Payé par wave perso", "montant": 6060}, "m08": {"date": "2026-05-26", "type": "depense", "libelle": "Réparation pare-choc", "mode": "Payé par wave perso", "montant": 12120}, "m09": {"date": "2026-05-15", "type": "depense", "libelle": "Réparation radiateur (le moteur chauffe)", "mode": "Payé par wave business ", "montant": 13130}, "m10": {"date": "2026-05-14", "type": "depense", "libelle": "Entretien climatisation", "mode": "Payé par wave business ", "montant": 20200}, "m11": {"date": "2026-05-07", "type": "depense", "libelle": "changement de rotule ", "mode": "Payé par wave business ", "montant": 8000}, "m12": {"date": "2026-05-04", "type": "depense", "libelle": "Réparation du kit d'embrayage complet", "mode": "Payé par Wave business", "montant": 70195}, "m13": {"date": "2026-06-02", "type": "depense", "libelle": "Réparation de support de radiateur", "mode": "Payé par wave business", "montant": 5050}, "m14": {"date": "2026-06-04", "type": "depense", "libelle": "Remboursement du bonus offert par Wave", "mode": "wave", "montant": 1000}, "m15": {"date": "2026-06-16", "type": "depense", "libelle": "Reparation auniveau des suspension", "mode": "Payé par wave business", "montant": 45955, "garage": "Garage Soweto"}, "m16": {"date": "2026-06-21", "type": "depense", "libelle": "Achat de 2 pneus", "mode": "Payé par wave business", "montant": 20705}, "m17": {"date": "2026-06-23", "type": "depense", "libelle": "Vidange complet effectuée", "mode": "Payé par wave perso", "montant": 41000}, "m18": {"date": "2026-06-27", "type": "depense", "libelle": "Réparation de bras et nettoyage du radiateur suite à un choc lorsque le chauffeur est tombé dans un trou.", "mode": "Payé par wave business", "montant": 17000}, "m19": {"date": "2026-07-02", "type": "depense", "libelle": "Achat d'un pneu", "mode": "Paye avec une partie de la recette du 02/07/2026", "montant": 10000}, "m20": {"date": "2026-07-05", "type": "depense", "libelle": "Achat d'un pneu", "mode": "Paye avec une partie de la recette du 02/07/2027", "montant": 10000}, "m21": {"date": "2026-07-06", "type": "depense", "libelle": "Reparation du demareur et nettoyage des plaquettes de frein", "mode": "Paye par wave business", "montant": 20200}, "m22": {"date": "2026-07-10", "type": "depense", "libelle": "Achat d'un pneu", "mode": "Paye avec une partie de la recette du 07/07/2026", "montant": 10000}, "m23": {"date": "2026-07-14", "type": "depense", "libelle": "Reparation des suspension", "mode": "Paye par wave business", "montant": 29290}, "m24": {"date": "2026-07-20", "type": "depense", "libelle": "Réparation cardant", "mode": "Paye par wave business", "montant": 30300}, "m25": {"date": "2026-07-27", "type": "depense", "libelle": "Remplacement de pare-brise", "mode": "Paye par wave business", "montant": 60600}, "m26": {"date": "2026-08-03", "type": "depense", "libelle": "Travaux de tolerie", "mode": "Paye par wave business", "montant": 12000}, "m27": {"date": "2026-08-04", "type": "depense", "libelle": "Réglage de freinage", "mode": "réglé en espèce", "montant": 30000}, "m28": {"date": "2026-08-05", "type": "depense", "libelle": "Achat de radiateur et montage de radiateur", "mode": "réglé en espèce", "montant": 38000}, "m29": {"date": "2026-08-06", "type": "depense", "libelle": "Visite technique", "mode": "Réglé par wave business", "montant": 59186}, "m30": {"date": "2026-08-08", "type": "depense", "libelle": "Achat de pneu", "mode": "Pris directement des recettes du vendredi 07/08/2026", "montant": 10000}, "m31": {"date": "2026-08-15", "type": "depense", "libelle": "Achat de pneu", "mode": "Pris directement des recettes du vendredi 14/08/2027", "montant": 10000}, "m32": {"date": "2026-08-20", "type": "depense", "libelle": "Achat de liquide de refroidissement", "mode": "Pris directement des recettes du jeudi 20/08/2028", "montant": 3000}, "m33": {"date": "2026-08-21", "type": "depense", "libelle": "Réparation de climatisation", "mode": "Paye par wave business", "montant": 10100}, "m34": {"date": "2026-08-26", "type": "depense", "libelle": "Réparation suspension, amortisseur et plaquettes de frein", "mode": "Paye par wave business", "montant": 59590}, "m35": {"date": "2026-08-27", "type": "depense", "libelle": "Vidange simple", "mode": "Paye par wave business", "montant": 18500}, "m36": {"date": "2026-08-28", "type": "depense", "libelle": "Achat de pneu et réparation clim", "mode": "Payé par wave", "montant": 30000}, "m37": {"date": "2026-09-02", "type": "depense", "libelle": "Paiement de la MO de remplacement du kit d'embrayage", "mode": "Pris dans la recette du mercredi 02/08/2026", "montant": 10000}, "m38": {"date": "2026-09-02", "type": "depense", "libelle": "Avance versée sur la facture de climatisation reste 70 000", "mode": "Payé par wave ", "montant": 30300}, "m39": {"date": "2026-09-10", "type": "depense", "libelle": "Achat d'un pneu", "mode": "Pris dans la recette du mercredi 09/09/2026", "montant": 20000}}, "documents": {"VISITE_TECHNIQUE": {"type": "VISITE TECHNIQUE", "dateEmission": "2026-08-06", "dateExpiration": "2027-02-06", "montant": 58600}, "ASSURANCE": {"type": "ASSURANCE", "dateEmission": "2025-10-17", "dateExpiration": "2026-10-16", "montant": 300000}, "CARTE_DE_STATIONNEMENT": {"type": "CARTE DE STATIONNEMENT", "dateEmission": "2026-04-14", "dateExpiration": "2027-03-01", "montant": 18000}, "PATENTE": {"type": "PATENTE", "dateEmission": "2026-02-28", "dateExpiration": "2027-03-01", "montant": 136000}, "CARTE_GRISE": {"type": "CARTE GRISE", "dateEmission": null, "dateExpiration": null, "montant": null}, "PERMIS_DE_CONDUIRE_CHAUFFEUR": {"type": "PERMIS DE CONDUIRE (CHAUFFEUR)", "dateEmission": null, "dateExpiration": null, "montant": null}, "EXTINCTEUR": {"type": "EXTINCTEUR", "dateEmission": null, "dateExpiration": null, "montant": null}, "VIGNETTE": {"type": "VIGNETTE", "dateEmission": null, "dateExpiration": null, "montant": null}}, "dettes": {"d01": {"date": "2026-08-21", "libelle": "Achat de bougies et de batterie", "mode": "A crédit", "montant": 38000}, "d02": {"date": "2026-08-28", "libelle": "Achat de pneu", "mode": "A crédit", "montant": 25000}, "d03": {"date": "2026-09-02", "libelle": "Achat de Kit d'embrayage", "mode": "A crédit", "montant": 57000}}, "creanciers": {"KOTTY": {"nom": "KOTTY", "sommeInitiale": 573000, "rembourse": 360000}, "MAMAN": {"nom": "MAMAN", "sommeInitiale": 100000, "rembourse": 0}, "O_P": {"nom": "O P", "sommeInitiale": 40000, "rembourse": 40000}, "MOI": {"nom": "MOI", "sommeInitiale": 390000, "rembourse": 0}, "WISDON": {"nom": "WISDON", "sommeInitiale": 100000, "rembourse": 0}}, "config": {"objectifs": {"default": 310000, "byMonth": {"2026-04": 77500}}, "vehicule": {"montantInitial": 3720000}}, "emprunt": {}};
 
   function loadStore(){
     try{
@@ -691,10 +726,24 @@
     }).then(function(){ toast('Objectif mis à jour'); }).catch(function(err){ toast('Erreur : '+err.message); });
   }
 
+  function saveVehiculePatch(patch){
+    if(!db) return;
+    var ref = db.doc('config/vehicule');
+    ref.get().then(function(snap){
+      if(snap.exists) return ref.update(patch);
+      var base = { montantInitial:3720000 };
+      Object.assign(base, patch);
+      return ref.set(base);
+    }).then(function(){ toast('Montant mis à jour'); }).catch(function(err){ toast('Erreur : '+err.message); });
+  }
+
   // ---------------- render: dashboard ----------------
   function computeTotals(){
-    var totalRecette = 0, totalRembEmprunt = 0;
-    state.journal.forEach(function(j){ if(j.reel) totalRecette += j.reel; if(j.rembEmprunt) totalRembEmprunt += j.rembEmprunt; });
+    var totalRecette = 0, totalRembEmpruntJournal = 0;
+    state.journal.forEach(function(j){ if(j.reel) totalRecette += j.reel; if(j.rembEmprunt) totalRembEmpruntJournal += j.rembEmprunt; });
+    var totalRembEmpruntManuel = 0;
+    state.emprunt.forEach(function(e){ totalRembEmpruntManuel += (e.montant||0); });
+    var totalRembEmprunt = totalRembEmpruntJournal + totalRembEmpruntManuel;
     var totalDepenses = 0, totalInvestissement = 0;
     state.maintenance.forEach(function(m){
       if(m.type==='investissement') totalInvestissement += (m.montant||0);
@@ -704,6 +753,8 @@
     state.creanciers.forEach(function(c){ totalRembCreanciers += (c.rembourse||0); totalSommeCreanciers += (c.sommeInitiale||0); });
     var totalDettes = 0;
     state.dettes.forEach(function(d){ totalDettes += (d.montant||0); });
+    var montantVehicule = (state.vehicule && state.vehicule.montantInitial) || 3720000;
+    var resteVehicule = montantVehicule - totalRembEmprunt;
 
     var soldeBrut = totalRecette - totalDepenses - totalRembEmprunt;
     var soldeNet = soldeBrut - totalRembCreanciers;
@@ -712,7 +763,8 @@
 
     return { totalRecette:totalRecette, totalDepenses:totalDepenses, totalRembEmprunt:totalRembEmprunt,
       totalInvestissement:totalInvestissement, totalRembCreanciers:totalRembCreanciers, totalSommeCreanciers:totalSommeCreanciers,
-      totalDettes:totalDettes, soldeBrut:soldeBrut, soldeNet:soldeNet, soldeApresDettes:soldeApresDettes, resteCreanciers:resteCreanciers };
+      totalDettes:totalDettes, soldeBrut:soldeBrut, soldeNet:soldeNet, soldeApresDettes:soldeApresDettes, resteCreanciers:resteCreanciers,
+      montantVehicule:montantVehicule, resteVehicule:resteVehicule };
   }
 
   function docStatus(doc){
@@ -751,8 +803,8 @@
     document.getElementById('kpiSoldeFoot').textContent = t.soldeApresDettes>=0 ? "Après créanciers et dettes" : "Négatif — dépenses > recettes";
     document.getElementById('kpiSolde').style.color = t.soldeApresDettes>=0 ? "" : "var(--bad)";
 
-    document.getElementById('kpiReste').textContent = money(t.resteCreanciers);
-    document.getElementById('kpiResteFoot').textContent = "Dû aux créanciers (sur "+money(t.totalSommeCreanciers)+")";
+    document.getElementById('kpiReste').textContent = money(t.resteVehicule);
+    document.getElementById('kpiResteFoot').textContent = "Remboursé "+money(t.totalRembEmprunt)+" sur "+money(t.montantVehicule);
 
     document.getElementById('kpiDettes').textContent = money(t.totalDettes + t.resteCreanciers);
     document.getElementById('kpiDettesFoot').textContent = money(t.totalDettes)+" exploitation + "+money(t.resteCreanciers)+" créanciers";
@@ -1004,6 +1056,35 @@
     }).join('');
   }
 
+  // ---------------- render: achat du vehicule ----------------
+  function renderVehicule(){
+    var t = computeTotals();
+    var pct = t.montantVehicule>0 ? Math.min(100, Math.round(t.totalRembEmprunt/t.montantVehicule*100)) : 0;
+    var fillEl = document.getElementById('vehFill');
+    if(fillEl) fillEl.style.width = pct+'%';
+    var rembEl = document.getElementById('vehRembTxt');
+    if(rembEl) rembEl.textContent = 'Remboursé '+money(t.totalRembEmprunt);
+    var resteEl = document.getElementById('vehResteTxt');
+    if(resteEl){ resteEl.textContent = money(t.resteVehicule); resteEl.style.color = t.resteVehicule>0?'var(--warn)':'var(--good)'; }
+    var mEl = document.getElementById('vehMontant');
+    if(mEl) makeInlineEditable(mEl, t.montantVehicule, function(v){ saveVehiculePatch({ montantInitial: v }); });
+
+    var rows = [];
+    state.journal.forEach(function(j){ if(j.rembEmprunt) rows.push({ date:j.date, montant:j.rembEmprunt, manual:false }); });
+    state.emprunt.forEach(function(e){ rows.push({ date:e.date, montant:e.montant, manual:true, id:e.id }); });
+    rows.sort(function(a,b){ return (b.date||'').localeCompare(a.date||''); });
+    var body = document.getElementById('empruntBody');
+    if(!body) return;
+    if(rows.length===0){ body.innerHTML = '<tr class="empty-row"><td colspan="3">Aucun versement enregistré.</td></tr>'; return; }
+    body.innerHTML = rows.map(function(r){
+      return '<tr>' +
+        '<td class="mono">'+(r.date||'—')+'</td>' +
+        '<td class="num">'+money(r.montant)+'</td>' +
+        '<td>'+(r.manual ? '<button class="btn ghost" data-del-emprunt="'+r.id+'">Suppr.</button>' : '<span class="row-note">saisi via Recettes</span>')+'</td>' +
+        '</tr>';
+    }).join('');
+  }
+
   // ---------------- render: financement ----------------
   function renderFinancement(){
     var list = state.creanciers.slice().sort(function(a,b){ return (b.sommeInitiale||0)-(a.sommeInitiale||0); });
@@ -1047,7 +1128,7 @@
     }
   }
 
-  function renderAll(){ renderDashboard(); renderJournal(); renderEntretien(); renderDocuments(); renderFinancement(); }
+  function renderAll(){ renderDashboard(); renderJournal(); renderEntretien(); renderDocuments(); renderVehicule(); renderFinancement(); }
 
   // ---------------- tabs ----------------
   document.getElementById('tabs').addEventListener('click', function(e){
@@ -1172,6 +1253,20 @@
     });
   });
 
+  document.getElementById('formEmprunt').addEventListener('submit', function(e){
+    e.preventDefault();
+    var data = {
+      date: document.getElementById('veDate').value,
+      montant: Number(document.getElementById('veMontant').value)
+    };
+    if(!data.date || !data.montant) return;
+    withDb(function(){
+      db.collection('emprunt').add(data).then(function(){
+        toast('Versement enregistré'); e.target.reset(); document.getElementById('veDate').value = todayStr();
+      }).catch(function(err){ toast('Erreur : '+err.message); });
+    });
+  });
+
   document.querySelectorAll('[data-cancel-edit]').forEach(function(btn){
     btn.addEventListener('click', function(){
       var key = btn.dataset.cancelEdit;
@@ -1192,6 +1287,7 @@
     else if(t.dataset.delDoc){ withDb(function(){ db.collection('documents').doc(t.dataset.delDoc).delete().then(function(){ toast('Document supprimé'); }); }); }
     else if(t.dataset.delCreditor){ if(confirm('Supprimer ce créancier ?')) withDb(function(){ db.collection('creanciers').doc(t.dataset.delCreditor).delete().then(function(){ toast('Créancier supprimé'); }); }); }
     else if(t.dataset.payDette){ withDb(function(){ db.collection('dettes').doc(t.dataset.payDette).delete().then(function(){ toast('Dette marquée payée'); }); }); }
+    else if(t.dataset.delEmprunt){ withDb(function(){ db.collection('emprunt').doc(t.dataset.delEmprunt).delete().then(function(){ toast('Versement supprimé'); }); }); }
 
     else if(t.dataset.editJournal){
       var j = findById(state.journal, t.dataset.editJournal) || state.journal.filter(function(x){return x.date===t.dataset.editJournal;})[0];
@@ -1265,6 +1361,7 @@
   document.getElementById('jDate').value = todayStr();
   document.getElementById('mDate').value = todayStr();
   document.getElementById('ddDate').value = todayStr();
+  document.getElementById('veDate').value = todayStr();
   renderAll();
 
   function boot(){
@@ -1280,8 +1377,13 @@
     watch('documents', 'documents', renderAll);
     watch('dettes', 'dettes', renderAll);
     watch('creanciers', 'creanciers', renderAll);
+    watch('emprunt', 'emprunt', renderAll);
     db.doc('config/objectifs').onSnapshot(function(snap){
       if(snap.exists) state.objectifs = snap.data();
+      renderAll();
+    });
+    db.doc('config/vehicule').onSnapshot(function(snap){
+      if(snap.exists) state.vehicule = snap.data();
       renderAll();
     });
     if(isFirstRun) toast('Données de départ chargées — modifie-les librement, tout est enregistré sur cet appareil.');
