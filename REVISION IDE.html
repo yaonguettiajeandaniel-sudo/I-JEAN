@@ -186,8 +186,8 @@
   }
   nav.bottom button{
     appearance:none; background:none; border:none; color:var(--ink-faint); cursor:pointer;
-    display:flex; flex-direction:column; align-items:center; gap:3px; font-size:10.5px; font-weight:600;
-    padding:4px 10px; border-radius:10px; min-width:64px;
+    display:flex; flex-direction:column; align-items:center; gap:3px; font-size:10px; font-weight:600;
+    padding:4px 6px; border-radius:10px; min-width:56px; flex:1; max-width:80px;
   }
   nav.bottom button .ic{ font-size:19px; line-height:1; }
   nav.bottom button.active{ color:var(--deep); }
@@ -511,6 +511,7 @@ function render(){
   else if (route.view === "quiz-run") html += renderQuizRun();
   else if (route.view === "exercices") html += renderExoSetup();
   else if (route.view === "exercices-run") html += renderExoRun();
+  else if (route.view === "diplome") html += renderDiplome();
   else if (route.view === "reglages") html += renderReglages();
   else html += renderAccueil();
   app.innerHTML = '<div class="app">' + html + '</div>' + renderBottomNav();
@@ -518,7 +519,7 @@ function render(){
 }
 
 function renderHeader(){
-  var titles = { accueil:"Révision IDE", programme:"Programme", quiz:"Réviser", "quiz-run":"Quiz en cours", exercices:"Exercices", "exercices-run":"Exercice", reglages:"Réglages" };
+  var titles = { accueil:"Révision IDE", programme:"Programme", quiz:"Réviser", "quiz-run":"Quiz en cours", exercices:"Exercices", "exercices-run":"Exercice", diplome:"Diplôme d'État", reglages:"Réglages" };
   return (
     '<header class="top">' +
       '<div class="brand">' +
@@ -539,10 +540,12 @@ function renderBottomNav(){
     { hash:"#/accueil", view:"accueil", ic:"🏠", label:"Accueil" },
     { hash:"#/programme/a1", view:"programme", ic:"📚", label:"Programme" },
     { hash:"#/quiz", view:"quiz", ic:"📝", label:"Réviser" },
-    { hash:"#/exercices", view:"exercices", ic:"✏️", label:"Exercices" }
+    { hash:"#/exercices", view:"exercices", ic:"✏️", label:"Exercices" },
+    { hash:"#/diplome", view:"diplome", ic:"🎓", label:"Diplôme" }
   ];
   return '<nav class="bottom">' + items.map(function(it){
-    var active = route.view === it.view || (route.view==='quiz-run' && it.view==='quiz') || (route.view==='exercices-run' && it.view==='exercices');
+    var quizRunTarget = (quizSession && quizSession.examType === "diplome") ? "diplome" : "quiz";
+    var active = route.view === it.view || (route.view==='quiz-run' && it.view===quizRunTarget) || (route.view==='exercices-run' && it.view==='exercices');
     return '<button class="' + (active?'active':'') + '" data-action="go" data-hash="' + it.hash + '"><span class="ic">' + it.ic + '</span>' + it.label + '</button>';
   }).join("") + '</nav>';
 }
@@ -718,7 +721,8 @@ function renderCoursList(y, m){
       '<p>' + nl2br(c.body) + '</p>' +
     '</div>';
   });
-  html += '<button class="btn block" data-action="add-cours" data-year="'+y.id+'" data-module="'+m.id+'">➕ Ajouter un cours</button>';
+  html += '<div class="row wrap"><button class="btn" style="flex:1;" data-action="add-cours" data-year="'+y.id+'" data-module="'+m.id+'">➕ Ajouter un cours</button>' +
+    '<button class="btn" style="flex:1;" data-action="import-start" data-year="'+y.id+'" data-module="'+m.id+'" data-kind="cours">📥 Importer (PDF/Word)</button></div>';
   return html;
 }
 
@@ -744,7 +748,8 @@ function renderQuestionList(y, m, kind){
       (q.explanation ? '<p class="faint" style="margin-top:8px;">💡 ' + nl2br(q.explanation) + '</p>' : "") +
     '</div>';
   });
-  html += '<button class="btn block" data-action="add-question" data-year="'+y.id+'" data-module="'+m.id+'" data-kind="'+kind+'">➕ Ajouter une question ' + kind.toUpperCase() + '</button>';
+  html += '<div class="row wrap"><button class="btn" style="flex:1;" data-action="add-question" data-year="'+y.id+'" data-module="'+m.id+'" data-kind="'+kind+'">➕ Ajouter une question ' + kind.toUpperCase() + '</button>' +
+    '<button class="btn" style="flex:1;" data-action="import-start" data-year="'+y.id+'" data-module="'+m.id+'" data-kind="'+kind+'">📥 Importer (PDF/Word)</button></div>';
   return html;
 }
 
@@ -763,7 +768,8 @@ function renderExoList(y, m){
       '<p class="faint" style="margin-top:8px;">Correction : ' + nl2br(e.correction) + '</p>' +
     '</div>';
   });
-  html += '<button class="btn block" data-action="add-exo" data-year="'+y.id+'" data-module="'+m.id+'">➕ Ajouter un exercice</button>';
+  html += '<div class="row wrap"><button class="btn" style="flex:1;" data-action="add-exo" data-year="'+y.id+'" data-module="'+m.id+'">➕ Ajouter un exercice</button>' +
+    '<button class="btn" style="flex:1;" data-action="import-start" data-year="'+y.id+'" data-module="'+m.id+'" data-kind="exercices">📥 Importer (PDF/Word)</button></div>';
   return html;
 }
 
@@ -934,6 +940,72 @@ function renderExoRun(){
     html += '<button class="btn deep block" style="margin-top:12px;" data-action="exo-reveal">👁️ Voir la correction</button>';
   }
   html += '</div>';
+  return html;
+}
+
+/* =========================================================
+   VUE : DIPLOME D'ETAT (revision combinee des 3 annees)
+   ========================================================= */
+function weakModules(){
+  var out = [];
+  allModulesFlat().forEach(function(x){
+    var qs = x.module.qcm.concat(x.module.qcd);
+    var answered = qs.filter(function(q){ return q.lastResult === true || q.lastResult === false; });
+    if (answered.length < 2) return;
+    var correct = answered.filter(function(q){ return q.lastResult; }).length;
+    var p = pct(correct, answered.length);
+    if (p < 60) out.push({ moduleName: x.module.name, yearLabel: x.year.label, pct: p, answered: answered.length });
+  });
+  out.sort(function(a,b){ return a.pct - b.pct; });
+  return out.slice(0,8);
+}
+function renderDiplome(){
+  var op = overallProgress();
+  var weak = weakModules();
+  var diplomeHistory = (state.history||[]).filter(function(h){ return h.examType === "diplome"; }).slice(0,10);
+  var pool = collectQuestions("mix","all",null,false);
+  var html = "";
+
+  html += '<div class="card row" style="gap:16px;">' + ringSvg(op.avg, 80) +
+    '<div style="flex:1;"><div class="small" style="font-weight:700;">Préparation Diplôme d\'État</div>' +
+    '<div class="faint" style="margin-top:2px;">Progression combinée sur les 3 années : cours lus, QCM/QCD réussis, exercices maîtrisés.</div></div>' +
+  '</div>';
+
+  html += '<div class="card"><h3 style="font-size:15px; margin-bottom:8px;">Par année</h3>';
+  state.years.forEach(function(y){
+    var s = computeYearStats(y);
+    var qPct = s.answeredQ ? pct(s.correctQ, s.answeredQ) + '% aux quiz' : 'pas encore de quiz';
+    html += '<div class="row between small" style="padding:7px 0; border-bottom:1px solid var(--line);">' +
+      '<span>' + esc(y.label) + '</span><span class="faint">' + pct(s.luCours,s.totalCours) + '% des cours lus · ' + qPct + '</span></div>';
+  });
+  html += '</div>';
+
+  if (weak.length){
+    html += '<div class="card"><h3 style="font-size:15px; margin-bottom:8px;">⚠️ Matières à renforcer en priorité</h3>' +
+      weak.map(function(w){
+        return '<div class="row between small" style="padding:7px 0; border-bottom:1px solid var(--line);">' +
+          '<span>' + esc(w.moduleName) + ' <span class="faint">(' + esc(w.yearLabel) + ')</span></span>' +
+          '<span class="tag ' + (w.pct<40?'bad':'warn') + '">' + w.pct + '%</span></div>';
+      }).join("") + '</div>';
+  }
+
+  html += '<div class="card" style="text-align:center;">' +
+    '<div style="font-size:30px;">🎓</div>' +
+    '<h3 style="margin:8px 0 4px;">Examen blanc — Diplôme d\'État</h3>' +
+    '<p class="faint" style="margin-bottom:12px;">Questions QCM et QCD mélangées, tirées des 1ère, 2ème et 3ème années (' + pool.length + ' disponibles).</p>' +
+    '<label class="field" style="max-width:220px; margin:0 auto 12px;"><span>Nombre de questions</span><input type="number" id="diplome-count" min="5" max="' + Math.max(5,pool.length) + '" value="' + Math.min(30, Math.max(1,pool.length)) + '"></label>' +
+    '<button class="btn primary block" data-action="diplome-start" ' + (!pool.length?'disabled':'') + '>🚀 Démarrer l\'examen blanc</button>' +
+    (!pool.length ? '<div class="faint" style="margin-top:8px;">Ajoute des QCM/QCD dans le Programme pour pouvoir lancer un examen blanc.</div>' : '') +
+  '</div>';
+
+  if (diplomeHistory.length){
+    html += '<div class="card"><h3 style="font-size:15px; margin-bottom:8px;">Historique des examens blancs</h3>' +
+      diplomeHistory.map(function(h){
+        return '<div class="row between small" style="padding:6px 0; border-bottom:1px solid var(--line);">' +
+          '<span>' + fmtDate(h.date) + '</span><span>' + h.correct + '/' + h.total + '</span>' +
+          '<span class="tag ' + (h.pct>=70?'good':h.pct>=50?'warn':'bad') + '">' + h.pct + '%</span></div>';
+      }).join("") + '</div>';
+  }
   return html;
 }
 
@@ -1187,6 +1259,301 @@ function modalExo(yearId, moduleId, itemId){
 }
 
 /* =========================================================
+   IMPORT DEPUIS FICHIER (PDF / DOCX / TXT)
+   ========================================================= */
+function loadScript(src){
+  return new Promise(function(resolve, reject){
+    var s = document.createElement("script");
+    s.src = src;
+    s.onload = function(){ resolve(); };
+    s.onerror = function(){ reject(new Error("Impossible de charger " + src + " (connexion internet requise la première fois).")); };
+    document.head.appendChild(s);
+  });
+}
+function ensurePdfJs(){
+  if (window.pdfjsLib) return Promise.resolve();
+  return loadScript("vendor-pdf.min.js").then(function(){
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc = "vendor-pdf-worker.min.js";
+  });
+}
+function ensureMammoth(){
+  if (window.mammoth) return Promise.resolve();
+  return loadScript("vendor-mammoth.min.js");
+}
+function extractTextFromPDF(arrayBuffer){
+  return ensurePdfJs().then(function(){
+    return window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  }).then(function(doc){
+    var pagePromises = [];
+    for (var i=1;i<=doc.numPages;i++){
+      pagePromises.push((function(pageNum){
+        return doc.getPage(pageNum).then(function(page){
+          return page.getTextContent().then(function(tc){
+            return tc.items.map(function(it){ return it.str + (it.hasEOL ? "\n" : " "); }).join("");
+          });
+        });
+      })(i));
+    }
+    return Promise.all(pagePromises).then(function(pages){ return pages.join("\n\n"); });
+  });
+}
+function extractTextFromDocx(arrayBuffer){
+  return ensureMammoth().then(function(){
+    return window.mammoth.extractRawText({ arrayBuffer: arrayBuffer });
+  }).then(function(res){ return res.value; });
+}
+function extractTextFromFile(file){
+  var name = file.name.toLowerCase();
+  return file.arrayBuffer().then(function(buf){
+    if (name.endsWith(".pdf")) return extractTextFromPDF(buf);
+    if (name.endsWith(".docx")) return extractTextFromDocx(buf);
+    if (name.endsWith(".txt")) return Promise.resolve(new TextDecoder("utf-8").decode(buf));
+    return Promise.reject(new Error("Format non pris en charge. Utilise un fichier .pdf, .docx ou .txt (les anciens .doc ne fonctionnent pas : réenregistre-le en .docx depuis Word, ou copie-colle le texte ci-dessous)."));
+  });
+}
+
+/* --- Analyse heuristique du texte importé --- */
+var RE_QUESTION_START = /^\s*(?:Q(?:uestion)?\.?\s*)?(\d{1,3})\s*[\.\)\:\-]\s+(.+)$/i;
+var RE_OPTION = /^\s*([A-Ea-e])\s*[\.\)\:\-]\s+(.+)$/;
+var RE_ANSWER = /^\s*(?:R[ée]ponses?|Corrig[ée]s?|Solutions?|Bonnes?\s+r[ée]ponses?)\s*(?:correcte)?s?\s*[:\-]?\s*(.*)$/i;
+
+function parseQuestionsFromText(text, kind){
+  var lines = text.split(/\r?\n/).map(function(l){ return l.trim(); });
+  var results = [];
+  var current = null;
+  function pushCurrent(){
+    if (current && current.question && current.options.length >= 2) results.push(current);
+    current = null;
+  }
+  lines.forEach(function(line){
+    if (!line) return;
+    var om = line.match(RE_OPTION);
+    var qm = !om ? line.match(RE_QUESTION_START) : null;
+    var am = !om && !qm ? line.match(RE_ANSWER) : null;
+    if (qm){
+      pushCurrent();
+      current = { question: qm[2].trim(), options: [], letters: [], correctLetters: [] };
+      return;
+    }
+    if (om && current){
+      current.options.push(om[2].trim());
+      current.letters.push(om[1].toUpperCase());
+      return;
+    }
+    if (am && current){
+      var found = (am[1].toUpperCase().match(/[A-E]/g)) || [];
+      current.correctLetters = found;
+      return;
+    }
+    if (current){
+      if (current.options.length) current.options[current.options.length-1] += " " + line;
+      else current.question += " " + line;
+    }
+  });
+  pushCurrent();
+  results.forEach(function(r){
+    r.correct = [];
+    r.correctLetters.forEach(function(L){
+      var idx = r.letters.indexOf(L);
+      if (idx !== -1 && r.correct.indexOf(idx) === -1) r.correct.push(idx);
+    });
+    if (kind === "qcd" && r.correct.length > 1) r.correct = [r.correct[0]];
+    if (!r.correct.length) r.correct = [0];
+    r.explanation = "";
+    delete r.letters; delete r.correctLetters;
+  });
+  return results;
+}
+function parseExercicesFromText(text){
+  var lines = text.split(/\r?\n/).map(function(l){ return l.trim(); });
+  var results = [];
+  var current = null;
+  lines.forEach(function(line){
+    if (!line) return;
+    var qm = line.match(RE_QUESTION_START);
+    var am = !qm ? line.match(RE_ANSWER) : null;
+    if (qm){
+      if (current && current.statement) results.push(current);
+      current = { statement: qm[2].trim(), correction: "" };
+      return;
+    }
+    if (am && current){
+      current.correction = (current.correction ? current.correction + " " : "") + am[1];
+      return;
+    }
+    if (current){
+      if (current.correction) current.correction += " " + line;
+      else current.statement += " " + line;
+    }
+  });
+  if (current && current.statement) results.push(current);
+  return results;
+}
+var RE_HEADING = /^(?:chapitre|partie|section|module)?\s*\d{1,2}\s*[\.\)\:\-]\s*(.{3,80})$/i;
+function parseCoursSections(text){
+  var lines = text.split(/\r?\n/);
+  var sections = [];
+  var current = null;
+  lines.forEach(function(raw){
+    var line = raw.trim();
+    if (line.length && line.length < 90 && RE_HEADING.test(line) ){
+      if (current) sections.push(current);
+      current = { title: line, body: "" };
+    } else if (current){
+      current.body += (current.body ? "\n" : "") + raw;
+    } else if (line){
+      current = { title: "Introduction", body: raw };
+    }
+  });
+  if (current) sections.push(current);
+  sections.forEach(function(s){ s.body = s.body.trim(); });
+  return sections;
+}
+
+/* --- Modales d'import --- */
+function modalImportStart(yearId, moduleId, kind){
+  var kindLabel = { cours:"cours", qcm:"questions QCM", qcd:"questions QCD", exercices:"exercices" }[kind];
+  var body =
+    '<p class="small muted">Importe un fichier <strong>.pdf</strong>, <strong>.docx</strong> ou <strong>.txt</strong> contenant tes ' + kindLabel + ', ou colle directement le texte. Les anciens fichiers <strong>.doc</strong> ne sont pas pris en charge : réenregistre-les en .docx depuis Word, ou copie-colle leur contenu.</p>' +
+    (kind==="qcm"||kind==="qcd" ? '<p class="faint">Format reconnu : questions numérotées (« 1. », « 2) »…), options lettrées (« A. », « B) »…) et une ligne « Réponse : B » ou « Corrigé : B, C ». Vérifie toujours le résultat avant d\'importer.</p>' : "") +
+    '<label class="field"><span>Fichier (optionnel)</span><input type="file" id="imp-file" accept=".pdf,.docx,.txt"></label>' +
+    '<div id="imp-status" class="faint" style="margin:4px 0 10px;"></div>' +
+    fieldTextarea("Texte à analyser", "imp-text", "", "Colle ici le texte de ta banque de sujets si tu ne fournis pas de fichier…");
+  openModal("Importer — " + kindLabel, body, {
+    submitLabel: "Analyser →",
+    onMount: function(){
+      document.getElementById("imp-file").addEventListener("change", function(e){
+        var file = e.target.files[0];
+        if (!file) return;
+        var statusEl = document.getElementById("imp-status");
+        statusEl.textContent = "Extraction du texte en cours…";
+        extractTextFromFile(file).then(function(text){
+          var ta = document.getElementById("imp-text");
+          if (ta) ta.value = text;
+          statusEl.textContent = "Texte extrait (" + text.length + " caractères). Vérifie/corrige si besoin, puis clique sur « Analyser ».";
+        }).catch(function(err){
+          statusEl.textContent = "⚠️ " + err.message;
+        });
+      });
+    },
+    onSubmit: function(){
+      var text = document.getElementById("imp-text").value;
+      if (!text.trim()) return showToast("Choisis un fichier ou colle du texte.");
+      var items;
+      if (kind === "qcm" || kind === "qcd") items = parseQuestionsFromText(text, kind);
+      else if (kind === "exercices") items = parseExercicesFromText(text);
+      else items = parseCoursSections(text);
+      if (!items.length) return showToast("Aucun élément détecté. Vérifie la numérotation (1., 2., options A. B. C.…) et réessaie.");
+      closeModal();
+      modalImportReview(yearId, moduleId, kind, items);
+    }
+  });
+}
+function modalImportReview(yearId, moduleId, kind, items){
+  var included = items.map(function(){ return true; });
+  function renderOneItem(it, i){
+    if (kind === "cours"){
+      return '<div class="item">' +
+        '<label class="checkbox-row small" style="margin-bottom:6px;"><input type="checkbox" data-inc="' + i + '" checked> Inclure</label>' +
+        fieldText("Titre", "rev-title-" + i, it.title) +
+        fieldTextarea("Contenu", "rev-body-" + i, it.body) +
+      '</div>';
+    }
+    if (kind === "exercices"){
+      return '<div class="item">' +
+        '<label class="checkbox-row small" style="margin-bottom:6px;"><input type="checkbox" data-inc="' + i + '" checked> Inclure</label>' +
+        fieldTextarea("Énoncé", "rev-stmt-" + i, it.statement) +
+        fieldTextarea("Correction", "rev-corr-" + i, it.correction) +
+      '</div>';
+    }
+    return '<div class="item">' +
+      '<label class="checkbox-row small" style="margin-bottom:6px;"><input type="checkbox" data-inc="' + i + '" checked> Inclure</label>' +
+      fieldText("Question", "rev-q-" + i, it.question) +
+      '<div class="small" style="font-weight:700; margin:6px 0 4px;">Options (coche la ou les bonnes réponses)</div>' +
+      it.options.map(function(opt,j){
+        return '<div class="opt-row"><input type="' + (kind==="qcm"?"checkbox":"radio") + '" name="rev-correct-' + i + '" data-rev-correct="' + i + '-' + j + '" ' + (it.correct.indexOf(j)!==-1?'checked':'') + '>' +
+          '<input type="text" data-rev-opt="' + i + '-' + j + '" value="' + escAttr(opt) + '"></div>';
+      }).join("") +
+    '</div>';
+  }
+  var body = '<div class="row between small" style="margin-bottom:8px;"><span>' + items.length + ' élément(s) détecté(s) — vérifie avant d\'importer.</span>' +
+    '<button type="button" class="btn sm" id="rev-toggle-all">Tout (dé)sélectionner</button></div>' +
+    '<div id="rev-list" style="max-height:50vh; overflow:auto;">' + items.map(renderOneItem).join("") + '</div>';
+
+  openModal("Vérifier avant import", body, {
+    submitLabel: "Importer",
+    onMount: function(){
+      document.querySelectorAll("[data-inc]").forEach(function(cb){
+        cb.onchange = function(){ included[+cb.getAttribute("data-inc")] = cb.checked; };
+      });
+      if (kind === "qcm" || kind === "qcd"){
+        document.querySelectorAll("[data-rev-correct]").forEach(function(cb){
+          cb.onchange = function(){
+            var parts = cb.getAttribute("data-rev-correct").split("-");
+            var i = +parts[0], j = +parts[1];
+            if (kind === "qcd"){ items[i].correct = [j]; }
+            else {
+              var pos = items[i].correct.indexOf(j);
+              if (cb.checked && pos === -1) items[i].correct.push(j);
+              if (!cb.checked && pos !== -1) items[i].correct.splice(pos,1);
+            }
+          };
+        });
+        document.querySelectorAll("[data-rev-opt]").forEach(function(inp){
+          inp.oninput = function(){
+            var parts = inp.getAttribute("data-rev-opt").split("-");
+            items[+parts[0]].options[+parts[1]] = inp.value;
+          };
+        });
+        items.forEach(function(it,i){
+          var qInp = document.getElementById("rev-q-" + i);
+          if (qInp) qInp.oninput = function(){ items[i].question = qInp.value; };
+        });
+      }
+      if (kind === "cours"){
+        items.forEach(function(it,i){
+          var t = document.getElementById("rev-title-" + i), b = document.getElementById("rev-body-" + i);
+          if (t) t.oninput = function(){ items[i].title = t.value; };
+          if (b) b.oninput = function(){ items[i].body = b.value; };
+        });
+      }
+      if (kind === "exercices"){
+        items.forEach(function(it,i){
+          var s = document.getElementById("rev-stmt-" + i), c = document.getElementById("rev-corr-" + i);
+          if (s) s.oninput = function(){ items[i].statement = s.value; };
+          if (c) c.oninput = function(){ items[i].correction = c.value; };
+        });
+      }
+      document.getElementById("rev-toggle-all").onclick = function(){
+        var allOn = included.every(function(v){ return v; });
+        included = included.map(function(){ return !allOn; });
+        document.querySelectorAll("[data-inc]").forEach(function(cb, idx){ cb.checked = included[idx]; });
+      };
+    },
+    onSubmit: function(){
+      var m = findModule(yearId, moduleId);
+      var count = 0;
+      items.forEach(function(it,i){
+        if (!included[i]) return;
+        if (kind === "cours"){
+          if (!it.title || !it.title.trim()) return;
+          m.cours.push({ id:uid(), title:it.title.trim(), body:(it.body||"").trim(), reviewLater:false, lastReviewed:null });
+        } else if (kind === "exercices"){
+          if (!it.statement || !it.statement.trim()) return;
+          m.exercices.push({ id:uid(), statement:it.statement.trim(), correction:(it.correction||"").trim(), reviewLater:false, mastered:false });
+        } else {
+          var opts = it.options.map(function(o){ return o.trim(); }).filter(function(o){ return o; });
+          if (!it.question || !it.question.trim() || opts.length < 2 || !it.correct.length) return;
+          m[kind].push({ id:uid(), question:it.question.trim(), options:opts, correct:it.correct.filter(function(c){ return c < opts.length; }), explanation:"", reviewLater:false, lastResult:null });
+        }
+        count++;
+      });
+      saveState(); closeModal(); render(); showToast(count + " élément(s) importé(s).");
+    }
+  });
+}
+
+/* =========================================================
    ACTIONS (délégation d'événements)
    ========================================================= */
 function handleAction(action, el, ev){
@@ -1227,6 +1594,8 @@ function handleAction(action, el, ev){
         saveState(); render();
       }
       break;
+
+    case "import-start": modalImportStart(yearId, moduleId, kind); break;
 
     case "add-cours": modalCours(yearId, moduleId); break;
     case "edit-cours": modalCours(yearId, moduleId, itemId); break;
@@ -1287,6 +1656,10 @@ function handleAction(action, el, ev){
     case "quiz-toggle-review": quizSetup.onlyReview = !quizSetup.onlyReview; render(); break;
     case "quiz-set-count": break; /* handled on input event */
     case "quiz-start": startQuiz(); break;
+    case "diplome-start":
+      var dCount = parseInt((document.getElementById("diplome-count")||{}).value, 10);
+      startDiplomeExam(dCount || 30);
+      break;
 
     /* Quiz run */
     case "quiz-select": quizSelectOption(+el.getAttribute("data-index")); break;
@@ -1358,8 +1731,25 @@ function startQuiz(){
   if (!pool.length) return;
   var n = Math.min(quizSetup.count, pool.length);
   var items = shuffle(pool).slice(0, n);
-  quizSession = { items: items, index: 0, answers: [], currentSelection: [], showFeedback:false, currentFlag:false };
+  quizSession = { items: items, index: 0, answers: [], currentSelection: [], showFeedback:false, currentFlag:false, examType:"normal", logged:false };
   navigate("#/quiz-run");
+}
+function startDiplomeExam(n){
+  var pool = collectQuestions("mix", "all", null, false);
+  if (!pool.length) return showToast("Aucune question disponible pour l'examen blanc.");
+  var count = Math.min(n || 30, pool.length);
+  var items = shuffle(pool).slice(0, count);
+  quizSession = { items: items, index: 0, answers: [], currentSelection: [], showFeedback:false, currentFlag:false, examType:"diplome", logged:false };
+  navigate("#/quiz-run");
+}
+function logQuizHistory(){
+  var correct = quizSession.answers.filter(function(a){ return a.correct; }).length;
+  var total = quizSession.items.length;
+  if (!total) return;
+  state.history = state.history || [];
+  state.history.unshift({ id: uid(), date: Date.now(), examType: quizSession.examType || "normal", total: total, correct: correct, pct: pct(correct,total) });
+  if (state.history.length > 200) state.history.length = 200;
+  saveState();
 }
 function quizSelectOption(i){
   if (quizSession.showFeedback) return;
@@ -1394,6 +1784,10 @@ function quizValidate(){
 }
 function quizNext(){
   quizSession.index++;
+  if (quizSession.index >= quizSession.items.length && !quizSession.logged){
+    logQuizHistory();
+    quizSession.logged = true;
+  }
   quizSession.currentSelection = [];
   quizSession.showFeedback = false;
   quizSession.currentFlag = false;
@@ -1401,7 +1795,7 @@ function quizNext(){
 }
 function quizRetryMissed(){
   var missedQuestions = quizSession.items.filter(function(item,i){ return quizSession.answers[i] && !quizSession.answers[i].correct; });
-  quizSession = { items: missedQuestions, index:0, answers:[], currentSelection:[], showFeedback:false, currentFlag:false };
+  quizSession = { items: missedQuestions, index:0, answers:[], currentSelection:[], showFeedback:false, currentFlag:false, examType: quizSession.examType, logged:false };
   render();
 }
 
