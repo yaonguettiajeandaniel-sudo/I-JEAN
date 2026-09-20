@@ -3,7 +3,7 @@
   "short_name": "Bord de Route",
   "description": "Suivi quotidien du véhicule AA-395-AD : recettes, entretien, documents et financement.",
   "start_url": "./BORD%20DE%20ROUTE.html",
-  "scope": "./",
+  "scope": "./BORD%20DE%20ROUTE.html",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#EEF0EE",
