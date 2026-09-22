@@ -762,6 +762,7 @@ function render(){
   else html += renderAccueil();
   app.innerHTML = '<div class="app">' + html + '</div>' + renderBottomNav();
   window.scrollTo(0,0);
+  if (route.view === "reglages") updateStorageUsage();
 }
 
 function renderHeader(){
@@ -899,7 +900,8 @@ function renderAccueil(){
    VUE : PROGRAMME
    ========================================================= */
 var openModules = {}; /* moduleId -> bool */
-var moduleSubTab = {}; /* moduleId -> 'cours'|'qcm'|'qcd'|'exercices' */
+var moduleSubTab = {}; /* moduleId -> 'cours'|'qcm'|'qcd'|'exercices'|'docs' */
+var docsCache = {}; /* moduleId -> array of document records (loaded lazily from IndexedDB) */
 
 function renderProgramme(yearId){
   var y = findYear(yearId) || state.years[0];
@@ -919,11 +921,12 @@ function renderProgramme(yearId){
 function renderModule(y, m){
   var isOpen = !!openModules[m.id];
   var sub = moduleSubTab[m.id] || "cours";
-  var counts = { cours:m.cours.length, qcm:m.qcm.length, qcd:m.qcd.length, exercices:m.exercices.length };
+  var docCount = (docsCache[m.id] || []).length;
+  var counts = { cours:m.cours.length, qcm:m.qcm.length, qcd:m.qcd.length, exercices:m.exercices.length, docs:docCount };
   var html = '<div class="module ' + (isOpen?'open':'') + '">';
   html += '<div class="mhead" data-action="toggle-module" data-module="' + m.id + '">' +
     '<div><h3>' + esc(m.name) + '</h3>' +
-    '<div class="faint" style="margin-top:3px;">' + counts.cours + ' cours · ' + counts.qcm + ' QCM · ' + counts.qcd + ' QCD · ' + counts.exercices + ' exercices</div></div>' +
+    '<div class="faint" style="margin-top:3px;">' + counts.cours + ' cours · ' + counts.qcm + ' QCM · ' + counts.qcd + ' QCD · ' + counts.exercices + ' exercices · ' + counts.docs + ' documents</div></div>' +
     '<div class="row" style="gap:6px;">' +
       '<button class="icon-btn" style="width:30px;height:30px;" data-action="rename-module" data-year="' + y.id + '" data-module="' + m.id + '" title="Renommer">✏️</button>' +
       '<button class="icon-btn" style="width:30px;height:30px;" data-action="delete-module" data-year="' + y.id + '" data-module="' + m.id + '" title="Supprimer">🗑️</button>' +
@@ -934,8 +937,8 @@ function renderModule(y, m){
   if (isOpen){
     html += '<div class="mbody">';
     html += '<div class="subtabs">' +
-      ['cours','qcm','qcd','exercices'].map(function(k){
-        var lbl = { cours:"📘 Cours", qcm:"☑️ QCM", qcd:"🔘 QCD", exercices:"✏️ Exercices" }[k];
+      ['cours','qcm','qcd','exercices','docs'].map(function(k){
+        var lbl = { cours:"📘 Cours", qcm:"☑️ QCM", qcd:"🔘 QCD", exercices:"✏️ Exercices", docs:"📎 Documents" }[k];
         return '<button class="' + (sub===k?'active':'') + '" data-action="module-subtab" data-module="' + m.id + '" data-sub="' + k + '">' + lbl + ' (' + counts[k] + ')</button>';
       }).join("") + '</div>';
 
@@ -943,6 +946,7 @@ function renderModule(y, m){
     if (sub === "qcm") html += renderQuestionList(y, m, "qcm");
     if (sub === "qcd") html += renderQuestionList(y, m, "qcd");
     if (sub === "exercices") html += renderExoList(y, m);
+    if (sub === "docs") html += renderDocsList(y, m);
 
     html += '</div>';
   }
@@ -992,6 +996,7 @@ function renderQuestionList(y, m, kind){
         return '<div class="opt' + (isCorrect?' correct':'') + '">' + (isCorrect?'✓ ':'') + esc(opt) + '</div>';
       }).join("") +
       (q.explanation ? '<p class="faint" style="margin-top:8px;">💡 ' + nl2br(q.explanation) + '</p>' : "") +
+      '<button class="btn sm" style="margin-top:8px;" data-action="search-courses" data-query="' + escAttr(q.question) + '">🔍 Chercher dans mes cours</button>' +
     '</div>';
   });
   html += '<div class="row wrap"><button class="btn" style="flex:1;" data-action="add-question" data-year="'+y.id+'" data-module="'+m.id+'" data-kind="'+kind+'">➕ Ajouter une question ' + kind.toUpperCase() + '</button>' +
@@ -1012,10 +1017,48 @@ function renderExoList(y, m){
         '</div>' +
       '</div>' +
       '<p class="faint" style="margin-top:8px;">Correction : ' + nl2br(e.correction) + '</p>' +
+      '<button class="btn sm" style="margin-top:8px;" data-action="search-courses" data-query="' + escAttr(e.statement) + '">🔍 Chercher dans mes cours</button>' +
     '</div>';
   });
   html += '<div class="row wrap"><button class="btn" style="flex:1;" data-action="add-exo" data-year="'+y.id+'" data-module="'+m.id+'">➕ Ajouter un exercice</button>' +
     '<button class="btn" style="flex:1;" data-action="import-start" data-year="'+y.id+'" data-module="'+m.id+'" data-kind="exercices">📥 Importer (PDF/Word)</button></div>';
+  return html;
+}
+
+function fmtSize(bytes){
+  if (bytes < 1024) return bytes + " o";
+  if (bytes < 1024*1024) return Math.round(bytes/1024) + " Ko";
+  return (bytes/(1024*1024)).toFixed(1) + " Mo";
+}
+function docKindIcon(kind){
+  return { pdf:"📕", docx:"📄", pptx:"📊", image:"🖼️" }[kind] || "📎";
+}
+function renderDocsList(y, m){
+  var docs = docsCache[m.id];
+  var html = "";
+  if (docs === undefined){
+    loadModuleDocs(m.id);
+    return '<div class="empty small">Chargement de tes documents…</div>' +
+      '<div class="faint" style="margin-top:8px;">Les cours que tu ajoutes ici (PDF, Word, PowerPoint, image) restent enregistrés en permanence sur cet appareil, même après fermeture du navigateur — jusqu\'à ce que tu les supprimes toi-même.</div>' +
+      '<label class="field" style="margin-top:12px;"><span>Ajouter un document</span><input type="file" multiple accept=".pdf,.docx,.pptx,.png,.jpg,.jpeg,.gif,.webp" data-action="doc-upload-input" data-year="'+y.id+'" data-module="'+m.id+'" data-module-name="'+escAttr(m.name)+'"></label>';
+  }
+  if (!docs.length){
+    html += '<div class="empty small">Aucun document pour l\'instant. Ajoute la version numérique de ton cours (PDF, Word, PowerPoint ou photo) : elle restera disponible en permanence sur cet appareil.</div>';
+  }
+  docs.forEach(function(d){
+    html += '<div class="item">' +
+      '<div class="ihead">' +
+        '<div style="min-width:0;"><strong class="small">' + docKindIcon(d.kind) + ' ' + esc(d.fileName) + '</strong>' +
+        '<div class="faint">' + fmtSize(d.size) + ' · ajouté le ' + fmtDate(d.uploadedAt) + (d.text ? ' · texte indexé pour la recherche' : '') + '</div></div>' +
+        '<div class="iactions">' +
+          '<button class="btn sm" data-action="doc-open" data-id="'+d.id+'">👁️ Ouvrir</button>' +
+          '<button class="btn sm danger" data-action="doc-delete" data-id="'+d.id+'" data-module="'+m.id+'">🗑️</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  });
+  html += '<label class="field" style="margin-top:6px;"><span>Ajouter un document (PDF, Word .docx, PowerPoint .pptx, image)</span>' +
+    '<input type="file" multiple accept=".pdf,.docx,.pptx,.png,.jpg,.jpeg,.gif,.webp" data-action="doc-upload-input" data-year="'+y.id+'" data-module="'+m.id+'" data-module-name="'+escAttr(m.name)+'"></label>';
   return html;
 }
 
@@ -1274,6 +1317,13 @@ function renderReglages(){
   '</div>';
 
   html += '<div class="card">' +
+    '<h3 style="font-size:15px; margin-bottom:8px;">Mes cours (documents)</h3>' +
+    '<p class="small muted">Les fichiers que tu ajoutes dans l\'onglet « 📎 Documents » d\'une matière (PDF, Word, PowerPoint, photo) restent <strong>enregistrés en permanence sur cet appareil</strong>, même après avoir fermé le navigateur ou éteint le téléphone — jusqu\'à ce que tu les supprimes toi-même.</p>' +
+    '<p class="small muted" style="margin-top:8px;">⚠️ Ce n\'est pas un vrai « cloud » internet : ces documents restent uniquement sur <strong>cet appareil</strong> et ne sont pas envoyés sur un serveur ni partagés avec tes autres appareils. Ils ne sont pas non plus inclus dans l\'export/import de sauvegarde ci-dessous.</p>' +
+    '<div id="storage-usage" class="faint" style="margin-top:8px;">Calcul de l\'espace utilisé…</div>' +
+  '</div>';
+
+  html += '<div class="card">' +
     '<h3 style="font-size:15px; margin-bottom:8px;">Installer l\'application</h3>' +
     '<p class="small muted"><strong>Android / Chrome :</strong> menu ⋮ → « Ajouter à l\'écran d\'accueil » / « Installer l\'application ».<br><br>' +
     '<strong>iPhone / Safari :</strong> bouton Partager 􀈂 → « Sur l\'écran d\'accueil ».<br><br>' +
@@ -1284,7 +1334,10 @@ function renderReglages(){
     '<h3 style="font-size:15px; margin-bottom:8px;">Zone danger</h3>' +
     '<div class="row wrap">' +
       '<button class="btn" style="flex:1;" data-action="reset-seed">↺ Restaurer le contenu d\'exemple</button>' +
-      '<button class="btn danger" style="flex:1;" data-action="clear-all">🗑️ Tout effacer</button>' +
+      '<button class="btn danger" style="flex:1;" data-action="clear-docs">🗑️ Supprimer tous mes documents</button>' +
+    '</div>' +
+    '<div class="row wrap" style="margin-top:8px;">' +
+      '<button class="btn danger block" data-action="clear-all">🗑️ Tout effacer (cours, QCM, QCD, exercices, progression et documents)</button>' +
     '</div>' +
   '</div>';
 
@@ -1800,6 +1853,285 @@ function modalImportReview(yearId, moduleId, kind, items){
 }
 
 /* =========================================================
+   BIBLIOTHEQUE DE COURS (stockage permanent sur cet appareil)
+   Les documents (PDF/DOCX/PPTX/images) sont conservés dans IndexedDB,
+   séparément de l'état principal (localStorage), car ils peuvent être
+   volumineux. Le texte des PDF/DOCX/PPTX est extrait à l'ajout pour
+   permettre la recherche « Chercher dans mes cours ».
+   ========================================================= */
+var FILES_DB_NAME = "revision_ide_files_v1";
+var FILES_STORE = "files";
+var filesDbPromise = null;
+function openFilesDB(){
+  if (filesDbPromise) return filesDbPromise;
+  filesDbPromise = new Promise(function(resolve, reject){
+    if (!window.indexedDB){ reject(new Error("IndexedDB non disponible sur ce navigateur.")); return; }
+    var req = indexedDB.open(FILES_DB_NAME, 1);
+    req.onupgradeneeded = function(e){
+      var db = e.target.result;
+      if (!db.objectStoreNames.contains(FILES_STORE)){
+        var store = db.createObjectStore(FILES_STORE, { keyPath: "id" });
+        store.createIndex("moduleId", "moduleId", { unique:false });
+      }
+    };
+    req.onsuccess = function(e){ resolve(e.target.result); };
+    req.onerror = function(e){ reject(e.target.error); };
+  });
+  return filesDbPromise;
+}
+function dbPut(record){
+  return openFilesDB().then(function(db){
+    return new Promise(function(resolve, reject){
+      var tx = db.transaction(FILES_STORE, "readwrite");
+      tx.objectStore(FILES_STORE).put(record);
+      tx.oncomplete = function(){ resolve(); };
+      tx.onerror = function(){ reject(tx.error); };
+    });
+  });
+}
+function dbDeleteFile(id){
+  return openFilesDB().then(function(db){
+    return new Promise(function(resolve, reject){
+      var tx = db.transaction(FILES_STORE, "readwrite");
+      tx.objectStore(FILES_STORE).delete(id);
+      tx.oncomplete = function(){ resolve(); };
+      tx.onerror = function(){ reject(tx.error); };
+    });
+  });
+}
+function dbGetByModule(moduleId){
+  return openFilesDB().then(function(db){
+    return new Promise(function(resolve, reject){
+      var tx = db.transaction(FILES_STORE, "readonly");
+      var idx = tx.objectStore(FILES_STORE).index("moduleId");
+      var req = idx.getAll(moduleId);
+      req.onsuccess = function(){ resolve(req.result || []); };
+      req.onerror = function(){ reject(req.error); };
+    });
+  });
+}
+function dbGetAllFiles(){
+  return openFilesDB().then(function(db){
+    return new Promise(function(resolve, reject){
+      var tx = db.transaction(FILES_STORE, "readonly");
+      var req = tx.objectStore(FILES_STORE).getAll();
+      req.onsuccess = function(){ resolve(req.result || []); };
+      req.onerror = function(){ reject(req.error); };
+    });
+  });
+}
+function dbGetFile(id){
+  return openFilesDB().then(function(db){
+    return new Promise(function(resolve, reject){
+      var tx = db.transaction(FILES_STORE, "readonly");
+      var req = tx.objectStore(FILES_STORE).get(id);
+      req.onsuccess = function(){ resolve(req.result || null); };
+      req.onerror = function(){ reject(req.error); };
+    });
+  });
+}
+function updateStorageUsage(){
+  var el = document.getElementById("storage-usage");
+  if (!el) return;
+  dbGetAllFiles().then(function(files){
+    var el2 = document.getElementById("storage-usage");
+    if (!el2) return;
+    var totalSize = files.reduce(function(s,f){ return s + (f.size||0); }, 0);
+    var txt = files.length + " document(s) enregistré(s) · " + fmtSize(totalSize);
+    if (navigator.storage && navigator.storage.estimate){
+      navigator.storage.estimate().then(function(est){
+        var el3 = document.getElementById("storage-usage");
+        if (!el3) return;
+        var quotaTxt = (est.quota ? " (espace disponible sur cet appareil : environ " + fmtSize(est.quota - (est.usage||0)) + ")" : "");
+        el3.textContent = txt + quotaTxt;
+      });
+    }
+    el2.textContent = txt;
+  }).catch(function(){
+    if (el) el.textContent = "Impossible de calculer l'espace utilisé.";
+  });
+}
+function loadModuleDocs(moduleId){
+  if (docsCache[moduleId] !== undefined) return;
+  docsCache[moduleId] = null; /* mark as "loading" to avoid duplicate loads */
+  dbGetByModule(moduleId).then(function(docs){
+    docs.sort(function(a,b){ return b.uploadedAt - a.uploadedAt; });
+    docsCache[moduleId] = docs;
+    render();
+  }).catch(function(err){
+    docsCache[moduleId] = [];
+    showToast("Impossible de charger tes documents : " + err.message);
+    render();
+  });
+}
+
+function detectDocKind(name){
+  var n = name.toLowerCase();
+  if (n.endsWith(".pdf")) return "pdf";
+  if (n.endsWith(".docx")) return "docx";
+  if (n.endsWith(".pptx")) return "pptx";
+  if (/\.(png|jpe?g|gif|webp)$/.test(n)) return "image";
+  return "other";
+}
+function ensureJSZip(){
+  if (window.JSZip) return Promise.resolve();
+  return loadScript("vendor-jszip.min.js");
+}
+function decodeXmlEntities(s){
+  return s.replace(/&amp;/g,"&").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,'"').replace(/&apos;/g,"'");
+}
+function extractTextFromPptx(arrayBuffer){
+  return ensureJSZip().then(function(){
+    return window.JSZip.loadAsync(arrayBuffer);
+  }).then(function(zip){
+    var slideFiles = Object.keys(zip.files).filter(function(n){ return /^ppt\/slides\/slide\d+\.xml$/.test(n); });
+    slideFiles.sort(function(a,b){
+      var na = parseInt(a.match(/slide(\d+)\.xml/)[1],10);
+      var nb = parseInt(b.match(/slide(\d+)\.xml/)[1],10);
+      return na-nb;
+    });
+    return Promise.all(slideFiles.map(function(name){ return zip.files[name].async("string"); })).then(function(xmls){
+      return xmls.map(function(xml, i){
+        var texts = [];
+        var re = /<a:t>([^<]*)<\/a:t>/g;
+        var mm;
+        while ((mm = re.exec(xml))) texts.push(decodeXmlEntities(mm[1]));
+        return "Diapositive " + (i+1) + " :\n" + texts.join(" ");
+      }).join("\n\n");
+    });
+  });
+}
+function extractTextForDoc(kind, arrayBuffer){
+  if (kind === "pdf") return extractTextFromPDF(arrayBuffer);
+  if (kind === "docx") return extractTextFromDocx(arrayBuffer);
+  if (kind === "pptx") return extractTextFromPptx(arrayBuffer);
+  return Promise.resolve("");
+}
+
+function handleDocUpload(files, yearId, moduleId, moduleName){
+  var list = Array.prototype.slice.call(files);
+  if (!list.length) return;
+  showToast("Ajout de " + list.length + " document(s)…");
+  var chain = Promise.resolve();
+  list.forEach(function(file){
+    chain = chain.then(function(){
+      var kind = detectDocKind(file.name);
+      if (kind === "other"){
+        showToast(file.name + " : format non pris en charge (utilise .pdf, .docx, .pptx ou une image).");
+        return;
+      }
+      return file.arrayBuffer().then(function(buf){
+        var extractPromise = (kind === "image") ? Promise.resolve("") : extractTextForDoc(kind, buf).catch(function(err){
+          showToast("Extraction du texte impossible pour " + file.name + " (" + err.message + ") — le fichier est quand même enregistré.");
+          return "";
+        });
+        return extractPromise.then(function(text){
+          return dbPut({
+            id: uid(), yearId: yearId, moduleId: moduleId, moduleName: moduleName,
+            fileName: file.name, mimeType: file.type || "", size: file.size, kind: kind,
+            text: text, uploadedAt: Date.now(), blob: file
+          });
+        });
+      });
+    });
+  });
+  chain.then(function(){
+    docsCache[moduleId] = undefined;
+    loadModuleDocs(moduleId);
+    showToast("Document(s) ajouté(s) — conservés en permanence sur cet appareil.");
+  }).catch(function(err){
+    showToast("Erreur lors de l'ajout : " + err.message);
+  });
+}
+
+function openDocFile(id){
+  dbGetFile(id).then(function(rec){
+    if (!rec){ showToast("Document introuvable."); return; }
+    var url = URL.createObjectURL(rec.blob);
+    window.open(url, "_blank");
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 60000);
+  });
+}
+function wipeAllDocs(){
+  return openFilesDB().then(function(db){
+    return new Promise(function(resolve, reject){
+      var tx = db.transaction(FILES_STORE, "readwrite");
+      tx.objectStore(FILES_STORE).clear();
+      tx.oncomplete = function(){ resolve(); };
+      tx.onerror = function(){ reject(tx.error); };
+    });
+  }).catch(function(){ /* IndexedDB unavailable: nothing to wipe */ });
+}
+function deleteDocFile(id, moduleId){
+  dbDeleteFile(id).then(function(){
+    docsCache[moduleId] = (docsCache[moduleId]||[]).filter(function(d){ return d.id !== id; });
+    render();
+    showToast("Document supprimé.");
+  });
+}
+
+/* --- Recherche dans les cours importés --- */
+var STOPWORDS_FR = ["les","des","une","un","le","la","de","du","et","ou","à","au","aux","en","dans","sur","par","pour","est","sont","qui","que","quel","quelle","quels","quelles","ce","ces","cette","son","sa","ses","tu","je","il","elle","nous","vous","ils","elles","avec","sans","plus","moins","comment","pourquoi","cochez","choisir","cocher","bonne","bonnes","réponse","réponses","parmi","suivant","suivants","suivante","suivantes","vrai","faux"];
+function extractKeywords(text){
+  var words = (text||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"")
+    .replace(/[^a-z0-9\s]/g," ").split(/\s+/).filter(Boolean);
+  var seen = {};
+  var out = [];
+  words.forEach(function(w){
+    if (w.length < 4) return;
+    if (STOPWORDS_FR.indexOf(w) !== -1 || seen[w]) return;
+    seen[w] = true; out.push(w);
+  });
+  return out.slice(0, 8);
+}
+function normalizeForSearch(s){
+  return (s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
+}
+function searchInCourses(query){
+  var keywords = extractKeywords(query);
+  return dbGetAllFiles().then(function(files){
+    var results = [];
+    files.forEach(function(f){
+      if (!f.text) return;
+      var normText = normalizeForSearch(f.text);
+      keywords.forEach(function(kw){
+        var idx = normText.indexOf(kw);
+        if (idx === -1) return;
+        var start = Math.max(0, idx-90);
+        var end = Math.min(f.text.length, idx+kw.length+90);
+        var snippet = (start>0?"…":"") + f.text.slice(start,end).replace(/\s+/g," ").trim() + (end<f.text.length?"…":"");
+        results.push({ fileName:f.fileName, moduleName:f.moduleName, moduleId:f.moduleId, yearId:f.yearId, keyword:kw, snippet:snippet });
+      });
+    });
+    return { keywords: keywords, results: results.slice(0,15) };
+  });
+}
+function openSearchCoursesModal(query){
+  openModal("🔍 Recherche dans mes cours", '<div class="empty small">Recherche en cours…</div>', { submitLabel:"Fermer", onSubmit: function(){ closeModal(); } });
+  document.querySelector("#modal-root .foot .btn:not(.primary)").style.display = "none";
+  searchInCourses(query).then(function(res){
+    var body = document.getElementById("modal-body");
+    if (!body) return;
+    if (!res.keywords.length){
+      body.innerHTML = '<div class="empty small">Question trop courte pour être recherchée.</div>';
+      return;
+    }
+    if (!res.results.length){
+      body.innerHTML = '<p class="small muted">Aucun passage trouvé pour : <strong>' + esc(res.keywords.join(", ")) + '</strong>.</p>' +
+        '<p class="faint" style="margin-top:8px;">Ajoute tes cours (PDF, Word ou PowerPoint) dans l\'onglet « 📎 Documents » d\'une matière pour pouvoir les retrouver ici.</p>';
+      return;
+    }
+    body.innerHTML = '<p class="faint" style="margin-bottom:10px;">Mots-clés recherchés : ' + esc(res.keywords.join(", ")) + '</p>' +
+      res.results.map(function(r){
+        return '<div class="item" data-action="go-module-docs" data-year="'+r.yearId+'" data-module="'+r.moduleId+'" style="cursor:pointer;">' +
+          '<div class="row between"><span class="tag deep">' + esc(r.fileName) + '</span><span class="faint">' + esc(r.moduleName) + '</span></div>' +
+          '<p>…' + esc(r.snippet) + '…</p>' +
+        '</div>';
+      }).join("");
+  });
+}
+
+/* =========================================================
    ACTIONS (délégation d'événements)
    ========================================================= */
 function handleAction(action, el, ev){
@@ -1842,6 +2174,20 @@ function handleAction(action, el, ev){
       break;
 
     case "import-start": modalImportStart(yearId, moduleId, kind); break;
+
+    case "doc-open": openDocFile(el.getAttribute("data-id")); break;
+    case "doc-delete":
+      if (confirm("Supprimer définitivement ce document de cet appareil ?")){
+        deleteDocFile(el.getAttribute("data-id"), el.getAttribute("data-module"));
+      }
+      break;
+    case "search-courses": openSearchCoursesModal(el.getAttribute("data-query")); break;
+    case "go-module-docs":
+      closeModal();
+      openModules[moduleId] = true;
+      moduleSubTab[moduleId] = "docs";
+      navigate("#/programme/" + yearId);
+      break;
 
     case "add-cours": modalCours(yearId, moduleId); break;
     case "edit-cours": modalCours(yearId, moduleId, itemId); break;
@@ -1951,11 +2297,17 @@ function handleAction(action, el, ev){
       }
       break;
     case "clear-all":
-      if (confirm("Effacer toutes les données (cours, QCM, QCD, exercices, progression) ? Cette action est irréversible.")){
+      if (confirm("Effacer toutes les données (cours, QCM, QCD, exercices, progression) ET tous tes documents ? Cette action est irréversible.")){
         state = buildSeed();
         state.years.forEach(function(y){ y.modules = []; });
         state.onboardingSeen = true;
-        saveState(); render(); showToast("Toutes les données ont été effacées.");
+        saveState();
+        wipeAllDocs().then(function(){ docsCache = {}; render(); showToast("Toutes les données ont été effacées."); });
+      }
+      break;
+    case "clear-docs":
+      if (confirm("Supprimer définitivement tous les documents ajoutés sur cet appareil ? Cette action est irréversible.")){
+        wipeAllDocs().then(function(){ docsCache = {}; render(); showToast("Tous les documents ont été supprimés."); });
       }
       break;
 
@@ -2104,6 +2456,10 @@ document.addEventListener("click", function(e){
 document.addEventListener("change", function(e){
   if (e.target.id === "import-file" && e.target.files[0]) importDataFile(e.target.files[0]);
   if (e.target.id === "settings-name") { state.settings.name = e.target.value; saveState(); }
+  if (e.target.getAttribute && e.target.getAttribute("data-action") === "doc-upload-input" && e.target.files.length){
+    handleDocUpload(e.target.files, e.target.getAttribute("data-year"), e.target.getAttribute("data-module"), e.target.getAttribute("data-module-name"));
+    e.target.value = "";
+  }
 });
 document.addEventListener("input", function(e){
   if (e.target.getAttribute && e.target.getAttribute("data-action") === "quiz-set-count"){
