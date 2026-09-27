@@ -1,0 +1,17 @@
+{
+  "name": "Révision IDE",
+  "short_name": "Révision IDE",
+  "description": "Application de révision pour la formation Infirmier Diplômé d'État (INFAS) : cours, QCM, QCD et exercices sur les 3 années, jusqu'au diplôme d'État.",
+  "start_url": "./REVISION IDE.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0E2A2E",
+  "theme_color": "#115E73",
+  "icons": [
+    { "src": "revision-ide-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "revision-ide-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "revision-ide-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "revision-ide-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
