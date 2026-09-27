@@ -972,7 +972,7 @@ function renderCoursList(y, m){
     '</div>';
   });
   html += '<div class="row wrap"><button class="btn" style="flex:1;" data-action="add-cours" data-year="'+y.id+'" data-module="'+m.id+'">➕ Ajouter un cours</button>' +
-    '<button class="btn" style="flex:1;" data-action="import-start" data-year="'+y.id+'" data-module="'+m.id+'" data-kind="cours">📥 Importer (PDF/Word)</button></div>';
+    '<button class="btn" style="flex:1;" data-action="import-start" data-year="'+y.id+'" data-module="'+m.id+'" data-kind="cours">📥 Importer (PDF/Word/PPT)</button></div>';
   return html;
 }
 
@@ -1000,7 +1000,7 @@ function renderQuestionList(y, m, kind){
     '</div>';
   });
   html += '<div class="row wrap"><button class="btn" style="flex:1;" data-action="add-question" data-year="'+y.id+'" data-module="'+m.id+'" data-kind="'+kind+'">➕ Ajouter une question ' + kind.toUpperCase() + '</button>' +
-    '<button class="btn" style="flex:1;" data-action="import-start" data-year="'+y.id+'" data-module="'+m.id+'" data-kind="'+kind+'">📥 Importer (PDF/Word)</button></div>';
+    '<button class="btn" style="flex:1;" data-action="import-start" data-year="'+y.id+'" data-module="'+m.id+'" data-kind="'+kind+'">📥 Importer (PDF/Word/PPT)</button></div>';
   return html;
 }
 
@@ -1021,7 +1021,7 @@ function renderExoList(y, m){
     '</div>';
   });
   html += '<div class="row wrap"><button class="btn" style="flex:1;" data-action="add-exo" data-year="'+y.id+'" data-module="'+m.id+'">➕ Ajouter un exercice</button>' +
-    '<button class="btn" style="flex:1;" data-action="import-start" data-year="'+y.id+'" data-module="'+m.id+'" data-kind="exercices">📥 Importer (PDF/Word)</button></div>';
+    '<button class="btn" style="flex:1;" data-action="import-start" data-year="'+y.id+'" data-module="'+m.id+'" data-kind="exercices">📥 Importer (PDF/Word/PPT)</button></div>';
   return html;
 }
 
