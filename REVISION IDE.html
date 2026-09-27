@@ -2041,6 +2041,26 @@ function looksMedical(text){
   return MEDICAL_KEYWORDS.some(function(kw){ return norm.indexOf(kw) !== -1; });
 }
 
+/* Le contenu doit aussi ressembler à un cours, un sujet d'examen ou une
+   série de questions — pas n'importe quel texte mentionnant la santé
+   (ex. article, actualité, publicité médicale…). */
+var EDU_KEYWORDS = ["sujet","cours","evaluation","examen","exercice","question","qcm","qcd","chapitre",
+  "reponse","corrige","enonce","epreuve","devoir","fiche de cours","objectif pedagogique","module",
+  "licence","version a","version b","groupe 1","groupe 2","duree :","cochez","choisir la bonne"];
+var RE_NUMBERED_LINE = /(^|\n)\s*\d{1,3}\s*[\.\)\-]\s+\S/;
+var RE_LETTERED_OPTION_LINE = /(^|\n)\s*[A-Ea-e]\s*[\.\)\-]\s+\S/;
+function looksLikeCourseOrExam(text){
+  var norm = normalizeForMatch(text);
+  if (RE_NUMBERED_LINE.test(text) || RE_LETTERED_OPTION_LINE.test(text)) return true;
+  return EDU_KEYWORDS.some(function(kw){ return norm.indexOf(kw) !== -1; });
+}
+/* Retourne un message d'erreur si le contenu doit être refusé, ou null s'il est accepté. */
+function contentRejectionReason(text){
+  if (!looksMedical(text)) return "⛔ Ce contenu ne ressemble pas à un cours ou un sujet de santé/médecine. Import refusé — cette appli est réservée au contenu médical.";
+  if (!looksLikeCourseOrExam(text)) return "⛔ Ce contenu semble médical mais ne ressemble pas à un cours, un sujet d'examen ou une série de questions. Import refusé — cette appli n'accepte que des cours, des sujets ou des questions, rien d'autre.";
+  return null;
+}
+
 /* --- Analyse heuristique du texte importé --- */
 var RE_QUESTION_START = /^\s*(?:Q(?:uestion)?\.?\s*)?(\d{1,3})\s*[\.\)\:\-]\s+(.+)$/i;
 var RE_OPTION = /^\s*([A-Ea-e])\s*[\.\)\:\-]\s+(.+)$/;
@@ -2168,7 +2188,8 @@ function modalImportStart(yearId, moduleId, kind){
     onSubmit: function(){
       var text = document.getElementById("imp-text").value;
       if (!text.trim()) return showToast("Choisis un fichier ou colle du texte.");
-      if (!looksMedical(text)) return showToast("⛔ Ce contenu ne ressemble pas à un cours ou un sujet de santé/médecine. Import refusé — cette appli est réservée au contenu médical.");
+      var rejectReason = contentRejectionReason(text);
+      if (rejectReason) return showToast(rejectReason);
       var items;
       if (kind === "qcm" || kind === "qcd") items = parseQuestionsFromText(text, kind);
       else if (kind === "exercices") items = parseExercicesFromText(text);
@@ -2461,8 +2482,9 @@ function handleDocUpload(files, yearId, moduleId, moduleName){
           return "";
         });
         return extractPromise.then(function(text){
-          if (text && !looksMedical(text)){
-            showToast("⛔ " + file.name + " ne ressemble pas à un contenu médical/de santé — refusé (cette appli est réservée aux cours et sujets de santé).");
+          var rejectReason = text ? contentRejectionReason(text) : null;
+          if (rejectReason){
+            showToast("⛔ " + file.name + " : " + rejectReason.replace(/^⛔ /,""));
             return;
           }
           return dbPut({
