@@ -1606,8 +1606,9 @@ function extractTextFromFile(file){
   return file.arrayBuffer().then(function(buf){
     if (name.endsWith(".pdf")) return extractTextFromPDF(buf);
     if (name.endsWith(".docx")) return extractTextFromDocx(buf);
+    if (name.endsWith(".pptx")) return extractTextFromPptx(buf);
     if (name.endsWith(".txt")) return Promise.resolve(new TextDecoder("utf-8").decode(buf));
-    return Promise.reject(new Error("Format non pris en charge. Utilise un fichier .pdf, .docx ou .txt (les anciens .doc ne fonctionnent pas : réenregistre-le en .docx depuis Word, ou copie-colle le texte ci-dessous)."));
+    return Promise.reject(new Error("Format non pris en charge. Utilise un fichier .pdf, .docx, .pptx ou .txt (les anciens .doc ne fonctionnent pas : réenregistre-le en .docx depuis Word, ou copie-colle le texte ci-dessous)."));
   });
 }
 
@@ -1713,9 +1714,9 @@ function parseCoursSections(text){
 function modalImportStart(yearId, moduleId, kind){
   var kindLabel = { cours:"cours", qcm:"questions QCM", qcd:"questions QCD", exercices:"exercices" }[kind];
   var body =
-    '<p class="small muted">Importe un fichier <strong>.pdf</strong>, <strong>.docx</strong> ou <strong>.txt</strong> contenant tes ' + kindLabel + ', ou colle directement le texte. Les anciens fichiers <strong>.doc</strong> ne sont pas pris en charge : réenregistre-les en .docx depuis Word, ou copie-colle leur contenu.</p>' +
+    '<p class="small muted">Importe un fichier <strong>.pdf</strong>, <strong>.docx</strong> (Word), <strong>.pptx</strong> (PowerPoint) ou <strong>.txt</strong> contenant tes ' + kindLabel + ' — par exemple un sujet d\'évaluation INFAS — ou colle directement le texte. Les anciens fichiers <strong>.doc</strong> ne sont pas pris en charge : réenregistre-les en .docx depuis Word, ou copie-colle leur contenu.</p>' +
     (kind==="qcm"||kind==="qcd" ? '<p class="faint">Format reconnu : questions numérotées (« 1. », « 2) »…), options lettrées (« A. », « B) »…) et une ligne « Réponse : B » ou « Corrigé : B, C ». Vérifie toujours le résultat avant d\'importer.</p>' : "") +
-    '<label class="field"><span>Fichier (optionnel)</span><input type="file" id="imp-file" accept=".pdf,.docx,.txt"></label>' +
+    '<label class="field"><span>Fichier (optionnel)</span><input type="file" id="imp-file" accept=".pdf,.docx,.pptx,.txt"></label>' +
     '<div id="imp-status" class="faint" style="margin:4px 0 10px;"></div>' +
     fieldTextarea("Texte à analyser", "imp-text", "", "Colle ici le texte de ta banque de sujets si tu ne fournis pas de fichier…");
   openModal("Importer — " + kindLabel, body, {
@@ -1992,11 +1993,15 @@ function extractTextFromPptx(arrayBuffer){
     });
     return Promise.all(slideFiles.map(function(name){ return zip.files[name].async("string"); })).then(function(xmls){
       return xmls.map(function(xml, i){
-        var texts = [];
-        var re = /<a:t>([^<]*)<\/a:t>/g;
-        var mm;
-        while ((mm = re.exec(xml))) texts.push(decodeXmlEntities(mm[1]));
-        return "Diapositive " + (i+1) + " :\n" + texts.join(" ");
+        var paragraphs = xml.match(/<a:p>[\s\S]*?<\/a:p>/g) || [];
+        var lines = paragraphs.map(function(p){
+          var texts = [];
+          var re = /<a:t[^>]*>([^<]*)<\/a:t>/g;
+          var mm;
+          while ((mm = re.exec(p))) texts.push(decodeXmlEntities(mm[1]));
+          return texts.join("");
+        }).filter(function(l){ return l.length; });
+        return "Diapositive " + (i+1) + " :\n" + lines.join("\n");
       }).join("\n\n");
     });
   });
