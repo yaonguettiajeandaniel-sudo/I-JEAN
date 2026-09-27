@@ -1849,6 +1849,28 @@ function extractTextFromFile(file){
   });
 }
 
+/* --- Filtre de contenu : n'accepter que des documents médicaux / de santé --- */
+var MEDICAL_KEYWORDS = ["anatom","physiolog","patholog","infirm","patient","malad","traitement","symptom",
+  "diagnostic","clinique","medic","sante","soin","hopital","chirurg","pharmaco","vaccin","fievre","douleur",
+  "therap","syndrome","virus","bacter","infection","grossess","accouch","tubercul","paludism","hemat","sang",
+  "coeur","cardiaqu","poumon","respirat","bronch","pneumon","dyspnee","cyanose","toux","expectoration","rein",
+  "foie","cerveau","nerveux","digestif","hygien","asepsie","sterilisa","pansement","perfusion","injection",
+  "posologie","prescription","epidemio","prevention","depistage","obstetriq","gyneco","pediatr","neonat",
+  "nourrisson","uterus","placenta","cesarien","hemorrag","anemie","diabet","hypertension","tension arteriel",
+  "pouls","temperature corporelle","fracture","plaie","antibiotiq","antalgiq","infas","hemoglobin","artere",
+  "veine","lesion","tumeur","cancer","immunitair","allergi","asthm","urin","vessie","prostate","menstru",
+  "ovul","spermat","contracept","sida","vih","meningite","paralysie","coma","choc hypovolemique","reanimation",
+  "bloc operatoire","suture","cicatris","biopsie","radiographi","echographi","hormone","insuline","glycemie",
+  "cholesterol","muscul","squelet","articul","tendon","ligament","dermat","ophtalmo","otite","gencive","qcm",
+  "qcd","semiologie","deontolog"];
+function normalizeForMatch(s){
+  return (s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
+}
+function looksMedical(text){
+  var norm = normalizeForMatch(text);
+  return MEDICAL_KEYWORDS.some(function(kw){ return norm.indexOf(kw) !== -1; });
+}
+
 /* --- Analyse heuristique du texte importé --- */
 var RE_QUESTION_START = /^\s*(?:Q(?:uestion)?\.?\s*)?(\d{1,3})\s*[\.\)\:\-]\s+(.+)$/i;
 var RE_OPTION = /^\s*([A-Ea-e])\s*[\.\)\:\-]\s+(.+)$/;
@@ -1976,6 +1998,7 @@ function modalImportStart(yearId, moduleId, kind){
     onSubmit: function(){
       var text = document.getElementById("imp-text").value;
       if (!text.trim()) return showToast("Choisis un fichier ou colle du texte.");
+      if (!looksMedical(text)) return showToast("⛔ Ce contenu ne ressemble pas à un cours ou un sujet de santé/médecine. Import refusé — cette appli est réservée au contenu médical.");
       var items;
       if (kind === "qcm" || kind === "qcd") items = parseQuestionsFromText(text, kind);
       else if (kind === "exercices") items = parseExercicesFromText(text);
@@ -2268,6 +2291,10 @@ function handleDocUpload(files, yearId, moduleId, moduleName){
           return "";
         });
         return extractPromise.then(function(text){
+          if (text && !looksMedical(text)){
+            showToast("⛔ " + file.name + " ne ressemble pas à un contenu médical/de santé — refusé (cette appli est réservée aux cours et sujets de santé).");
+            return;
+          }
           return dbPut({
             id: uid(), yearId: yearId, moduleId: moduleId, moduleName: moduleName,
             fileName: file.name, mimeType: file.type || "", size: file.size, kind: kind,
