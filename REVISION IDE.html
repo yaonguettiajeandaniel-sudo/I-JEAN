@@ -1998,14 +1998,24 @@ function extractTextFromDocx(arrayBuffer){
     return window.mammoth.extractRawText({ arrayBuffer: arrayBuffer });
   }).then(function(res){ return res.value; });
 }
+var ALLOWED_DOC_EXTENSIONS = [".pdf",".docx",".pptx",".png",".jpg",".jpeg",".gif",".webp"];
+function hasAllowedExtension(name){
+  var n = name.toLowerCase();
+  return ALLOWED_DOC_EXTENSIONS.some(function(ext){ return n.endsWith(ext); });
+}
+function isImageName(name){
+  return /\.(png|jpe?g|gif|webp)$/.test(name.toLowerCase());
+}
 function extractTextFromFile(file){
   var name = file.name.toLowerCase();
+  if (!hasAllowedExtension(name)){
+    return Promise.reject(new Error("Type de fichier non autorisé : seuls les cours et sujets au format PDF, Word (.docx), PowerPoint (.pptx) ou image (photo) sont acceptés."));
+  }
   return file.arrayBuffer().then(function(buf){
     if (name.endsWith(".pdf")) return extractTextFromPDF(buf);
     if (name.endsWith(".docx")) return extractTextFromDocx(buf);
     if (name.endsWith(".pptx")) return extractTextFromPptx(buf);
-    if (name.endsWith(".txt")) return Promise.resolve(new TextDecoder("utf-8").decode(buf));
-    return Promise.reject(new Error("Format non pris en charge. Utilise un fichier .pdf, .docx, .pptx ou .txt (les anciens .doc ne fonctionnent pas : réenregistre-le en .docx depuis Word, ou copie-colle le texte ci-dessous)."));
+    return Promise.reject(new Error("Cette image ne peut pas être lue automatiquement (l'appli ne fait pas de reconnaissance de texte sur les photos). Regarde la photo et tape ou colle son contenu dans le champ « Texte à analyser » ci-dessous — ou envoie directement la photo à Claude en conversation pour qu'il l'intègre pour toi."));
   });
 }
 
@@ -2133,9 +2143,9 @@ function parseCoursSections(text){
 function modalImportStart(yearId, moduleId, kind){
   var kindLabel = { cours:"cours", qcm:"questions QCM", qcd:"questions QCD", exercices:"exercices" }[kind];
   var body =
-    '<p class="small muted">Importe un fichier <strong>.pdf</strong>, <strong>.docx</strong> (Word), <strong>.pptx</strong> (PowerPoint) ou <strong>.txt</strong> contenant tes ' + kindLabel + ' — par exemple un sujet d\'évaluation INFAS — ou colle directement le texte. Les anciens fichiers <strong>.doc</strong> ne sont pas pris en charge : réenregistre-les en .docx depuis Word, ou copie-colle leur contenu.</p>' +
+    '<p class="small muted">Importe un fichier <strong>.pdf</strong>, <strong>.docx</strong> (Word), <strong>.pptx</strong> (PowerPoint) ou une <strong>image</strong> (photo) contenant tes ' + kindLabel + ' — par exemple un sujet d\'évaluation INFAS — ou colle directement le texte. Seuls les cours et sujets de santé/médecine sont acceptés. Les anciens fichiers <strong>.doc</strong> ne sont pas pris en charge : réenregistre-les en .docx depuis Word, ou copie-colle leur contenu. Les <strong>photos</strong> ne peuvent pas être lues automatiquement (pas de reconnaissance de texte) : envoie-les plutôt directement à Claude dans la conversation.</p>' +
     (kind==="qcm"||kind==="qcd" ? '<p class="faint">Format reconnu : questions numérotées (« 1. », « 2) »…), options lettrées (« A. », « B) »…) et une ligne « Réponse : B » ou « Corrigé : B, C ». Vérifie toujours le résultat avant d\'importer.</p>' : "") +
-    '<label class="field"><span>Fichier (optionnel)</span><input type="file" id="imp-file" accept=".pdf,.docx,.pptx,.txt"></label>' +
+    '<label class="field"><span>Fichier (optionnel)</span><input type="file" id="imp-file" accept=".pdf,.docx,.pptx,.png,.jpg,.jpeg,.gif,.webp"></label>' +
     '<div id="imp-status" class="faint" style="margin:4px 0 10px;"></div>' +
     fieldTextarea("Texte à analyser", "imp-text", "", "Colle ici le texte de ta banque de sujets si tu ne fournis pas de fichier…");
   openModal("Importer — " + kindLabel, body, {
