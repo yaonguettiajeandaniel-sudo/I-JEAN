@@ -1,6 +1,6 @@
 {
-  "name": "Révision IDE",
-  "short_name": "Révision IDE",
+  "name": "La Syncope",
+  "short_name": "La Syncope",
   "description": "Application de révision pour la formation Infirmier Diplômé d'État (INFAS) : cours, QCM, QCD et exercices sur les 3 années, jusqu'au diplôme d'État.",
   "start_url": "./REVISION IDE.html",
   "scope": "./",

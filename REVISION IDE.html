@@ -9,9 +9,9 @@
 <link rel="apple-touch-icon" href="revision-ide-icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Révision IDE">
+<meta name="apple-mobile-web-app-title" content="La Syncope">
 <meta name="mobile-web-app-capable" content="yes">
-<title>Révision IDE</title>
+<title>La Syncope</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
@@ -1428,12 +1428,12 @@ function render(){
 }
 
 function renderHeader(){
-  var titles = { accueil:"Révision IDE", programme:"Programme", quiz:"Réviser", "quiz-run":"Quiz en cours", exercices:"Exercices", "exercices-run":"Exercice", diplome:"Diplôme d'État", reglages:"Réglages" };
+  var titles = { accueil:"La Syncope", programme:"Programme", quiz:"Réviser", "quiz-run":"Quiz en cours", exercices:"Exercices", "exercices-run":"Exercice", diplome:"Diplôme d'État", reglages:"Réglages" };
   return (
     '<header class="top">' +
       '<div class="brand">' +
         '<div class="logo">🩺</div>' +
-        '<div><h1>' + esc(titles[route.view] || "Révision IDE") + '</h1>' +
+        '<div><h1>' + esc(titles[route.view] || "La Syncope") + '</h1>' +
         '<div class="sub">' + esc(state.settings.name ? "Bonjour " + state.settings.name : "Formation Infirmier Diplômé d'État") + '</div></div>' +
       '</div>' +
       '<div class="header-actions">' +
@@ -2003,7 +2003,7 @@ function renderReglages(){
     '</div>' +
   '</div>';
 
-  html += '<div class="card faint">Révision IDE · v' + APP_VERSION + ' · Application locale, sans compte ni connexion internet requise après le premier chargement.</div>';
+  html += '<div class="card faint">La Syncope · v' + APP_VERSION + ' · Application locale, sans compte ni connexion internet requise après le premier chargement.</div>';
 
   html += '<input type="file" id="import-file" accept="application/json" style="display:none;">';
   return html;
