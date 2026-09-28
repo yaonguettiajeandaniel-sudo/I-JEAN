@@ -1577,7 +1577,10 @@ function renderProgramme(yearId){
 
   y.modules.forEach(function(m){ html += renderModule(y, m); });
 
-  html += '<button class="btn block" style="margin-top:6px;" data-action="add-module" data-year="' + y.id + '">➕ Ajouter une matière</button>';
+  html += '<div class="row wrap" style="margin-top:6px; gap:8px;">' +
+    '<button class="btn" style="flex:1;" data-action="add-module" data-year="' + y.id + '">➕ Ajouter une matière</button>' +
+    '<button class="btn deep" style="flex:1;" data-action="toc-import-start" data-year="' + y.id + '">📄 Actualiser depuis une table des matières</button>' +
+  '</div>';
   return html;
 }
 
@@ -2247,6 +2250,139 @@ function modalRenameModule(yearId, moduleId){
       var name = document.getElementById("m-name").value.trim();
       if (!name) return showToast("Le nom est requis.");
       m.name = name; saveState(); closeModal(); render();
+    }
+  });
+}
+
+/* --- Actualiser la liste des matières depuis une table des matières (PDF/DOCX/PPTX) --- */
+function moduleNameExists(year, name){
+  var norm = normalizeForMatch(name);
+  return year.modules.some(function(m){ return normalizeForMatch(m.name) === norm; });
+}
+function detectYearHeaderIndex(line){
+  var norm = normalizeForMatch(line);
+  if (norm.length > 60) return -1;
+  if (/\b(1ere|1re|premiere)\s*annee\b/.test(norm) || /\bannee\s*1\b/.test(norm) || /\bniveau\s*1\b/.test(norm) || /\bl1\b/.test(norm)) return 0;
+  if (/\b(2eme|2e|deuxieme)\s*annee\b/.test(norm) || /\bannee\s*2\b/.test(norm) || /\bniveau\s*2\b/.test(norm) || /\bl2\b/.test(norm)) return 1;
+  if (/\b(3eme|3e|troisieme)\s*annee\b/.test(norm) || /\bannee\s*3\b/.test(norm) || /\bniveau\s*3\b/.test(norm) || /\bl3\b/.test(norm)) return 2;
+  return -1;
+}
+var RE_TOC_LEADING = /^\s*(?:[IVXLCM]{1,6}|[0-9]{1,2})\s*[\.\)\-–:]\s*/i;
+var RE_TOC_TRAILING_PAGE = /[\s.\-–_]{2,}\d{1,4}\s*$/;
+var RE_TOC_BULLET = /^\s*[•\-–*▪●○]\s*/;
+var TOC_NOISE_WORDS = ["sommaire","table des matieres","programme","plan de formation","plan d'etudes","contenu","index","matieres","liste des matieres"];
+function parseModuleNamesFromText(text){
+  var lines = text.split(/\r?\n/);
+  var out = [];
+  var currentYear = -1;
+  var seen = {};
+  lines.forEach(function(raw){
+    var line = raw.trim();
+    if (!line) return;
+    var yi = detectYearHeaderIndex(line);
+    if (yi !== -1){ currentYear = yi; return; }
+    var cleaned = line.replace(RE_TOC_TRAILING_PAGE, "").replace(RE_TOC_LEADING, "").replace(RE_TOC_BULLET, "").trim();
+    if (cleaned.length < 3 || cleaned.length > 90) return;
+    if (/^\d+$/.test(cleaned)) return;
+    var norm = normalizeForMatch(cleaned);
+    if (TOC_NOISE_WORDS.indexOf(norm) !== -1) return;
+    var key = currentYear + "|" + norm;
+    if (seen[key]) return;
+    seen[key] = true;
+    out.push({ name: cleaned, yearIndex: currentYear });
+  });
+  return out;
+}
+function modalTocImportStart(defaultYearId){
+  var body =
+    '<p class="small muted">Importe un fichier <strong>.pdf</strong>, <strong>.docx</strong> ou <strong>.pptx</strong> contenant le sommaire / la table des matières de ton programme (liste des matières, éventuellement groupées par année), ou colle directement le texte. Les nouvelles matières détectées seront ajoutées — celles qui existent déjà ne seront pas dupliquées.</p>' +
+    '<label class="field"><span>Fichier (optionnel)</span><input type="file" id="toc-file" accept=".pdf,.docx,.pptx"></label>' +
+    '<div id="toc-status" class="faint" style="margin:4px 0 10px;"></div>' +
+    fieldTextarea("Texte à analyser", "toc-text", "", "Colle ici le sommaire si tu ne fournis pas de fichier…");
+  openModal("Actualiser les matières", body, {
+    submitLabel: "Analyser →",
+    onMount: function(){
+      document.getElementById("toc-file").addEventListener("change", function(e){
+        var file = e.target.files[0];
+        if (!file) return;
+        var statusEl = document.getElementById("toc-status");
+        statusEl.textContent = "Extraction du texte en cours…";
+        extractTextForFile(file).then(function(text){
+          var ta = document.getElementById("toc-text");
+          if (ta) ta.value = text;
+          statusEl.textContent = "Texte extrait (" + text.length + " caractères). Vérifie/corrige si besoin, puis clique sur « Analyser ».";
+        }).catch(function(err){
+          statusEl.textContent = "⚠️ " + err.message;
+        });
+      });
+    },
+    onSubmit: function(){
+      var text = document.getElementById("toc-text").value;
+      if (!text.trim()) return showToast("Choisis un fichier ou colle du texte.");
+      var rejectReason = contentRejectionReason(text);
+      if (rejectReason) return showToast(rejectReason);
+      var items = parseModuleNamesFromText(text);
+      if (!items.length) return showToast("Aucune matière détectée. Vérifie que la liste contient bien des lignes numérotées ou à puces, et réessaie.");
+      closeModal();
+      modalTocImportReview(defaultYearId, items);
+    }
+  });
+}
+function modalTocImportReview(defaultYearId, items){
+  var targetYear = items.map(function(it){
+    if (it.yearIndex !== -1 && state.years[it.yearIndex]) return state.years[it.yearIndex].id;
+    return defaultYearId;
+  });
+  var included = items.map(function(it, i){
+    var y = findYear(targetYear[i]);
+    return !moduleNameExists(y, it.name);
+  });
+  function renderOne(it, i){
+    var y = findYear(targetYear[i]);
+    var already = moduleNameExists(y, it.name);
+    return '<div class="item">' +
+      '<label class="checkbox-row small" style="margin-bottom:6px;"><input type="checkbox" data-inc="' + i + '" ' + (included[i]?'checked':'') + '> Inclure' + (already?' <span class="faint">(déjà existante dans l\'année choisie)</span>':'') + '</label>' +
+      fieldText("Nom de la matière", "toc-name-" + i, it.name) +
+      '<label class="field"><span>Année</span><select id="toc-year-' + i + '">' +
+        state.years.map(function(y2){ return '<option value="' + y2.id + '" ' + (targetYear[i]===y2.id?'selected':'') + '>' + esc(y2.label) + '</option>'; }).join("") +
+      '</select></label>' +
+    '</div>';
+  }
+  var body = '<div class="row between small" style="margin-bottom:8px;"><span>' + items.length + ' matière(s) détectée(s) — vérifie avant d\'importer.</span>' +
+    '<button type="button" class="btn sm" id="toc-toggle-all">Tout (dé)sélectionner</button></div>' +
+    '<div id="toc-list" style="max-height:50vh; overflow:auto;">' + items.map(renderOne).join("") + '</div>';
+  openModal("Vérifier avant import", body, {
+    submitLabel: "Importer",
+    onMount: function(){
+      document.querySelectorAll("[data-inc]").forEach(function(cb){
+        cb.onchange = function(){ included[+cb.getAttribute("data-inc")] = cb.checked; };
+      });
+      items.forEach(function(it, i){
+        var nameInp = document.getElementById("toc-name-" + i);
+        if (nameInp) nameInp.oninput = function(){ items[i].name = nameInp.value; };
+        var yearSel = document.getElementById("toc-year-" + i);
+        if (yearSel) yearSel.onchange = function(){ targetYear[i] = yearSel.value; };
+      });
+      document.getElementById("toc-toggle-all").onclick = function(){
+        var allOn = included.every(function(v){ return v; });
+        included = included.map(function(){ return !allOn; });
+        document.querySelectorAll("[data-inc]").forEach(function(cb, idx){ cb.checked = included[idx]; });
+      };
+    },
+    onSubmit: function(){
+      var added = 0, ignored = 0;
+      items.forEach(function(it, i){
+        if (!included[i]) return;
+        var name = (it.name||"").trim();
+        if (!name) return;
+        var y = findYear(targetYear[i]);
+        if (!y) return;
+        if (moduleNameExists(y, name)){ ignored++; return; }
+        y.modules.push(makeModule(name));
+        added++;
+      });
+      saveState(); closeModal(); render();
+      showToast(added + " matière(s) ajoutée(s)" + (ignored ? (", " + ignored + " déjà existante(s) ignorée(s)") : "") + ".");
     }
   });
 }
@@ -3030,6 +3166,7 @@ function handleAction(action, el, ev){
       render();
       break;
     case "add-module": modalAddModule(yearId); break;
+    case "toc-import-start": modalTocImportStart(yearId); break;
     case "rename-module": modalRenameModule(yearId, moduleId); break;
     case "delete-module":
       if (confirm("Supprimer cette matière et tout son contenu ?")){
