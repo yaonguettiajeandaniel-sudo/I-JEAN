@@ -267,11 +267,44 @@
   .search-overlay .app{ padding-top: calc(env(safe-area-inset-top,0px) + 14px); }
 
   ::selection{ background:var(--accent-soft); }
+
+  /* ---- Mascotte : le Serpent Médical ---- */
+  #mascot-root{ position:fixed; left:0; right:0; bottom:0; z-index:150; pointer-events:none; }
+  .mascot-wrap{
+    position:absolute; right:14px; bottom:calc(env(safe-area-inset-bottom,0px) + 88px);
+    display:flex; align-items:flex-end; gap:8px; max-width:min(320px, calc(100vw - 28px));
+    pointer-events:none; opacity:0; transform:translateY(10px) scale(.92);
+    transition:opacity .25s ease, transform .25s ease;
+  }
+  .mascot-wrap.show{ opacity:1; transform:translateY(0) scale(1); pointer-events:auto; }
+  .mascot-avatar{ width:54px; height:54px; flex:none; filter:drop-shadow(0 4px 10px rgba(0,0,0,.18)); }
+  .mascot-avatar svg{ width:100%; height:100%; display:block; }
+  .mascot-bubble{
+    background:var(--surface); border:1px solid var(--line); border-radius:14px 14px 14px 4px;
+    padding:10px 26px 10px 12px; font-size:13px; font-weight:600; color:var(--ink); box-shadow:var(--shadow);
+    position:relative; line-height:1.35;
+  }
+  .mascot-bubble .mascot-close{
+    position:absolute; top:6px; right:6px; width:18px; height:18px; border-radius:99px; border:none;
+    background:transparent; color:var(--ink-faint); font-size:12px; line-height:1; display:flex; align-items:center; justify-content:center;
+    cursor:pointer; pointer-events:auto; padding:0;
+  }
+  .mascot-wrap.mood-happy .mascot-avatar{ animation:mascot-bounce .6s ease; }
+  .mascot-wrap.mood-encourage .mascot-avatar{ animation:mascot-wiggle .5s ease; }
+  .mascot-wrap.mood-alert .mascot-avatar{ animation:mascot-shake .45s ease 2; }
+  .mascot-wrap.mood-alert .mascot-bubble{ border-color:var(--bad); background:var(--bad-soft); }
+  .mascot-wrap.mood-happy .mascot-bubble{ border-color:var(--good); background:var(--good-soft); }
+  .mascot-wrap.mood-encourage .mascot-bubble{ border-color:var(--warn); background:var(--warn-soft); }
+  @keyframes mascot-bounce{ 0%{transform:translateY(0);} 30%{transform:translateY(-9px);} 55%{transform:translateY(0);} 75%{transform:translateY(-4px);} 100%{transform:translateY(0);} }
+  @keyframes mascot-wiggle{ 0%,100%{transform:rotate(0);} 25%{transform:rotate(-9deg);} 75%{transform:rotate(9deg);} }
+  @keyframes mascot-shake{ 0%,100%{transform:translateX(0);} 25%{transform:translateX(-6px);} 50%{transform:translateX(6px);} 75%{transform:translateX(-4px);} }
+  @media (max-width:420px){ .mascot-wrap{ right:8px; } .mascot-avatar{ width:46px; height:46px; } }
 </style>
 </head>
 <body>
 <div id="app"></div>
 <div id="modal-root"></div>
+<div id="mascot-root"></div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -1101,6 +1134,97 @@ function fmtDate(ts){
 }
 
 /* =========================================================
+   MASCOTTE : LE SERPENT MEDICAL
+   ========================================================= */
+var MASCOT_MSGS = {
+  greet: [
+    "Bonjour ! Je suis Ausculte, ton serpent médical. Prêt·e à réviser un peu aujourd'hui ? 🐍",
+    "On révise ensemble ? Choisis un module ou lance un quiz quand tu veux ! 🐍"
+  ],
+  happy: [
+    "Bonne réponse ! Continue comme ça 🎉",
+    "Exact ! Tu progresses bien 👏",
+    "Bravo, c'est ça ! 💪",
+    "Impeccable, la suite maintenant !"
+  ],
+  encourage: [
+    "Pas tout à fait… relis l'explication, ça va rentrer 💪",
+    "Ce n'était pas la bonne réponse, mais chaque erreur t'apprend quelque chose 📖",
+    "On ne lâche rien ! Regarde bien la correction avant de continuer.",
+    "Pas grave, l'important c'est de comprendre pourquoi. Courage !"
+  ],
+  alert: [
+    "Tu quittes le sujet en pleine route ? Tes réponses sont gardées, reviens vite le terminer ⚠️",
+    "Abandon en cours de quiz repéré ! Pas de souci, tu peux reprendre quand tu veux 🐍"
+  ]
+};
+function mascotPick(mood){
+  var list = MASCOT_MSGS[mood] || MASCOT_MSGS.greet;
+  return list[Math.floor(Math.random() * list.length)];
+}
+function mascotFace(mood){
+  switch(mood){
+    case "happy": return {
+      eyes: '<path d="M36 44 Q44 36 52 44" stroke="#123B2E" stroke-width="4" fill="none" stroke-linecap="round"/>' +
+            '<path d="M60 44 Q68 36 76 44" stroke="#123B2E" stroke-width="4" fill="none" stroke-linecap="round"/>',
+      mouth: '<path d="M40 58 Q56 76 72 58" stroke="#123B2E" stroke-width="4" fill="none" stroke-linecap="round"/>' +
+             '<path d="M52 64 L56 74 L60 64 Z" fill="#D8483C"/>'
+    };
+    case "encourage": return {
+      eyes: '<circle cx="44" cy="46" r="4.4" fill="#123B2E"/><circle cx="68" cy="46" r="4.4" fill="#123B2E"/>' +
+            '<path d="M34 36 Q44 30 54 34" stroke="#123B2E" stroke-width="3" fill="none" stroke-linecap="round"/>',
+      mouth: '<path d="M42 60 Q56 68 70 60" stroke="#123B2E" stroke-width="4" fill="none" stroke-linecap="round"/>'
+    };
+    case "alert": return {
+      eyes: '<circle cx="44" cy="46" r="7" fill="#fff" stroke="#123B2E" stroke-width="2.4"/><circle cx="44" cy="46" r="3" fill="#123B2E"/>' +
+            '<circle cx="68" cy="46" r="7" fill="#fff" stroke="#123B2E" stroke-width="2.4"/><circle cx="68" cy="46" r="3" fill="#123B2E"/>',
+      mouth: '<ellipse cx="56" cy="63" rx="7" ry="8" fill="#123B2E"/>'
+    };
+    default: return {
+      eyes: '<circle cx="44" cy="46" r="4.4" fill="#123B2E"/><circle cx="68" cy="46" r="4.4" fill="#123B2E"/>',
+      mouth: '<path d="M42 58 Q56 70 70 58" stroke="#123B2E" stroke-width="4" fill="none" stroke-linecap="round"/>'
+    };
+  }
+}
+function mascotSvg(mood){
+  var f = mascotFace(mood);
+  return '<svg viewBox="0 0 112 100" aria-hidden="true">' +
+    '<path d="M30 82 Q8 82 8 58 Q8 38 26 34" fill="none" stroke="#0F8A6B" stroke-width="15" stroke-linecap="round"/>' +
+    '<circle cx="56" cy="50" r="32" fill="#12987A"/>' +
+    '<ellipse cx="56" cy="66" rx="17" ry="11" fill="#DCF3EA" opacity=".55"/>' +
+    '<path d="M28 26 Q56 4 84 26 Q84 34 56 34 Q28 34 28 26 Z" fill="#fff"/>' +
+    '<rect x="51" y="10" width="10" height="4" rx="1" fill="#D8483C"/><rect x="54" y="7" width="4" height="10" rx="1" fill="#D8483C"/>' +
+    f.eyes + f.mouth +
+    '</svg>';
+}
+var mascotHideTimer = null;
+function showMascot(mood, text, opts){
+  opts = opts || {};
+  var root = document.getElementById("mascot-root");
+  if (!root) return;
+  text = text || mascotPick(mood);
+  root.innerHTML =
+    '<div class="mascot-wrap mood-' + mood + '" id="mascot-wrap">' +
+      '<div class="mascot-avatar">' + mascotSvg(mood) + '</div>' +
+      '<div class="mascot-bubble">' + esc(text) +
+        '<button type="button" class="mascot-close" data-action="mascot-dismiss" aria-label="Fermer">✕</button>' +
+      '</div>' +
+    '</div>';
+  requestAnimationFrame(function(){
+    var w = document.getElementById("mascot-wrap");
+    if (w) w.classList.add("show");
+  });
+  clearTimeout(mascotHideTimer);
+  var duration = opts.duration || (mood === "alert" ? 6500 : 4200);
+  if (duration) mascotHideTimer = setTimeout(hideMascot, duration);
+}
+function hideMascot(){
+  clearTimeout(mascotHideTimer);
+  var w = document.getElementById("mascot-wrap");
+  if (w) w.classList.remove("show");
+}
+
+/* =========================================================
    ROUTAGE
    ========================================================= */
 var route = { view: "accueil", params: {} };
@@ -1115,7 +1239,19 @@ function parseHash(){
   return { view: view, params: params };
 }
 function navigate(hash){ location.hash = hash; }
-window.addEventListener("hashchange", function(){ route = parseHash(); closeSearch(); render(); });
+window.addEventListener("hashchange", function(){
+  var quizWasActive = route.view === "quiz-run" && quizSession && quizSession.index < quizSession.items.length;
+  route = parseHash();
+  closeSearch();
+  render();
+  if (quizWasActive && route.view !== "quiz-run") showMascot("alert");
+});
+window.addEventListener("beforeunload", function(e){
+  if (route.view === "quiz-run" && quizSession && quizSession.index < quizSession.items.length){
+    e.preventDefault();
+    e.returnValue = "";
+  }
+});
 
 /* =========================================================
    SESSION DE QUIZ (en mémoire, non persistée)
@@ -2607,6 +2743,7 @@ function handleAction(action, el, ev){
       break;
     case "open-search": openSearchOverlay(); break;
     case "close-search": closeSearch(); break;
+    case "mascot-dismiss": hideMascot(); break;
     case "search-goto":
       closeSearch();
       openModules[moduleId] = true;
@@ -2840,6 +2977,7 @@ function quizValidate(){
   }
   saveState();
   render();
+  showMascot(isCorrect ? "happy" : "encourage");
 }
 function quizNext(){
   quizSession.index++;
@@ -2932,6 +3070,7 @@ document.addEventListener("input", function(e){
 loadState();
 route = parseHash();
 render();
+setTimeout(function(){ showMascot("greet"); }, 500);
 
 })();
 </script>
