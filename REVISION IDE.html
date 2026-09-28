@@ -276,10 +276,10 @@
     opacity:0; transform:translateY(10px) scale(.9); transition:opacity .3s ease, transform .3s ease;
     pointer-events:none;
   }
-  .mascot-wrap.present{ opacity:1; transform:translateY(0) scale(1); pointer-events:auto; }
+  .mascot-wrap.present{ opacity:1; transform:translateY(0) scale(1); }
   .mascot-avatar{
     width:52px; height:52px; flex:none; cursor:pointer; border:none; background:none; padding:0;
-    filter:drop-shadow(0 4px 10px rgba(0,0,0,.18)); transition:transform .2s ease;
+    filter:drop-shadow(0 4px 10px rgba(0,0,0,.18)); transition:transform .2s ease; pointer-events:auto;
   }
   .mascot-avatar:active{ transform:scale(.93); }
   .mascot-avatar svg{ width:100%; height:100%; display:block; }
@@ -1421,6 +1421,7 @@ function render(){
   else if (route.view === "exercices-run") html += renderExoRun();
   else if (route.view === "diplome") html += renderDiplome();
   else if (route.view === "reglages") html += renderReglages();
+  else if (route.view === "telegram") html += renderTelegram();
   else html += renderAccueil();
   app.innerHTML = '<div class="app">' + html + '</div>' + renderBottomNav();
   window.scrollTo(0,0);
@@ -1428,7 +1429,7 @@ function render(){
 }
 
 function renderHeader(){
-  var titles = { accueil:"La Syncope", programme:"Programme", quiz:"Réviser", "quiz-run":"Quiz en cours", exercices:"Exercices", "exercices-run":"Exercice", diplome:"Diplôme d'État", reglages:"Réglages" };
+  var titles = { accueil:"La Syncope", programme:"Programme", quiz:"Réviser", "quiz-run":"Quiz en cours", exercices:"Exercices", "exercices-run":"Exercice", diplome:"Diplôme d'État", reglages:"Réglages", telegram:"Import Telegram" };
   return (
     '<header class="top">' +
       '<div class="brand">' +
@@ -1986,6 +1987,12 @@ function renderReglages(){
   '</div>';
 
   html += '<div class="card">' +
+    '<h3 style="font-size:15px; margin-bottom:8px;">📡 Import automatique Telegram</h3>' +
+    '<p class="small muted">Relie un groupe Telegram pour que les PDF, Word (.docx) et PowerPoint (.pptx) postés dedans soient ajoutés automatiquement à ta banque de sujets, cours et questions.</p>' +
+    '<button class="btn deep block" style="margin-top:10px;" data-action="go" data-hash="#/telegram">Configurer / voir les documents reçus</button>' +
+  '</div>';
+
+  html += '<div class="card">' +
     '<h3 style="font-size:15px; margin-bottom:8px;">Installer l\'application</h3>' +
     '<p class="small muted"><strong>Android / Chrome :</strong> menu ⋮ → « Ajouter à l\'écran d\'accueil » / « Installer l\'application ».<br><br>' +
     '<strong>iPhone / Safari :</strong> bouton Partager 􀈂 → « Sur l\'écran d\'accueil ».<br><br>' +
@@ -2007,6 +2014,135 @@ function renderReglages(){
 
   html += '<input type="file" id="import-file" accept="application/json" style="display:none;">';
   return html;
+}
+
+/* =========================================================
+   VUE : IMPORT TELEGRAM
+   ========================================================= */
+function renderTelegram(){
+  var docs = docsCache[TELEGRAM_INBOX_MODULE];
+  if (docs === undefined) loadModuleDocs(TELEGRAM_INBOX_MODULE);
+  var html = "";
+
+  html += '<div class="card stack">' +
+    '<h3 style="font-size:15px;">📡 Import automatique depuis Telegram</h3>' +
+    '<p class="small muted">Poste tes PDF, Word (.docx) ou PowerPoint (.pptx) dans ton groupe Telegram : un robot les récupère automatiquement toutes les 10 minutes environ et les dépose ici. Ils passent ensuite par le même filtre que les autres documents (uniquement cours, sujets et questions de santé).</p>' +
+    '<button class="btn primary block" data-action="telegram-sync">🔄 Vérifier maintenant</button>' +
+  '</div>';
+
+  html += '<div class="card stack">' +
+    '<h3 style="font-size:15px;">⚙️ Configuration (à faire une seule fois)</h3>' +
+    '<ol class="small muted" style="padding-left:18px; line-height:1.8; margin:0;">' +
+      '<li>Dans Telegram, ouvre une conversation avec <strong>@BotFather</strong> et envoie <code>/newbot</code>. Choisis un nom, puis un identifiant qui se termine par « bot ». Il te donne un <strong>token</strong> (une longue clé) — garde-le secret, ne le partage avec personne.</li>' +
+      '<li>Toujours avec @BotFather, envoie <code>/setprivacy</code>, choisis ton bot, puis choisis <strong>Disable</strong> (sinon il ne peut pas voir les fichiers postés par les autres membres du groupe).</li>' +
+      '<li>Ajoute ton bot dans ton groupe Telegram, comme un membre normal.</li>' +
+      '<li>Poste n\'importe quel message dans le groupe, puis ouvre dans un navigateur : <code>https://api.telegram.org/bot&lt;TON_TOKEN&gt;/getUpdates</code> — cherche <code>"chat":{"id": ...}</code> : c\'est ton <strong>identifiant de groupe</strong> (souvent un nombre négatif).</li>' +
+      '<li>Sur la page GitHub du projet : <strong>Settings → Secrets and variables → Actions → New repository secret</strong>. Ajoute deux secrets : <code>TELEGRAM_BOT_TOKEN</code> (le token) et <code>TELEGRAM_CHAT_ID</code> (l\'identifiant du groupe).</li>' +
+    '</ol>' +
+    '<p class="small muted" style="margin-top:6px;">Une fois ces deux secrets enregistrés, tout devient automatique : plus besoin d\'y retoucher.</p>' +
+  '</div>';
+
+  html += '<div class="card">';
+  html += '<h3 style="font-size:15px; margin-bottom:8px;">Documents reçus (' + (docs ? docs.length : 0) + ')</h3>';
+  if (docs === null || docs === undefined){
+    html += '<div class="empty small">Chargement…</div>';
+  } else if (!docs.length){
+    html += '<div class="empty small">Aucun document reçu depuis Telegram pour l\'instant.</div>';
+  } else {
+    docs.forEach(function(d){
+      html += '<div class="item">' +
+        '<div class="ihead">' +
+          '<div style="min-width:0;"><strong class="small">' + docKindIcon(d.kind) + ' ' + esc(d.fileName) + '</strong>' +
+          '<div class="faint">' + fmtSize(d.size) + ' · reçu le ' + fmtDate(d.uploadedAt) + (d.text ? ' · texte indexé pour la recherche' : '') + '</div></div>' +
+          '<div class="iactions">' +
+            '<button class="btn sm" data-action="doc-open" data-id="' + d.id + '">👁️</button>' +
+            '<button class="btn sm" data-action="telegram-move" data-id="' + d.id + '">📂 Classer</button>' +
+            '<button class="btn sm danger" data-action="doc-delete" data-id="' + d.id + '" data-module="' + TELEGRAM_INBOX_MODULE + '">🗑️</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    });
+  }
+  html += '</div>';
+  return html;
+}
+
+var TELEGRAM_INBOX_YEAR = "__telegram_inbox__";
+var TELEGRAM_INBOX_MODULE = "__telegram_inbox__";
+var TELEGRAM_MANIFEST_PATH = "telegram-imports/index.json";
+function syncTelegramImports(silent){
+  if (!state.telegramSeen) state.telegramSeen = [];
+  return fetch(TELEGRAM_MANIFEST_PATH + "?t=" + Date.now()).then(function(r){
+    if (!r.ok) throw new Error("manifeste indisponible (" + r.status + ")");
+    return r.json();
+  }).then(function(list){
+    var todo = (list || []).filter(function(e){ return state.telegramSeen.indexOf(e.id) === -1; });
+    if (!todo.length){
+      if (!silent) showToast("Aucun nouveau document depuis Telegram.");
+      return;
+    }
+    if (!silent) showToast("Synchronisation Telegram : " + todo.length + " document(s)…");
+    var imported = 0, rejected = 0;
+    var chain = Promise.resolve();
+    todo.forEach(function(entry){
+      chain = chain.then(function(){
+        return fetch(entry.path).then(function(r2){
+          if (!r2.ok) throw new Error("fichier indisponible");
+          return r2.blob();
+        }).then(function(blob){
+          var file = new File([blob], entry.fileName, { type: entry.mimeType || "" });
+          var kind = detectDocKind(file.name);
+          state.telegramSeen.push(entry.id);
+          if (kind === "other") return;
+          return file.arrayBuffer().then(function(buf){
+            return extractTextForDoc(kind, buf).catch(function(){ return ""; }).then(function(text){
+              var rejectReason = text ? contentRejectionReason(text) : null;
+              if (rejectReason){ rejected++; return; }
+              imported++;
+              return dbPut({
+                id: uid(), yearId: TELEGRAM_INBOX_YEAR, moduleId: TELEGRAM_INBOX_MODULE, moduleName: "Import Telegram",
+                fileName: file.name, mimeType: file.type || "", size: file.size, kind: kind,
+                text: text, uploadedAt: Date.now(), blob: file
+              });
+            });
+          });
+        }).catch(function(){ /* fichier illisible : marqué comme vu pour ne pas boucler dessus */ });
+      });
+    });
+    return chain.then(function(){
+      saveState();
+      docsCache[TELEGRAM_INBOX_MODULE] = undefined;
+      if (route.view === "telegram") loadModuleDocs(TELEGRAM_INBOX_MODULE);
+      if (!silent) showToast(imported + " document(s) importé(s)" + (rejected ? (", " + rejected + " refusé(s) car hors-sujet") : "") + ".");
+      render();
+    });
+  }).catch(function(err){
+    if (!silent) showToast("Synchronisation Telegram impossible : " + err.message);
+  });
+}
+function modalTelegramMove(id){
+  var mods = allModulesFlat();
+  if (!mods.length) return showToast("Crée d'abord une matière dans le Programme.");
+  var body = '<label class="field"><span>Matière de destination</span><select id="tg-move-target">' +
+    mods.map(function(x){ return '<option value="' + x.year.id + '|' + x.module.id + '">' + esc(x.year.label) + ' — ' + esc(x.module.name) + '</option>'; }).join("") +
+    '</select></label>';
+  openModal("Classer ce document", body, {
+    submitLabel: "Déplacer",
+    onSubmit: function(){
+      var sel = document.getElementById("tg-move-target").value.split("|");
+      var yearId = sel[0], moduleId = sel[1];
+      var mod = findModule(yearId, moduleId);
+      dbGetFile(id).then(function(rec){
+        if (!rec) return;
+        rec.yearId = yearId; rec.moduleId = moduleId; rec.moduleName = mod.name;
+        return dbPut(rec);
+      }).then(function(){
+        docsCache[TELEGRAM_INBOX_MODULE] = (docsCache[TELEGRAM_INBOX_MODULE] || []).filter(function(d){ return d.id !== id; });
+        docsCache[moduleId] = undefined;
+        closeModal(); render(); showToast("Document déplacé vers « " + mod.name + " ».");
+      });
+    }
+  });
 }
 
 /* =========================================================
@@ -2874,6 +3010,8 @@ function handleAction(action, el, ev){
     case "close-search": closeSearch(); break;
     case "mascot-dismiss": hideMascotBubble(); break;
     case "mascot-replay": replayMascot(); break;
+    case "telegram-sync": syncTelegramImports(false); break;
+    case "telegram-move": modalTelegramMove(el.getAttribute("data-id")); break;
     case "search-goto":
       closeSearch();
       openModules[moduleId] = true;
@@ -3201,6 +3339,7 @@ loadState();
 route = parseHash();
 render();
 setTimeout(function(){ showMascot("greet"); }, 500);
+setTimeout(function(){ syncTelegramImports(true); }, 1500);
 
 })();
 </script>
