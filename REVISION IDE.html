@@ -681,11 +681,55 @@ function buildSeed(){
             exercices: [{ statement: "Expliquez pourquoi la voie orale n'est pas adaptée en cas d'urgence vitale. (exemple)",
               correction: "La voie orale nécessite une absorption digestive, plus lente et variable (dépend de la vidange gastrique, de l'état de conscience et de la capacité à avaler). En urgence vitale, on préfère une voie à action rapide et fiable comme la voie intraveineuse." }]
           }),
-          makeModule("Pathologie médicale"),
+          makeModule("Pathologie médicale", {
+            casClinique: [
+              {
+                titre: "Dyspnée et hypotension chez un patient cancéreux",
+                anamnese: "Un patient de 50 ans, suivi pour un cancer du poumon, se présente pour une dyspnée d'aggravation progressive depuis quelques jours, associée à une sensation d'oppression thoracique. À l'examen : tension artérielle à 85/60 mmHg, veines jugulaires turgescentes, bruits du cœur assourdis à l'auscultation, et un pouls qui semble diminuer à l'inspiration (pouls paradoxal).",
+                triade: "Triade de Beck (évocatrice de tamponnade cardiaque) : hypotension artérielle + turgescence des veines jugulaires + assourdissement des bruits du cœur.",
+                options: ["Tamponnade cardiaque", "Insuffisance cardiaque décompensée", "Embolie pulmonaire", "Péricardite aiguë simple", "Pneumothorax suffocant"],
+                correct: 0,
+                diagnostic: "Tamponnade cardiaque",
+                explication: "La triade de Beck associant hypotension, turgescence jugulaire et assourdissement des bruits du cœur, chez un patient à risque (cancer), signe une tamponnade cardiaque : un épanchement péricardique comprime le cœur et empêche son remplissage. L'insuffisance cardiaque décompensée donnerait plutôt des crépitants et des œdèmes des membres inférieurs ; l'embolie pulmonaire ne donne pas typiquement d'assourdissement des bruits du cœur ; la péricardite aiguë simple ne s'accompagne pas d'hypotension ni de choc ; le pneumothorax suffocant donnerait une abolition unilatérale du murmure vésiculaire avec déviation trachéale, pas un assourdissement des bruits cardiaques.",
+                cat: "CAT infirmière : alerter le médecin en urgence absolue, oxygénothérapie, mettre le patient en position demi-assise, poser une voie veineuse, assurer un monitorage cardiaque et tensionnel continu, préparer le matériel pour une échocardiographie et une éventuelle ponction péricardique (péricardiocentèse) en urgence, surveiller étroitement la conscience et les constantes."
+              },
+              {
+                titre: "Monoarthrite aiguë du gros orteil",
+                anamnese: "Un homme de 48 ans, hypertendu traité par diurétiques et consommateur régulier d'alcool, se réveille en pleine nuit avec une douleur intense et brutale du gros orteil droit. À l'examen, l'articulation métatarso-phalangienne du gros orteil est rouge, chaude, très douloureuse au moindre contact (même le drap est insupportable), avec un œdème net. Température à 37,9°C.",
+                triade: "Pas de triade nommée universellement reconnue, mais un tableau très évocateur : douleur nocturne brutale + monoarthrite du gros orteil (podagre) + rougeur/chaleur locale intense, chez un patient à profil à risque (alcool, diurétiques).",
+                options: ["Crise de goutte aiguë", "Arthrite septique", "Pseudogoutte (chondrocalcinose)", "Rhumatisme articulaire aigu", "Polyarthrite rhumatoïde débutante"],
+                correct: 0,
+                diagnostic: "Crise de goutte aiguë",
+                explication: "Le profil (homme, diurétiques, consommation d'alcool) associé à une monoarthrite brutale du gros orteil (podagre) est très typique de la crise de goutte aiguë. L'arthrite septique doit toujours être évoquée et écartée en cas de doute (fièvre élevée, altération de l'état général) car c'est une urgence. La pseudogoutte touche plus souvent le genou et le sujet âgé. Le rhumatisme articulaire aigu touche surtout l'enfant et l'adolescent, dans les suites d'une angine. La polyarthrite rhumatoïde débutante est en général symétrique et touche plusieurs petites articulations.",
+                cat: "CAT infirmière : mettre l'articulation au repos, appliquer de la glace, administrer les anti-inflammatoires prescrits (sauf contre-indication), réaliser le bilan biologique demandé (uricémie, NFS, CRP), participer à l'élimination d'une arthrite septique par ponction articulaire en cas de doute, et sensibiliser le patient sur l'arrêt de l'alcool et l'adaptation éventuelle du traitement diurétique avec le médecin."
+              }
+            ]
+          }),
           makeModule("Pathologie chirurgicale"),
           makeModule("Soins Infirmiers en Médecine"),
-          makeModule("Soins Infirmiers en Chirurgie"),
+          makeModule("Soins Infirmiers en Chirurgie", {
+            casClinique: [{
+              titre: "Arrêt des matières et des gaz avec météorisme abdominal",
+              anamnese: "Un homme de 68 ans, opéré il y a 5 ans d'une appendicectomie, se présente pour des douleurs abdominales diffuses à type de coliques, des vomissements répétés, et n'a ni émis de gaz ni été à la selle depuis 3 jours. À l'examen, l'abdomen est distendu et tympanique, avec des bruits hydro-aériques d'abord augmentés puis diminués.",
+              triade: "Il s'agit ici d'une tétrade clinique classique (et non d'une triade) : douleur abdominale + vomissements + arrêt des matières et des gaz + météorisme abdominal — les 4 signes cardinaux de l'occlusion intestinale aiguë.",
+              options: ["Occlusion intestinale aiguë sur bride", "Gastro-entérite aiguë", "Colique néphrétique", "Pancréatite aiguë", "Péritonite par perforation d'ulcère"],
+              correct: 0,
+              diagnostic: "Occlusion intestinale aiguë sur bride",
+              explication: "L'antécédent de chirurgie abdominale (appendicectomie) est un facteur de risque classique de bride/adhérence responsable d'occlusion intestinale. L'arrêt des matières et des gaz avec météorisme oriente fortement vers l'occlusion, alors que la gastro-entérite donnerait plutôt une diarrhée. La colique néphrétique ne donne pas d'arrêt du transit. La pancréatite aiguë donne une douleur épigastrique transfixiante. La péritonite par perforation donnerait une contracture abdominale généralisée et un tableau septique plus marqué.",
+              cat: "CAT infirmière : mettre le patient à jeun strict, participer à la pose d'une sonde nasogastrique en aspiration douce pour décomprimer l'estomac, poser une voie veineuse pour réhydratation et rééquilibration hydro-électrolytique, surveiller les constantes et la diurèse, préparer le bilan biologique et l'imagerie demandés (radiographie de l'abdomen sans préparation ou scanner), et prévenir le chirurgien pour la suite de la prise en charge."
+            }]
+          }),
           makeModule("Pédiatrie et Soins de l'enfant", {
+            casClinique: [{
+              titre: "Nourrisson avec douleurs abdominales et vomissements",
+              anamnese: "Un nourrisson de 8 mois, auparavant en bonne santé, est amené par sa mère pour des épisodes de pleurs intenses avec crispation des jambes sur l'abdomen, survenant par crises de quelques minutes séparées de périodes d'accalmie où l'enfant semble normal. Il a vomi à plusieurs reprises. La mère rapporte avoir remarqué des selles glairo-sanglantes (« comme de la gelée de groseille ») dans la dernière couche.",
+              triade: "Triade classique de l'invagination intestinale aiguë : douleurs abdominales paroxystiques + vomissements + rectorragies (selles glairo-sanglantes).",
+              options: ["Invagination intestinale aiguë", "Gastro-entérite aiguë", "Colique du nourrisson", "Appendicite aiguë du nourrisson", "Torsion d'un kyste de l'ovaire"],
+              correct: 0,
+              diagnostic: "Invagination intestinale aiguë",
+              explication: "Les crises paroxystiques avec intervalles libres, associées aux rectorragies typiques (« gelée de groseille »), sont très évocatrices de l'invagination intestinale aiguë, urgence chirurgicale fréquente chez le nourrisson. La gastro-entérite aiguë donne surtout une diarrhée, pas du sang. La colique du nourrisson ne s'accompagne ni de vomissements ni de sang. L'appendicite est rare et se présente différemment chez le nourrisson. La torsion d'un kyste de l'ovaire est un diagnostic différentiel possible mais beaucoup plus rare.",
+              cat: "CAT infirmière : alerter immédiatement le médecin ou le pédiatre (urgence chirurgicale), mettre l'enfant à jeun, poser une voie veineuse pour réhydratation, surveiller les constantes et l'état de conscience, préparer l'enfant pour une échographie abdominale en urgence et une réduction (par lavement ou chirurgicale selon les cas), et rassurer les parents."
+            }],
             cours: [{ title: "Signes de danger chez le nouveau-né et l'enfant (exemple)",
               body: "Signes devant alerter et nécessiter une consultation en urgence :\n\n- Fièvre élevée ou hypothermie\n- Difficulté respiratoire (tirage, geignement)\n- Refus de téter / de boire\n- Léthargie, enfant difficile à réveiller\n- Convulsions\n- Coloration anormale de la peau (pâleur, cyanose, ictère marqué)\n\nCes signes font partie de l'approche de prise en charge intégrée des maladies de l'enfant (PCIME)." }],
             qcm: [
@@ -1045,6 +1089,16 @@ function buildSeed(){
           }),
           makeModule("Techniques de laboratoire et Explorations"),
           makeModule("Pathologies Respiratoires", {
+            casClinique: [{
+              titre: "Douleur thoracique brutale chez un adolescent longiligne",
+              anamnese: "Un adolescent de 17 ans, longiligne, sans antécédent particulier, se présente pour une douleur thoracique brutale en coup de poignard du côté droit, apparue au repos, associée à une dyspnée d'apparition brutale. Pas de fièvre, pas de traumatisme rapporté.",
+              triade: "Triade clinique évocatrice de pneumothorax : douleur thoracique brutale + dyspnée + tympanisme (hypersonorité) à la percussion du côté atteint, avec abolition du murmure vésiculaire.",
+              options: ["Pneumothorax spontané", "Crise d'asthme aiguë", "Pneumonie franche lobaire aiguë", "Embolie pulmonaire", "Péricardite aiguë"],
+              correct: 0,
+              diagnostic: "Pneumothorax spontané",
+              explication: "Le profil typique (adolescent longiligne), l'absence de fièvre, le début brutal et le tympanisme unilatéral avec abolition du murmure vésiculaire orientent vers un pneumothorax spontané. La crise d'asthme donnerait des sibilants bilatéraux plutôt qu'un tympanisme unilatéral. La pneumonie franche lobaire aiguë s'accompagnerait de fièvre et d'expectoration. L'embolie pulmonaire survient plutôt avec des facteurs de risque thromboemboliques. La péricardite aiguë donne une douleur positionnelle sans tympanisme thoracique.",
+              cat: "CAT infirmière : oxygénothérapie, installer le patient en position demi-assise, ne pas le laisser seul, préparer une radiographie thoracique en urgence, prévenir le médecin en vue d'une éventuelle exsufflation ou d'un drainage thoracique, et surveiller étroitement la saturation en oxygène et la fréquence respiratoire."
+            }],
             qcm: [
               { question: "Les gaz du sang permettent d'analyser :",
                 options: ["L'hémostase", "L'hématose", "Les hémoptysies", "L'hématome"],
@@ -1186,6 +1240,15 @@ function buildSeed(){
               diagnostic: "Cholécystite aiguë",
               explication: "Le tableau associe douleur de l'hypochondre droit, fièvre et signes digestifs après un repas gras, sans ictère : c'est le tableau classique de la cholécystite aiguë (inflammation de la vésicule biliaire, souvent secondaire à une lithiase). L'angiocholite se distingue par la présence d'un ictère (triade de Charcot complète) ; l'appendicite se situe en fosse iliaque droite ; la pancréatite aiguë donne une douleur épigastrique transfixiante ; la colique néphrétique droite s'accompagne typiquement de signes urinaires.",
               cat: "CAT infirmière : mettre la patiente à jeun strict, poser une voie veineuse périphérique, surveiller les constantes (température, pouls, tension artérielle, douleur), administrer les antalgiques et antispasmodiques prescrits, préparer le bilan biologique (NFS, CRP, bilan hépatique) et l'échographie abdominale demandés par le médecin, et prévenir le chirurgien en vue d'une éventuelle cholécystectomie."
+            }, {
+              titre: "Douleur abdominale migratrice avec anorexie",
+              anamnese: "Un jeune homme de 22 ans rapporte une douleur abdominale ayant débuté autour de l'ombilic il y a environ 12 heures, puis s'étant déplacée et localisée en fosse iliaque droite. Il signale une perte d'appétit depuis le début des douleurs, quelques nausées, et une température à 37,8°C.",
+              triade: "Triade clinique classique de l'appendicite aiguë : douleur migratrice (péri-ombilicale puis fosse iliaque droite) + anorexie + fébricule.",
+              options: ["Appendicite aiguë", "Colique néphrétique droite", "Adénolymphite mésentérique", "Diverticulite du cæcum", "Cholécystite aiguë"],
+              correct: 0,
+              diagnostic: "Appendicite aiguë",
+              explication: "La douleur migratrice péri-ombilicale puis en fosse iliaque droite, associée à l'anorexie et au fébricule, est le tableau classique de l'appendicite aiguë. L'adénolymphite mésentérique (fréquente chez le jeune) suit souvent un épisode viral et évolue en général plus favorablement. La colique néphrétique droite donne une douleur colique avec signes urinaires. La diverticulite du cæcum est un diagnostic différentiel plus rare, plutôt chez le sujet âgé. La cholécystite aiguë se situe à l'hypochondre droit, pas en fosse iliaque droite.",
+              cat: "CAT infirmière : mettre le patient à jeun, poser une voie veineuse, administrer les antalgiques prescrits sans masquer excessivement l'évolution clinique avant l'avis chirurgical, préparer le bilan biologique (NFS, CRP) et l'échographie abdominale demandés, et prévenir le chirurgien en urgence en vue d'une éventuelle appendicectomie."
             }]
           }),
           makeModule("Soins Infirmiers dans les Pathologies Médicales I", {
