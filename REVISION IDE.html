@@ -1905,12 +1905,22 @@ function renderCoursRubrique(yearId){
   }
   y.modules.forEach(function(m){
     var isOpen = !!openModules[m.id];
+    var docCount = (docsCache[m.id]||[]).length;
     html += '<div class="module ' + (isOpen?'open':'') + '">';
     html += '<div class="mhead" data-action="toggle-module" data-module="' + m.id + '">' +
-      '<div><h3>' + esc(m.name) + '</h3><div class="faint" style="margin-top:3px;">' + m.cours.length + ' chapitre(s)</div></div>' +
+      '<div><h3>' + esc(m.name) + '</h3><div class="faint" style="margin-top:3px;">' + m.cours.length + ' chapitre(s) · ' + docCount + ' document(s)</div></div>' +
       '<span class="chevron">▶</span>' +
     '</div>';
-    if (isOpen) html += '<div class="mbody">' + renderCoursChapters(y, m) + '</div>';
+    if (isOpen){
+      html += '<div class="mbody">';
+      html += renderCoursChapters(y, m);
+      html += '<div style="margin-top:16px; padding-top:14px; border-top:1px solid var(--line);">' +
+        '<h4 style="font-size:13.5px; margin:0 0 8px;">📎 Document du cours</h4>' +
+        '<p class="faint" style="margin-bottom:8px;">Charge ici le document numérique définitif de cette matière (PDF, Word ou PowerPoint) : il reste enregistré en permanence sur cet appareil.</p>' +
+        renderDocsList(y, m) +
+      '</div>';
+      html += '</div>';
+    }
     html += '</div>';
   });
   return html;
