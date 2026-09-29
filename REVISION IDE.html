@@ -306,6 +306,24 @@
   @keyframes mascot-wiggle{ 0%,100%{transform:rotate(0);} 25%{transform:rotate(-9deg);} 75%{transform:rotate(9deg);} }
   @keyframes mascot-shake{ 0%,100%{transform:translateX(0);} 25%{transform:translateX(-6px);} 50%{transform:translateX(6px);} 75%{transform:translateX(-4px);} }
   @media (max-width:420px){ .mascot-wrap{ right:8px; } .mascot-avatar{ width:44px; height:44px; } }
+
+  /* ---- Écrans d'inscription / verrouillage ---- */
+  .auth-screen{
+    min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;
+    background:linear-gradient(160deg, var(--paper), var(--deep-soft));
+  }
+  .auth-card{
+    width:100%; max-width:380px; background:var(--surface); border:1px solid var(--line); border-radius:20px;
+    padding:28px 22px; box-shadow:var(--shadow);
+  }
+  .auth-brand{ display:flex; flex-direction:column; align-items:center; gap:10px; margin-bottom:20px; animation:auth-pop .5s ease; }
+  .auth-cross{
+    width:56px; height:56px; border-radius:16px; background:linear-gradient(160deg,var(--deep),var(--accent));
+    color:#fff; display:flex; align-items:center; justify-content:center; font-size:30px; font-weight:700;
+    box-shadow:0 6px 16px -6px rgba(0,0,0,.35);
+  }
+  .auth-brand h1{ font-size:21px; margin:0; }
+  @keyframes auth-pop{ 0%{opacity:0; transform:scale(.82) translateY(10px);} 100%{opacity:1; transform:scale(1) translateY(0);} }
 </style>
 </head>
 <body>
@@ -342,6 +360,7 @@ function buildSeed(){
     version: APP_VERSION,
     settings: { name: "" },
     onboardingSeen: false,
+    registration: null,
     history: [],
     years: [
       {
@@ -1274,9 +1293,20 @@ function findModule(yearId, moduleId){
   var y = findYear(yearId); if (!y) return null;
   return y.modules.find(function(m){ return m.id === moduleId; });
 }
+function allowedYearIds(){
+  var niveau = state.registration && state.registration.niveau;
+  if (niveau === "L1") return ["a1"];
+  if (niveau === "L2") return ["a1","a2"];
+  if (niveau === "L3") return ["a1","a2","a3"];
+  return state.years.map(function(y){ return y.id; });
+}
+function visibleYears(){
+  var allowed = allowedYearIds();
+  return state.years.filter(function(y){ return allowed.indexOf(y.id) !== -1; });
+}
 function allModulesFlat(){
   var out = [];
-  state.years.forEach(function(y){ y.modules.forEach(function(m){ out.push({ year:y, module:m }); }); });
+  visibleYears().forEach(function(y){ y.modules.forEach(function(m){ out.push({ year:y, module:m }); }); });
   return out;
 }
 
@@ -1477,7 +1507,7 @@ var exoSession = null;  /* { items:[...], index, scopeLabel } */
 
 function collectQuestions(kind, yearFilter, moduleFilter, onlyReview){
   var out = [];
-  state.years.forEach(function(y){
+  visibleYears().forEach(function(y){
     if (yearFilter && yearFilter !== "all" && y.id !== yearFilter) return;
     y.modules.forEach(function(m){
       if (moduleFilter && moduleFilter.length && moduleFilter.indexOf(m.id) === -1) return;
@@ -1496,8 +1526,19 @@ function collectQuestions(kind, yearFilter, moduleFilter, onlyReview){
 /* =========================================================
    RENDU PRINCIPAL
    ========================================================= */
+var appUnlocked = false;
 function render(){
   var app = document.getElementById("app");
+  if (!state.registration){
+    app.innerHTML = renderRegistrationScreen();
+    return;
+  }
+  if (!appUnlocked){
+    app.innerHTML = renderLockScreen();
+    var fld = document.getElementById("unlock-matricule");
+    if (fld) fld.focus();
+    return;
+  }
   var html = "";
   html += renderHeader();
   if (route.view === "accueil") html += renderAccueil();
@@ -1513,6 +1554,72 @@ function render(){
   app.innerHTML = '<div class="app">' + html + '</div>' + renderBottomNav();
   window.scrollTo(0,0);
   if (route.view === "reglages") updateStorageUsage();
+}
+
+/* =========================================================
+   INSCRIPTION & VERROUILLAGE (code d'accès = matricule INFAS)
+   ========================================================= */
+var REG_FILIERES = ["IDE (Infirmier Diplômé d'État)", "SF (Sage-femme)", "Autre"];
+function renderRegistrationScreen(){
+  return '<div class="auth-screen"><div class="auth-card">' +
+    '<div class="auth-brand"><div class="auth-cross">✚</div><h1>La Syncope</h1></div>' +
+    '<p class="small muted" style="text-align:center; margin-bottom:16px;">Crée ton compte étudiant (une seule fois)</p>' +
+    fieldText("Nom", "reg-nom", "", "Ton nom") +
+    fieldText("Prénom", "reg-prenom", "", "Ton prénom") +
+    '<label class="field"><span>Niveau INFAS</span><select id="reg-niveau">' +
+      '<option value="L1">L1 — 1ère année</option>' +
+      '<option value="L2">L2 — 2ème année</option>' +
+      '<option value="L3">L3 — 3ème année</option>' +
+    '</select></label>' +
+    '<label class="field"><span>Filière</span><select id="reg-filiere">' +
+      REG_FILIERES.map(function(f){ return '<option value="' + escAttr(f) + '">' + esc(f) + '</option>'; }).join("") +
+    '</select></label>' +
+    fieldText("Matricule INFAS", "reg-matricule", "", "Ex : 240016IA — servira de code d'accès") +
+    '<button type="button" class="btn primary block" style="margin-top:14px;" data-action="register-submit">S\'inscrire</button>' +
+  '</div></div>';
+}
+function submitRegistration(){
+  var nom = document.getElementById("reg-nom").value.trim();
+  var prenom = document.getElementById("reg-prenom").value.trim();
+  var niveau = document.getElementById("reg-niveau").value;
+  var filiere = document.getElementById("reg-filiere").value;
+  var matricule = document.getElementById("reg-matricule").value.trim();
+  if (!nom || !prenom) return showToast("Nom et prénom sont requis.");
+  if (!matricule) return showToast("Le matricule est requis : il servira de code d'accès.");
+  state.registration = { nom: nom, prenom: prenom, niveau: niveau, filiere: filiere, matricule: matricule };
+  state.settings.name = prenom;
+  saveState();
+  appUnlocked = true;
+  render();
+  showToast("Bienvenue " + prenom + " !");
+  onEnterApp();
+}
+var unlockError = "";
+function renderLockScreen(){
+  var prenom = state.registration.prenom || "";
+  return '<div class="auth-screen"><div class="auth-card">' +
+    '<div class="auth-brand"><div class="auth-cross">✚</div><h1>La Syncope</h1></div>' +
+    '<p class="small muted" style="text-align:center; margin-bottom:4px;">Bon retour' + (prenom ? ", " + esc(prenom) : "") + '</p>' +
+    '<p class="small muted" style="text-align:center; margin-bottom:16px;">Entre ton matricule INFAS pour continuer.</p>' +
+    '<label class="field"><span>Matricule INFAS</span><input type="password" id="unlock-matricule" placeholder="Ton matricule"></label>' +
+    (unlockError ? '<div class="small" style="color:var(--bad); margin:-6px 0 10px;">' + esc(unlockError) + '</div>' : '') +
+    '<button type="button" class="btn primary block" style="margin-top:6px;" data-action="unlock-submit">VALIDER</button>' +
+  '</div></div>';
+}
+function submitUnlock(){
+  var val = document.getElementById("unlock-matricule").value.trim();
+  if (val && state.registration && val.toLowerCase() === (state.registration.matricule || "").toLowerCase()){
+    appUnlocked = true; unlockError = "";
+    render();
+    onEnterApp();
+  } else {
+    unlockError = "Matricule incorrect, réessaie.";
+    render();
+  }
+}
+function onEnterApp(){
+  setTimeout(function(){ showMascot("greet"); }, 400);
+  setTimeout(function(){ syncTelegramImports(true); }, 1200);
 }
 
 function renderHeader(){
@@ -1563,7 +1670,7 @@ function computeYearStats(y){
 }
 function overallProgress(){
   var tc=0,lc=0,tq=0,cq=0,aq=0,te=0,me=0;
-  state.years.forEach(function(y){ var s = computeYearStats(y); tc+=s.totalCours; lc+=s.luCours; tq+=s.totalQ; cq+=s.correctQ; aq+=s.answeredQ; te+=s.totalExo; me+=s.masteredExo; });
+  visibleYears().forEach(function(y){ var s = computeYearStats(y); tc+=s.totalCours; lc+=s.luCours; tq+=s.totalQ; cq+=s.correctQ; aq+=s.answeredQ; te+=s.totalExo; me+=s.masteredExo; });
   var parts = [];
   if (tc) parts.push(pct(lc,tc));
   if (aq) parts.push(pct(cq,aq));
@@ -1602,7 +1709,7 @@ function renderAccueil(){
     '</div>' +
   '</div>';
 
-  html += '<div class="grid3">' + state.years.map(function(y){
+  html += '<div class="grid3">' + visibleYears().map(function(y){
     var s = computeYearStats(y);
     var coursPct = pct(s.luCours, s.totalCours);
     return '<div class="card" data-action="go" data-hash="#/programme/'+y.id+'" style="cursor:pointer;">' +
@@ -1654,9 +1761,11 @@ var moduleSubTab = {}; /* moduleId -> 'cours'|'qcm'|'qcd'|'exercices'|'docs' */
 var docsCache = {}; /* moduleId -> array of document records (loaded lazily from IndexedDB) */
 
 function renderProgramme(yearId){
-  var y = findYear(yearId) || state.years[0];
+  var vy = visibleYears();
+  var y = findYear(yearId);
+  if (!y || vy.indexOf(y) === -1) y = vy[0] || state.years[0];
   var html = "";
-  html += '<div class="tabs" style="margin-bottom:12px;">' + state.years.map(function(yy){
+  html += '<div class="tabs" style="margin-bottom:12px;">' + vy.map(function(yy){
     return '<button class="' + (yy.id===y.id?'active':'') + '" data-action="go" data-hash="#/programme/' + yy.id + '">' + esc(yy.label) + '</button>';
   }).join("") + '</div>';
 
@@ -1831,7 +1940,7 @@ function renderQuizSetup(){
     }).join("") + '</div></div>';
 
   html += '<div><h3 style="font-size:15px;">Année</h3><div class="tabs" style="margin-top:8px;">' +
-    [["all","Toutes"]].concat(state.years.map(function(y){return [y.id,y.label];})).map(function(o){
+    [["all","Toutes"]].concat(visibleYears().map(function(y){return [y.id,y.label];})).map(function(o){
       return '<button class="' + (quizSetup.year===o[0]?'active':'') + '" data-action="quiz-set-year" data-year="' + o[0] + '">' + o[1] + '</button>';
     }).join("") + '</div></div>';
 
@@ -1937,7 +2046,7 @@ function renderExoSetup(){
 
   var html = '<div class="card stack">';
   html += '<div><h3 style="font-size:15px;">Année</h3><div class="tabs" style="margin-top:8px;">' +
-    [["all","Toutes"]].concat(state.years.map(function(y){return [y.id,y.label];})).map(function(o){
+    [["all","Toutes"]].concat(visibleYears().map(function(y){return [y.id,y.label];})).map(function(o){
       return '<button class="' + (exoSetup.year===o[0]?'active':'') + '" data-action="exo-set-year" data-year="' + o[0] + '">' + o[1] + '</button>';
     }).join("") + '</div></div>';
 
@@ -2010,11 +2119,11 @@ function renderDiplome(){
 
   html += '<div class="card row" style="gap:16px;">' + ringSvg(op.avg, 80) +
     '<div style="flex:1;"><div class="small" style="font-weight:700;">Préparation Diplôme d\'État</div>' +
-    '<div class="faint" style="margin-top:2px;">Progression combinée sur les 3 années : cours lus, QCM/QCD réussis, exercices maîtrisés.</div></div>' +
+    '<div class="faint" style="margin-top:2px;">Progression combinée sur tes années accessibles (niveau ' + esc((state.registration&&state.registration.niveau)||"") + ') : cours lus, QCM/QCD réussis, exercices maîtrisés.</div></div>' +
   '</div>';
 
   html += '<div class="card"><h3 style="font-size:15px; margin-bottom:8px;">Par année</h3>';
-  state.years.forEach(function(y){
+  visibleYears().forEach(function(y){
     var s = computeYearStats(y);
     var qPct = s.answeredQ ? pct(s.correctQ, s.answeredQ) + '% aux quiz' : 'pas encore de quiz';
     html += '<div class="row between small" style="padding:7px 0; border-bottom:1px solid var(--line);">' +
@@ -2056,6 +2165,14 @@ function renderDiplome(){
    ========================================================= */
 function renderReglages(){
   var html = "";
+  if (state.registration){
+    html += '<div class="card">' +
+      '<h3 style="font-size:15px; margin-bottom:6px;">🎓 Mon profil INFAS</h3>' +
+      '<div class="small muted">' + esc(state.registration.prenom) + ' ' + esc(state.registration.nom) + ' · ' + esc(state.registration.filiere||"") + '</div>' +
+      '<div class="small muted" style="margin-top:2px;">Niveau actuel : <strong>' + esc(state.registration.niveau) + '</strong> — matières accessibles : ' + esc(visibleYears().map(function(y){return y.label;}).join(", ")) + '</div>' +
+      '<button class="btn sm" style="margin-top:10px;" data-action="edit-niveau">🎓 Je suis passé(e) au niveau supérieur</button>' +
+    '</div>';
+  }
   html += '<div class="card">' +
     '<label class="field"><span>Ton prénom (optionnel)</span><input type="text" id="settings-name" value="' + escAttr(state.settings.name) + '" data-action="settings-name"></label>' +
   '</div>';
@@ -2337,6 +2454,19 @@ function modalRenameModule(yearId, moduleId){
       var name = document.getElementById("m-name").value.trim();
       if (!name) return showToast("Le nom est requis.");
       m.name = name; saveState(); closeModal(); render();
+    }
+  });
+}
+
+/* --- Mise à jour du niveau INFAS (passage à l'année supérieure) --- */
+function modalEditNiveau(){
+  var body = '<label class="field"><span>Nouveau niveau INFAS</span><select id="niveau-edit">' +
+    ["L1","L2","L3"].map(function(n){ return '<option value="' + n + '" ' + (state.registration.niveau===n?'selected':'') + '>' + n + '</option>'; }).join("") +
+  '</select></label>';
+  openModal("Mettre à jour mon niveau", body, {
+    onSubmit: function(){
+      state.registration.niveau = document.getElementById("niveau-edit").value;
+      saveState(); closeModal(); render(); showToast("Niveau mis à jour : " + state.registration.niveau + ".");
     }
   });
 }
@@ -3233,6 +3363,9 @@ function handleAction(action, el, ev){
     case "close-search": closeSearch(); break;
     case "mascot-dismiss": hideMascotBubble(); break;
     case "mascot-replay": replayMascot(); break;
+    case "register-submit": submitRegistration(); break;
+    case "unlock-submit": submitUnlock(); break;
+    case "edit-niveau": modalEditNiveau(); break;
     case "telegram-sync": syncTelegramImports(false); break;
     case "telegram-move": modalTelegramMove(el.getAttribute("data-id")); break;
     case "search-goto":
@@ -3544,6 +3677,12 @@ document.addEventListener("click", function(e){
   if (action === "modal-overlay" && e.target !== el) return;
   handleAction(action, el, e);
 });
+document.addEventListener("keydown", function(e){
+  if (e.key !== "Enter") return;
+  if (!e.target || !e.target.id) return;
+  if (e.target.id === "unlock-matricule") submitUnlock();
+  else if (e.target.id === "reg-matricule") submitRegistration();
+});
 document.addEventListener("change", function(e){
   if (e.target.id === "import-file" && e.target.files[0]) importDataFile(e.target.files[0]);
   if (e.target.id === "settings-name") { state.settings.name = e.target.value; saveState(); }
@@ -3562,8 +3701,6 @@ document.addEventListener("input", function(e){
 loadState();
 route = parseHash();
 render();
-setTimeout(function(){ showMascot("greet"); }, 500);
-setTimeout(function(){ syncTelegramImports(true); }, 1500);
 
 })();
 </script>
