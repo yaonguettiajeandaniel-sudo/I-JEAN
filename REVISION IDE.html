@@ -324,6 +324,20 @@
   }
   .auth-brand h1{ font-size:21px; margin:0; }
   @keyframes auth-pop{ 0%{opacity:0; transform:scale(.82) translateY(10px);} 100%{opacity:1; transform:scale(1) translateY(0);} }
+
+  /* ---- Cas cliniques (simulation de consultation) ---- */
+  .cas-anamnese{
+    background:var(--surface-2); border:1px solid var(--line); border-radius:12px; padding:12px 14px;
+    font-size:14px; line-height:1.55; font-style:italic;
+  }
+  .cas-triade{
+    margin-top:10px; background:var(--warn-soft); border:1px solid var(--warn); border-radius:10px;
+    padding:10px 12px; font-size:13px; line-height:1.5; color:var(--ink);
+  }
+  .cas-cat{
+    margin-top:10px; background:var(--deep-soft); border:1px solid var(--deep); border-radius:10px;
+    padding:10px 12px; font-size:13.5px; line-height:1.55;
+  }
 </style>
 </head>
 <body>
@@ -345,12 +359,13 @@ var APP_VERSION = 1;
 function uid(){ return Math.random().toString(36).slice(2,9) + Date.now().toString(36).slice(-4); }
 
 function makeModule(name, extra){
-  var m = { id: uid(), name: name, cours: [], qcm: [], qcd: [], exercices: [] };
+  var m = { id: uid(), name: name, cours: [], qcm: [], qcd: [], exercices: [], casClinique: [] };
   if (extra) {
     if (extra.cours) m.cours = extra.cours.map(function(c){ return Object.assign({ id: uid(), reviewLater:false, lastReviewed:null }, c); });
     if (extra.qcm) m.qcm = extra.qcm.map(function(q){ return Object.assign({ id: uid(), reviewLater:false, lastResult:null }, q); });
     if (extra.qcd) m.qcd = extra.qcd.map(function(q){ return Object.assign({ id: uid(), reviewLater:false, lastResult:null }, q); });
     if (extra.exercices) m.exercices = extra.exercices.map(function(e){ return Object.assign({ id: uid(), reviewLater:false, mastered:false }, e); });
+    if (extra.casClinique) m.casClinique = extra.casClinique.map(function(c){ return Object.assign({ id: uid(), reviewLater:false, lastResult:null }, c); });
   }
   return m;
 }
@@ -1161,7 +1176,17 @@ function buildSeed(){
             cours: [{ title: "Programme officiel (UE SCP 1310 — 4 crédits, Semestre 3)", body: "ECUE :\n- Pathologies obstétricales — SCP 1311 — 2 crédits\n- Pathologies gynécologiques — SCP 1312 — 2 crédits\n\nSource : Point des crédits Licence 2 IDE, maquette officielle INFAS (Antenne d'Abengourou)." }]
           }),
           makeModule("Soins Infirmiers dans les Pathologies Chirurgicales", {
-            cours: [{ title: "Programme officiel (UE PIC 1320 — 2 crédits, Semestre 3)", body: "ECUE :\n- Traumatologie — PIC 1321 — 1 crédit\n- Chirurgie digestive — PIC 1322 — 1 crédit\n\nSource : Point des crédits Licence 2 IDE, maquette officielle INFAS (Antenne d'Abengourou)." }]
+            cours: [{ title: "Programme officiel (UE PIC 1320 — 2 crédits, Semestre 3)", body: "ECUE :\n- Traumatologie — PIC 1321 — 1 crédit\n- Chirurgie digestive — PIC 1322 — 1 crédit\n\nSource : Point des crédits Licence 2 IDE, maquette officielle INFAS (Antenne d'Abengourou)." }],
+            casClinique: [{
+              titre: "Douleur de l'hypochondre droit fébrile",
+              anamnese: "Une patiente de 45 ans, sans antécédent particulier, se présente aux urgences pour une douleur brutale de l'hypochondre droit apparue quelques heures après un repas copieux et riche en graisses. La douleur irradie vers l'omoplate droite. Elle rapporte des nausées, un épisode de vomissement, et une température mesurée à 38,4°C. À l'interrogatoire, elle ne rapporte pas de coloration jaune de la peau ni des yeux, et ses urines sont de couleur normale.",
+              triade: "Pense à la triade de Charcot (évocatrice d'angiocholite) : douleur de l'hypochondre droit + fièvre + ictère. Ici, l'ictère est absent — un élément clé pour orienter le diagnostic.",
+              options: ["Cholécystite aiguë", "Angiocholite aiguë", "Appendicite aiguë", "Pancréatite aiguë", "Colique néphrétique droite"],
+              correct: 0,
+              diagnostic: "Cholécystite aiguë",
+              explication: "Le tableau associe douleur de l'hypochondre droit, fièvre et signes digestifs après un repas gras, sans ictère : c'est le tableau classique de la cholécystite aiguë (inflammation de la vésicule biliaire, souvent secondaire à une lithiase). L'angiocholite se distingue par la présence d'un ictère (triade de Charcot complète) ; l'appendicite se situe en fosse iliaque droite ; la pancréatite aiguë donne une douleur épigastrique transfixiante ; la colique néphrétique droite s'accompagne typiquement de signes urinaires.",
+              cat: "CAT infirmière : mettre la patiente à jeun strict, poser une voie veineuse périphérique, surveiller les constantes (température, pouls, tension artérielle, douleur), administrer les antalgiques et antispasmodiques prescrits, préparer le bilan biologique (NFS, CRP, bilan hépatique) et l'échographie abdominale demandés par le médecin, et prévenir le chirurgien en vue d'une éventuelle cholécystectomie."
+            }]
           }),
           makeModule("Soins Infirmiers dans les Pathologies Médicales I", {
             cours: [{ title: "Programme officiel (UE SIM 1320 — 4 crédits, Semestre 3)", body: "ECUE :\n- Affections transmissibles — SIM 1321 — 1 crédit\n- Affections non transmissibles — SIM 1322 — 1 crédit\n- VIH-SIDA — SIM 1323 — 1 crédit\n- Dispositif minimum en situation d'urgence — SIM 1324 — 1 crédit\n\nSource : Point des crédits Licence 2 IDE, maquette officielle INFAS (Antenne d'Abengourou)." }]
@@ -1220,7 +1245,17 @@ function buildSeed(){
               options: ["60 à 80 par minute", "100 à 120 par minute", "140 à 160 par minute", "20 à 30 par minute"],
               correct: [1], explanation: "Les recommandations internationales préconisent des compressions thoraciques à une fréquence de 100 à 120 par minute chez l'adulte." }],
             exercices: [{ statement: "Décrivez la conduite à tenir face à une personne inconsciente qui ne respire pas normalement. (exemple)",
-              correction: "1. Sécuriser les lieux\n2. Vérifier l'état de conscience (stimuler, appeler)\n3. Alerter / faire alerter les secours\n4. Vérifier la respiration (regarder, écouter, sentir)\n5. Débuter la RCP : compressions thoraciques puis insufflations selon protocole en vigueur\n6. Utiliser un défibrillateur automatisé externe dès que disponible" }]
+              correction: "1. Sécuriser les lieux\n2. Vérifier l'état de conscience (stimuler, appeler)\n3. Alerter / faire alerter les secours\n4. Vérifier la respiration (regarder, écouter, sentir)\n5. Débuter la RCP : compressions thoraciques puis insufflations selon protocole en vigueur\n6. Utiliser un défibrillateur automatisé externe dès que disponible" }],
+            casClinique: [{
+              titre: "Céphalées intenses avec troubles de la conscience",
+              anamnese: "Un patient de 60 ans est amené aux urgences par sa famille pour des céphalées intenses et brutales, apparues il y a deux heures, associées à des vomissements en jet et une somnolence progressive. À l'examen, vous notez une tension artérielle à 190/110 mmHg, une fréquence cardiaque à 48 battements par minute, et une respiration irrégulière.",
+              triade: "C'est la triade de Cushing, signe d'une hypertension intracrânienne (HTIC) engageant le pronostic vital : hypertension artérielle + bradycardie + irrégularité respiratoire.",
+              options: ["Hypertension intracrânienne (HTIC)", "Accident vasculaire cérébral ischémique simple", "Méningite bactérienne", "Crise d'épilepsie généralisée", "Migraine ophtalmique"],
+              correct: 0,
+              diagnostic: "Hypertension intracrânienne (HTIC)",
+              explication: "L'association de céphalées brutales, de vomissements en jet, de troubles de la conscience et surtout de la triade de Cushing (HTA + bradycardie + respiration irrégulière) signe une hypertension intracrânienne, urgence neurologique absolue pouvant précéder un engagement cérébral. Un AVC ischémique simple ne donne pas typiquement cette triade ; la méningite s'accompagnerait de fièvre et de raideur de nuque ; la crise d'épilepsie se manifeste par des convulsions ; la migraine ophtalmique ne s'accompagne pas de troubles de la conscience ni de signes de gravité hémodynamique.",
+              cat: "CAT infirmière : alerter immédiatement le médecin (urgence vitale), installer le patient en position demi-assise (tête surélevée à 30°), libérer les voies aériennes, surveiller étroitement la conscience (score de Glasgow), la tension artérielle, la fréquence cardiaque et respiratoire, poser une voie veineuse, préparer le patient pour une imagerie cérébrale en urgence (scanner), et se tenir prêt pour un transfert en réanimation."
+            }]
           }),
           makeModule("Psychiatrie et Santé mentale"),
           makeModule("Maladies infectieuses et VIH/SIDA"),
@@ -1257,6 +1292,7 @@ function loadState(){
 function seedItemKey(kind, it){
   if (kind === "cours") return normalizeForMatch(it.title||"");
   if (kind === "exercices") return normalizeForMatch(it.statement||"");
+  if (kind === "casClinique") return normalizeForMatch(it.titre||"");
   return normalizeForMatch(it.question||"");
 }
 function mergeSeedIntoState(){
@@ -1269,7 +1305,8 @@ function mergeSeedIntoState(){
     seedYear.modules.forEach(function(seedMod){
       var mod = y.modules.find(function(m){ return normalizeForMatch(m.name) === normalizeForMatch(seedMod.name); });
       if (!mod){ y.modules.push(seedMod); changed = true; return; }
-      ["cours","qcm","qcd","exercices"].forEach(function(kind){
+      if (!mod.casClinique){ mod.casClinique = []; changed = true; }
+      ["cours","qcm","qcd","exercices","casClinique"].forEach(function(kind){
         var existingKeys = {};
         mod[kind].forEach(function(it){ existingKeys[seedItemKey(kind, it)] = true; });
         seedMod[kind].forEach(function(seedItem){
@@ -1547,6 +1584,8 @@ function render(){
   else if (route.view === "quiz-run") html += renderQuizRun();
   else if (route.view === "exercices") html += renderExoSetup();
   else if (route.view === "exercices-run") html += renderExoRun();
+  else if (route.view === "cas") html += renderCasSetup();
+  else if (route.view === "cas-run") html += renderCasRun();
   else if (route.view === "diplome") html += renderDiplome();
   else if (route.view === "reglages") html += renderReglages();
   else if (route.view === "telegram") html += renderTelegram();
@@ -1623,7 +1662,7 @@ function onEnterApp(){
 }
 
 function renderHeader(){
-  var titles = { accueil:"La Syncope", programme:"Programme", quiz:"Réviser", "quiz-run":"Quiz en cours", exercices:"Exercices", "exercices-run":"Exercice", diplome:"Diplôme d'État", reglages:"Réglages", telegram:"Import Telegram" };
+  var titles = { accueil:"La Syncope", programme:"Programme", quiz:"Réviser", "quiz-run":"Quiz en cours", exercices:"Exercices", "exercices-run":"Exercice", cas:"Cas Cliniques", "cas-run":"Cas clinique", diplome:"Diplôme d'État", reglages:"Réglages", telegram:"Import Telegram" };
   return (
     '<header class="top">' +
       '<div class="brand">' +
@@ -1645,11 +1684,12 @@ function renderBottomNav(){
     { hash:"#/programme/a1", view:"programme", ic:"📚", label:"Programme" },
     { hash:"#/quiz", view:"quiz", ic:"📝", label:"Réviser" },
     { hash:"#/exercices", view:"exercices", ic:"✏️", label:"Exercices" },
+    { hash:"#/cas", view:"cas", ic:"🩻", label:"Cas" },
     { hash:"#/diplome", view:"diplome", ic:"🎓", label:"Diplôme" }
   ];
   return '<nav class="bottom">' + items.map(function(it){
     var quizRunTarget = (quizSession && quizSession.examType === "diplome") ? "diplome" : "quiz";
-    var active = route.view === it.view || (route.view==='quiz-run' && it.view===quizRunTarget) || (route.view==='exercices-run' && it.view==='exercices');
+    var active = route.view === it.view || (route.view==='quiz-run' && it.view===quizRunTarget) || (route.view==='exercices-run' && it.view==='exercices') || (route.view==='cas-run' && it.view==='cas');
     return '<button class="' + (active?'active':'') + '" data-action="go" data-hash="' + it.hash + '"><span class="ic">' + it.ic + '</span>' + it.label + '</button>';
   }).join("") + '</nav>';
 }
@@ -1784,11 +1824,11 @@ function renderModule(y, m){
   var isOpen = !!openModules[m.id];
   var sub = moduleSubTab[m.id] || "cours";
   var docCount = (docsCache[m.id] || []).length;
-  var counts = { cours:m.cours.length, qcm:m.qcm.length, qcd:m.qcd.length, exercices:m.exercices.length, docs:docCount };
+  var counts = { cours:m.cours.length, qcm:m.qcm.length, qcd:m.qcd.length, exercices:m.exercices.length, cas:(m.casClinique||[]).length, docs:docCount };
   var html = '<div class="module ' + (isOpen?'open':'') + '">';
   html += '<div class="mhead" data-action="toggle-module" data-module="' + m.id + '">' +
     '<div><h3>' + esc(m.name) + '</h3>' +
-    '<div class="faint" style="margin-top:3px;">' + counts.cours + ' cours · ' + counts.qcm + ' QCM · ' + counts.qcd + ' QCD · ' + counts.exercices + ' exercices · ' + counts.docs + ' documents</div></div>' +
+    '<div class="faint" style="margin-top:3px;">' + counts.cours + ' cours · ' + counts.qcm + ' QCM · ' + counts.qcd + ' QCD · ' + counts.exercices + ' exercices · ' + counts.cas + ' cas cliniques · ' + counts.docs + ' documents</div></div>' +
     '<div class="row" style="gap:6px;">' +
       '<button class="icon-btn" style="width:30px;height:30px;" data-action="rename-module" data-year="' + y.id + '" data-module="' + m.id + '" title="Renommer">✏️</button>' +
       '<button class="icon-btn" style="width:30px;height:30px;" data-action="delete-module" data-year="' + y.id + '" data-module="' + m.id + '" title="Supprimer">🗑️</button>' +
@@ -1799,8 +1839,8 @@ function renderModule(y, m){
   if (isOpen){
     html += '<div class="mbody">';
     html += '<div class="subtabs">' +
-      ['cours','qcm','qcd','exercices','docs'].map(function(k){
-        var lbl = { cours:"📘 Cours", qcm:"☑️ QCM", qcd:"🔘 QCD", exercices:"✏️ Exercices", docs:"📎 Documents" }[k];
+      ['cours','qcm','qcd','exercices','cas','docs'].map(function(k){
+        var lbl = { cours:"📘 Cours", qcm:"☑️ QCM", qcd:"🔘 QCD", exercices:"✏️ Exercices", cas:"🩻 Cas clinique", docs:"📎 Documents" }[k];
         return '<button class="' + (sub===k?'active':'') + '" data-action="module-subtab" data-module="' + m.id + '" data-sub="' + k + '">' + lbl + ' (' + counts[k] + ')</button>';
       }).join("") + '</div>';
 
@@ -1808,6 +1848,7 @@ function renderModule(y, m){
     if (sub === "qcm") html += renderQuestionList(y, m, "qcm");
     if (sub === "qcd") html += renderQuestionList(y, m, "qcd");
     if (sub === "exercices") html += renderExoList(y, m);
+    if (sub === "cas") html += renderCasList(y, m);
     if (sub === "docs") html += renderDocsList(y, m);
 
     html += '</div>';
@@ -1884,6 +1925,26 @@ function renderExoList(y, m){
   });
   html += '<div class="row wrap"><button class="btn" style="flex:1;" data-action="add-exo" data-year="'+y.id+'" data-module="'+m.id+'">➕ Ajouter un exercice</button>' +
     '<button class="btn" style="flex:1;" data-action="import-start" data-year="'+y.id+'" data-module="'+m.id+'" data-kind="exercices">📥 Importer (PDF/Word/PPT)</button></div>';
+  return html;
+}
+
+function renderCasList(y, m){
+  var list = m.casClinique || [];
+  var html = "";
+  if (!list.length) html += '<div class="empty small">Aucun cas clinique pour l\'instant. Ajoute une mise en situation avec anamnèse, symptômes et 5 diagnostics possibles.</div>';
+  list.forEach(function(c){
+    html += '<div class="item">' +
+      '<div class="ihead">' +
+        '<div style="min-width:0;"><strong class="small">' + esc(c.titre) + '</strong> ' + (c.lastResult===true ? '<span class="tag good">réussi</span>' : c.lastResult===false ? '<span class="tag bad">à revoir</span>' : '') + (c.reviewLater ? ' <span class="tag warn">à revoir</span>' : '') + '</div>' +
+        '<div class="iactions">' +
+          '<button class="btn sm" data-action="edit-cas" data-year="'+y.id+'" data-module="'+m.id+'" data-item="'+c.id+'">✏️</button>' +
+          '<button class="btn sm danger" data-action="delete-cas" data-year="'+y.id+'" data-module="'+m.id+'" data-item="'+c.id+'">🗑️</button>' +
+        '</div>' +
+      '</div>' +
+      '<p class="faint" style="margin-top:8px;">Diagnostic : ' + esc(c.diagnostic || c.options[c.correct]) + '</p>' +
+    '</div>';
+  });
+  html += '<button class="btn block" data-action="add-cas" data-year="'+y.id+'" data-module="'+m.id+'">➕ Ajouter un cas clinique</button>';
   return html;
 }
 
@@ -2092,6 +2153,160 @@ function renderExoRun(){
   }
   html += '</div>';
   return html;
+}
+
+/* =========================================================
+   VUE : CAS CLINIQUES (simulation de consultation)
+   ========================================================= */
+var casSetup = { year:"all", modules:[], onlyReview:false };
+var casSession = null;
+
+function collectCasCliniques(yearFilter, moduleFilter, onlyReview){
+  var out = [];
+  visibleYears().forEach(function(y){
+    if (yearFilter && yearFilter !== "all" && y.id !== yearFilter) return;
+    y.modules.forEach(function(m){
+      if (moduleFilter && moduleFilter.length && moduleFilter.indexOf(m.id) === -1) return;
+      (m.casClinique||[]).forEach(function(c){
+        if (onlyReview && !c.reviewLater) return;
+        out.push(Object.assign({}, c, { yearId:y.id, yearLabel:y.label, moduleId:m.id, moduleName:m.name }));
+      });
+    });
+  });
+  return out;
+}
+function renderCasSetup(){
+  var mods = allModulesFlat();
+  var available = collectCasCliniques(casSetup.year, casSetup.modules.length?casSetup.modules:null, casSetup.onlyReview);
+
+  var html = '<div class="card stack">';
+  html += '<p class="small muted">Une patiente ou un patient se présente à toi : lis l\'anamnèse, repère les symptômes (et la triade caractéristique quand il y en a une), puis pose ton diagnostic parmi 5 propositions avant de découvrir la conduite à tenir (CAT).</p>';
+  html += '<div><h3 style="font-size:15px;">Année</h3><div class="tabs" style="margin-top:8px;">' +
+    [["all","Toutes"]].concat(visibleYears().map(function(y){return [y.id,y.label];})).map(function(o){
+      return '<button class="' + (casSetup.year===o[0]?'active':'') + '" data-action="cas-set-year" data-year="' + o[0] + '">' + o[1] + '</button>';
+    }).join("") + '</div></div>';
+
+  html += '<div><h3 style="font-size:15px;">Matières (optionnel)</h3>' +
+    '<div class="stack" style="max-height:180px; overflow:auto; border:1px solid var(--line); border-radius:10px; padding:8px;">' +
+    mods.filter(function(x){ return casSetup.year==="all" || x.year.id===casSetup.year; }).map(function(x){
+      var checked = casSetup.modules.indexOf(x.module.id) !== -1;
+      return '<label class="checkbox-row small"><input type="checkbox" data-action="cas-toggle-module" data-module="' + x.module.id + '" ' + (checked?'checked':'') + '> ' + esc(x.module.name) + ' <span class="faint">(' + x.year.label + ')</span></label>';
+    }).join("") + '</div></div>';
+
+  html += '<label class="checkbox-row"><input type="checkbox" data-action="cas-toggle-review" ' + (casSetup.onlyReview?'checked':'') + '> <span class="small">Uniquement les cas marqués « à revoir »</span></label>';
+
+  html += '<button class="btn primary block" data-action="cas-start" ' + (!available.length?'disabled':'') + '>🚀 Commencer (' + available.length + ' cas clinique(s))</button>';
+  if (!available.length) html += '<div class="faint">Aucun cas clinique ne correspond à ces critères. Ajoute-en depuis l\'onglet 🩻 d\'une matière, dans Programme.</div>';
+  html += '</div>';
+  return html;
+}
+function startCas(){
+  var pool = collectCasCliniques(casSetup.year, casSetup.modules.length?casSetup.modules:null, casSetup.onlyReview);
+  if (!pool.length) return;
+  casSession = { items: shuffle(pool), index:0, answers:[], currentSelection:null, showFeedback:false, currentFlag:false };
+  navigate("#/cas-run");
+}
+function renderCasRun(){
+  if (!casSession) return '<div class="empty">Aucune session de cas clinique. <br><button class="btn primary" style="margin-top:10px;" data-action="go" data-hash="#/cas">Configurer</button></div>';
+  if (casSession.index >= casSession.items.length) return renderCasResult();
+
+  var c = casSession.items[casSession.index];
+  var sel = casSession.currentSelection;
+  var showFeedback = casSession.showFeedback;
+  var html = "";
+  html += '<div class="row between quiz-progress" style="margin-bottom:10px;"><span>Cas ' + (casSession.index+1) + ' / ' + casSession.items.length + '</span><span class="tag deep">' + esc(c.moduleName) + '</span></div>';
+  html += '<div class="bar" style="margin-bottom:14px;"><span style="width:' + pct(casSession.index, casSession.items.length) + '%"></span></div>';
+
+  html += '<div class="card">';
+  html += '<div class="tag accent" style="margin-bottom:8px;">🩻 Consultation</div>';
+  html += '<h3 style="font-size:16px; margin-bottom:10px;">' + esc(c.titre) + '</h3>';
+  html += '<div class="cas-anamnese">' + nl2br(c.anamnese) + '</div>';
+  if (c.triade) html += '<div class="cas-triade">⚠️ ' + nl2br(c.triade) + '</div>';
+
+  html += '<div class="small" style="font-weight:700; margin:14px 0 8px;">Quel diagnostic retenez-vous ?</div>';
+  c.options.forEach(function(opt, i){
+    var selected = sel === i;
+    var cls = "opt";
+    if (showFeedback){
+      if (i === c.correct) cls += " correct";
+      else if (selected) cls += " wrong";
+    }
+    html += '<div class="' + cls + '" style="cursor:' + (showFeedback?'default':'pointer') + ';" data-action="' + (showFeedback?'noop':'cas-select') + '" data-index="' + i + '">' +
+      '<input type="radio" ' + (selected?'checked':'') + ' ' + (showFeedback?'disabled':'') + ' style="pointer-events:none;"> ' + esc(opt) +
+    '</div>';
+  });
+
+  if (showFeedback){
+    html += '<div class="faint" style="margin-top:12px; padding-top:12px; border-top:1px solid var(--line);">' +
+      '<strong>Diagnostic retenu : ' + esc(c.diagnostic || c.options[c.correct]) + '</strong>' +
+      (c.explication ? '<br><br>' + nl2br(c.explication) : '') +
+    '</div>';
+    if (c.cat) html += '<div class="cas-cat"><strong>🩺 CAT — Conduite à tenir</strong><br>' + nl2br(c.cat) + '</div>';
+  }
+
+  html += '<div class="foot" style="margin-top:14px; justify-content:space-between;">' +
+    '<button class="btn sm" data-action="cas-toggle-flag">' + (casSession.currentFlag ? '🔁 Marqué à revoir' : '🔁 Marquer à revoir') + '</button>';
+  if (!showFeedback) html += '<button class="btn primary" data-action="cas-validate" ' + (sel===null?'disabled':'') + '>Valider</button>';
+  else html += '<button class="btn primary" data-action="cas-next">' + (casSession.index+1 < casSession.items.length ? 'Cas suivant →' : 'Voir le résultat →') + '</button>';
+  html += '</div></div>';
+  return html;
+}
+function renderCasResult(){
+  var total = casSession.items.length;
+  var correct = casSession.answers.filter(function(a){ return a.correct; }).length;
+  var missed = casSession.answers.filter(function(a){ return !a.correct; });
+  var p = pct(correct, total);
+  var html = "";
+  html += '<div class="card" style="text-align:center;">' +
+    ringSvg(p, 92) +
+    '<h2 style="margin-top:12px;">' + correct + ' / ' + total + '</h2>' +
+    '<div class="muted small" style="margin-top:4px;">' + (p>=80?"Excellent raisonnement clinique 👏":p>=50?"Pas mal, continue à t'entraîner 💪":"Revois bien les triades et diagnostics différentiels 📖") + '</div>' +
+  '</div>';
+  if (missed.length){
+    html += '<div class="card"><h3 style="font-size:15px; margin-bottom:8px;">Cas à revoir (' + missed.length + ')</h3>' +
+      missed.map(function(a){ return '<div class="small" style="padding:7px 0; border-bottom:1px solid var(--line);">❌ ' + esc(a.titre) + ' <span class="faint">— ' + esc(a.moduleName) + '</span></div>'; }).join("") +
+    '</div>';
+  }
+  html += '<div class="row wrap" style="margin-top:4px;">';
+  if (missed.length) html += '<button class="btn deep" style="flex:1;" data-action="cas-retry-missed">🔁 Refaire les cas ratés</button>';
+  html += '<button class="btn primary" style="flex:1;" data-action="go" data-hash="#/cas">Nouveaux cas</button>';
+  html += '</div>';
+  return html;
+}
+function casSelectOption(i){
+  if (casSession.showFeedback) return;
+  casSession.currentSelection = i;
+  render();
+}
+function casValidate(){
+  var c = casSession.items[casSession.index];
+  var isCorrect = casSession.currentSelection === c.correct;
+  casSession.showFeedback = true;
+  casSession.answers.push({ titre:c.titre, moduleName:c.moduleName, correct:isCorrect });
+
+  var m = findModule(c.yearId, c.moduleId);
+  var orig = (m.casClinique||[]).find(function(x){ return x.id===c.id; });
+  if (orig){
+    orig.lastResult = isCorrect;
+    if (casSession.currentFlag) orig.reviewLater = true;
+    else if (isCorrect) orig.reviewLater = false;
+    if (!isCorrect) orig.reviewLater = true;
+  }
+  saveState();
+  render();
+  showMascot(isCorrect ? "happy" : "encourage");
+}
+function casNext(){
+  casSession.index++;
+  casSession.currentSelection = null;
+  casSession.showFeedback = false;
+  casSession.currentFlag = false;
+  render();
+}
+function casRetryMissed(){
+  var missedItems = casSession.items.filter(function(item,i){ return casSession.answers[i] && !casSession.answers[i].correct; });
+  casSession = { items: missedItems, index:0, answers:[], currentSelection:null, showFeedback:false, currentFlag:false };
+  render();
 }
 
 /* =========================================================
@@ -2704,6 +2919,58 @@ function modalExo(yearId, moduleId, itemId){
       if (item){ item.statement = statement; item.correction = correction; }
       else { m.exercices.push({ id: uid(), statement: statement, correction: correction, reviewLater:false, mastered:false }); }
       saveState(); closeModal(); render(); showToast("Exercice enregistré.");
+    }
+  });
+}
+
+/* --- Cas clinique (simulation de consultation) --- */
+function modalCas(yearId, moduleId, itemId){
+  var m = findModule(yearId, moduleId);
+  var item = itemId ? (m.casClinique||[]).find(function(c){return c.id===itemId;}) : null;
+  var options = item ? item.options.slice() : ["","","","",""];
+  var correct = item ? item.correct : 0;
+  function renderOptions(){
+    return options.map(function(opt,i){
+      return '<div class="opt-row" data-opt-row="' + i + '">' +
+        '<input type="radio" name="cas-correct" data-cas-correct-idx="' + i + '" ' + (correct===i?'checked':'') + '>' +
+        '<input type="text" data-cas-opt-idx="' + i + '" value="' + escAttr(opt) + '" placeholder="Diagnostic proposé ' + (i+1) + '">' +
+      '</div>';
+    }).join("");
+  }
+  var body =
+    fieldText("Titre du cas", "cas-titre", item?item.titre:"", "Ex : Douleur de l'hypochondre droit fébrile") +
+    fieldTextarea("Anamnèse / mise en situation", "cas-anamnese", item?item.anamnese:"", "Le patient se présente avec…") +
+    fieldTextarea("Triade caractéristique (optionnel)", "cas-triade", item?item.triade:"", "Ex : triade de Charcot : douleur + fièvre + ictère…") +
+    '<label class="field"><span>5 propositions de diagnostic (coche la bonne réponse)</span><div id="cas-options">' + renderOptions() + '</div></label>' +
+    fieldTextarea("Explication du diagnostic", "cas-explication", item?item.explication:"", "Pourquoi ce diagnostic plutôt que les autres…") +
+    fieldTextarea("CAT — Conduite à tenir", "cas-cat", item?item.cat:"", "Ce que l'infirmier doit faire concrètement…");
+  openModal(item?"Modifier le cas clinique":"Ajouter un cas clinique", body, {
+    onMount: function(){
+      document.querySelectorAll("#cas-options [data-cas-opt-idx]").forEach(function(inp){
+        inp.oninput = function(){ options[+inp.getAttribute("data-cas-opt-idx")] = inp.value; };
+      });
+      document.querySelectorAll("#cas-options [data-cas-correct-idx]").forEach(function(inp){
+        inp.onchange = function(){ correct = +inp.getAttribute("data-cas-correct-idx"); };
+      });
+    },
+    onSubmit: function(){
+      var titre = document.getElementById("cas-titre").value.trim();
+      var anamnese = document.getElementById("cas-anamnese").value.trim();
+      var triade = document.getElementById("cas-triade").value.trim();
+      var explication = document.getElementById("cas-explication").value.trim();
+      var cat = document.getElementById("cas-cat").value.trim();
+      var opts = options.map(function(o){ return o.trim(); }).filter(function(o){ return o; });
+      if (!titre || !anamnese) return showToast("Le titre et l'anamnèse sont requis.");
+      if (opts.length < 2) return showToast("Ajoute au moins 2 propositions de diagnostic.");
+      if (correct >= opts.length) correct = 0;
+      var diagnostic = opts[correct];
+      if (!m.casClinique) m.casClinique = [];
+      if (item){
+        item.titre=titre; item.anamnese=anamnese; item.triade=triade; item.options=opts; item.correct=correct; item.diagnostic=diagnostic; item.explication=explication; item.cat=cat;
+      } else {
+        m.casClinique.push({ id: uid(), titre:titre, anamnese:anamnese, triade:triade, options:opts, correct:correct, diagnostic:diagnostic, explication:explication, cat:cat, reviewLater:false, lastResult:null });
+      }
+      saveState(); closeModal(); render(); showToast("Cas clinique enregistré.");
     }
   });
 }
@@ -3460,6 +3727,16 @@ function handleAction(action, el, ev){
       }
       break;
 
+    case "add-cas": modalCas(yearId, moduleId); break;
+    case "edit-cas": modalCas(yearId, moduleId, itemId); break;
+    case "delete-cas":
+      if (confirm("Supprimer ce cas clinique ?")){
+        var m7 = findModule(yearId, moduleId);
+        m7.casClinique = (m7.casClinique||[]).filter(function(c){return c.id!==itemId;});
+        saveState(); render();
+      }
+      break;
+
     /* Quiz setup */
     case "quiz-set-kind": quizSetup.kind = el.getAttribute("data-kind"); render(); break;
     case "quiz-set-year": quizSetup.year = el.getAttribute("data-year"); quizSetup.modules=[]; render(); break;
@@ -3510,6 +3787,23 @@ function handleAction(action, el, ev){
       exoSession.index++; exoSession.revealed = false;
       render();
       break;
+
+    /* Cas cliniques setup */
+    case "cas-set-year": casSetup.year = el.getAttribute("data-year"); casSetup.modules=[]; render(); break;
+    case "cas-toggle-module":
+      var cmid = el.getAttribute("data-module");
+      var cpos = casSetup.modules.indexOf(cmid);
+      if (cpos===-1) casSetup.modules.push(cmid); else casSetup.modules.splice(cpos,1);
+      break;
+    case "cas-toggle-review": casSetup.onlyReview = !casSetup.onlyReview; render(); break;
+    case "cas-start": startCas(); break;
+
+    /* Cas cliniques run */
+    case "cas-select": casSelectOption(+el.getAttribute("data-index")); break;
+    case "cas-toggle-flag": casSession.currentFlag = !casSession.currentFlag; render(); break;
+    case "cas-validate": casValidate(); break;
+    case "cas-next": casNext(); break;
+    case "cas-retry-missed": casRetryMissed(); break;
 
     /* Reglages */
     case "export-data": exportData(); break;
