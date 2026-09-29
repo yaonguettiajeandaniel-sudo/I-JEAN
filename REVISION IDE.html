@@ -1581,6 +1581,7 @@ function parseHash(){
   var view = parts[0];
   var params = {};
   if (view === "programme") { params.year = parts[1] || "a1"; }
+  if (view === "cours") { params.year = parts[1] || "a1"; }
   if (view === "quiz-run") { /* uses in-memory quiz session */ }
   return { view: view, params: params };
 }
@@ -1643,6 +1644,7 @@ function render(){
   html += renderHeader();
   if (route.view === "accueil") html += renderAccueil();
   else if (route.view === "programme") html += renderProgramme(route.params.year || "a1");
+  else if (route.view === "cours") html += renderCoursRubrique(route.params.year || "a1");
   else if (route.view === "quiz") html += renderQuizSetup();
   else if (route.view === "quiz-run") html += renderQuizRun();
   else if (route.view === "exercices") html += renderExoSetup();
@@ -1725,7 +1727,7 @@ function onEnterApp(){
 }
 
 function renderHeader(){
-  var titles = { accueil:"La Syncope", programme:"Programme", quiz:"Réviser", "quiz-run":"Quiz en cours", exercices:"Exercices", "exercices-run":"Exercice", cas:"Cas Cliniques", "cas-run":"Cas clinique", diplome:"Diplôme d'État", reglages:"Réglages", telegram:"Import Telegram" };
+  var titles = { accueil:"La Syncope", programme:"Programme", cours:"Cours", quiz:"Réviser", "quiz-run":"Quiz en cours", exercices:"Exercices", "exercices-run":"Exercice", cas:"Cas Cliniques", "cas-run":"Cas clinique", diplome:"Diplôme d'État", reglages:"Réglages", telegram:"Import Telegram" };
   return (
     '<header class="top">' +
       '<div class="brand">' +
@@ -1745,13 +1747,13 @@ function renderBottomNav(){
   var items = [
     { hash:"#/accueil", view:"accueil", ic:"🏠", label:"Accueil" },
     { hash:"#/programme/a1", view:"programme", ic:"📚", label:"Programme" },
-    { hash:"#/quiz", view:"quiz", ic:"📝", label:"Réviser" },
+    { hash:"#/cours/a1", view:"cours", ic:"📘", label:"Cours" },
     { hash:"#/exercices", view:"exercices", ic:"✏️", label:"Exercices" },
     { hash:"#/cas", view:"cas", ic:"🩻", label:"Cas" },
     { hash:"#/diplome", view:"diplome", ic:"🎓", label:"Diplôme" }
   ];
   return '<nav class="bottom">' + items.map(function(it){
-    var quizRunTarget = (quizSession && quizSession.examType === "diplome") ? "diplome" : "quiz";
+    var quizRunTarget = (quizSession && quizSession.examType === "diplome") ? "diplome" : null;
     var active = route.view === it.view || (route.view==='quiz-run' && it.view===quizRunTarget) || (route.view==='exercices-run' && it.view==='exercices') || (route.view==='cas-run' && it.view==='cas');
     return '<button class="' + (active?'active':'') + '" data-action="go" data-hash="' + it.hash + '"><span class="ic">' + it.ic + '</span>' + it.label + '</button>';
   }).join("") + '</nav>';
@@ -1880,6 +1882,36 @@ function renderProgramme(yearId){
     '<button class="btn" style="flex:1;" data-action="add-module" data-year="' + y.id + '">➕ Ajouter une matière</button>' +
     '<button class="btn deep" style="flex:1;" data-action="toc-import-start" data-year="' + y.id + '">📄 Actualiser depuis une table des matières</button>' +
   '</div>';
+  return html;
+}
+
+/* =========================================================
+   VUE : COURS (lecture des cours, organisée par programme de matière)
+   ========================================================= */
+function renderCoursRubrique(yearId){
+  var vy = visibleYears();
+  var y = findYear(yearId);
+  if (!y || vy.indexOf(y) === -1) y = vy[0] || state.years[0];
+  var html = "";
+  html += '<div class="tabs" style="margin-bottom:12px;">' + vy.map(function(yy){
+    return '<button class="' + (yy.id===y.id?'active':'') + '" data-action="go" data-hash="#/cours/' + yy.id + '">' + esc(yy.label) + '</button>';
+  }).join("") + '</div>';
+
+  html += '<p class="small muted" style="margin-bottom:12px;">Les cours de ' + esc(y.label) + ', classés par matière selon le programme officiel.</p>';
+
+  if (!y.modules.length){
+    html += '<div class="empty">Aucune matière pour cette année. Ajoute des matières depuis Programme.</div>';
+  }
+  y.modules.forEach(function(m){
+    var isOpen = !!openModules[m.id];
+    html += '<div class="module ' + (isOpen?'open':'') + '">';
+    html += '<div class="mhead" data-action="toggle-module" data-module="' + m.id + '">' +
+      '<div><h3>' + esc(m.name) + '</h3><div class="faint" style="margin-top:3px;">' + m.cours.length + ' cours</div></div>' +
+      '<span class="chevron">▶</span>' +
+    '</div>';
+    if (isOpen) html += '<div class="mbody">' + renderCoursList(y, m) + '</div>';
+    html += '</div>';
+  });
   return html;
 }
 
