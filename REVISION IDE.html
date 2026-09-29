@@ -1864,6 +1864,7 @@ function renderAccueil(){
 var openModules = {}; /* moduleId -> bool */
 var moduleSubTab = {}; /* moduleId -> 'cours'|'qcm'|'qcd'|'exercices'|'docs' */
 var docsCache = {}; /* moduleId -> array of document records (loaded lazily from IndexedDB) */
+var openChapters = {}; /* coursId -> bool, utilisé dans la rubrique Cours (lecture par chapitre) */
 
 function renderProgramme(yearId){
   var vy = visibleYears();
@@ -1906,10 +1907,31 @@ function renderCoursRubrique(yearId){
     var isOpen = !!openModules[m.id];
     html += '<div class="module ' + (isOpen?'open':'') + '">';
     html += '<div class="mhead" data-action="toggle-module" data-module="' + m.id + '">' +
-      '<div><h3>' + esc(m.name) + '</h3><div class="faint" style="margin-top:3px;">' + m.cours.length + ' cours</div></div>' +
+      '<div><h3>' + esc(m.name) + '</h3><div class="faint" style="margin-top:3px;">' + m.cours.length + ' chapitre(s)</div></div>' +
       '<span class="chevron">▶</span>' +
     '</div>';
-    if (isOpen) html += '<div class="mbody">' + renderCoursList(y, m) + '</div>';
+    if (isOpen) html += '<div class="mbody">' + renderCoursChapters(y, m) + '</div>';
+    html += '</div>';
+  });
+  return html;
+}
+function renderCoursChapters(y, m){
+  if (!m.cours.length) return '<div class="empty small">Aucun chapitre pour l\'instant dans cette matière.</div>';
+  var html = "";
+  m.cours.forEach(function(c){
+    var isOpen = !!openChapters[c.id];
+    html += '<div class="item">' +
+      '<div class="ihead" data-action="toggle-chapter" data-item="' + c.id + '" style="cursor:pointer;">' +
+        '<div style="min-width:0;"><strong class="small">' + esc(c.title) + '</strong> ' + (c.lastReviewed ? '<span class="tag good">lu</span>' : '<span class="tag">non lu</span>') + (c.reviewLater ? ' <span class="tag warn">à revoir</span>' : '') + '</div>' +
+        '<span class="chevron" style="' + (isOpen?'transform:rotate(90deg);':'') + '">▶</span>' +
+      '</div>';
+    if (isOpen){
+      html += '<p style="margin-top:8px;">' + nl2br(c.body) + '</p>' +
+        '<div class="row wrap" style="margin-top:8px; gap:8px;">' +
+          '<button class="btn sm" style="flex:1;" data-action="toggle-cours-read" data-year="'+y.id+'" data-module="'+m.id+'" data-item="'+c.id+'">' + (c.lastReviewed?'↺ Marquer non lu':'✓ Marquer comme lu') + '</button>' +
+          '<button class="btn sm" style="flex:1;" data-action="toggle-cours-review" data-year="'+y.id+'" data-module="'+m.id+'" data-item="'+c.id+'">🔁 ' + (c.reviewLater?'Retirer « à revoir »':'Marquer à revoir') + '</button>' +
+        '</div>';
+    }
     html += '</div>';
   });
   return html;
@@ -3733,6 +3755,10 @@ function handleAction(action, el, ev){
 
     case "toggle-module":
       openModules[moduleId] = !openModules[moduleId];
+      render();
+      break;
+    case "toggle-chapter":
+      openChapters[itemId] = !openChapters[itemId];
       render();
       break;
     case "module-subtab":
