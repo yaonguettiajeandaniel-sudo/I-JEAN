@@ -2221,7 +2221,7 @@ function renderExoRun(){
 /* =========================================================
    VUE : CAS CLINIQUES (simulation de consultation)
    ========================================================= */
-var casSetup = { year:"all", modules:[], onlyReview:false };
+var casSetup = { year:"all", onlyReview:false };
 var casSession = null;
 
 function collectCasCliniques(yearFilter, moduleFilter, onlyReview){
@@ -2239,21 +2239,13 @@ function collectCasCliniques(yearFilter, moduleFilter, onlyReview){
   return out;
 }
 function renderCasSetup(){
-  var mods = allModulesFlat();
-  var available = collectCasCliniques(casSetup.year, casSetup.modules.length?casSetup.modules:null, casSetup.onlyReview);
+  var available = collectCasCliniques(casSetup.year, null, casSetup.onlyReview);
 
   var html = '<div class="card stack">';
   html += '<p class="small muted">Une patiente ou un patient se présente à toi : lis l\'anamnèse, repère les symptômes (et la triade caractéristique quand il y en a une), puis pose ton diagnostic parmi 5 propositions avant de découvrir la conduite à tenir (CAT).</p>';
   html += '<div><h3 style="font-size:15px;">Année</h3><div class="tabs" style="margin-top:8px;">' +
     [["all","Toutes"]].concat(visibleYears().map(function(y){return [y.id,y.label];})).map(function(o){
       return '<button class="' + (casSetup.year===o[0]?'active':'') + '" data-action="cas-set-year" data-year="' + o[0] + '">' + o[1] + '</button>';
-    }).join("") + '</div></div>';
-
-  html += '<div><h3 style="font-size:15px;">Matières (optionnel)</h3>' +
-    '<div class="stack" style="max-height:180px; overflow:auto; border:1px solid var(--line); border-radius:10px; padding:8px;">' +
-    mods.filter(function(x){ return casSetup.year==="all" || x.year.id===casSetup.year; }).map(function(x){
-      var checked = casSetup.modules.indexOf(x.module.id) !== -1;
-      return '<label class="checkbox-row small"><input type="checkbox" data-action="cas-toggle-module" data-module="' + x.module.id + '" ' + (checked?'checked':'') + '> ' + esc(x.module.name) + ' <span class="faint">(' + x.year.label + ')</span></label>';
     }).join("") + '</div></div>';
 
   html += '<label class="checkbox-row"><input type="checkbox" data-action="cas-toggle-review" ' + (casSetup.onlyReview?'checked':'') + '> <span class="small">Uniquement les cas marqués « à revoir »</span></label>';
@@ -2264,7 +2256,7 @@ function renderCasSetup(){
   return html;
 }
 function startCas(){
-  var pool = collectCasCliniques(casSetup.year, casSetup.modules.length?casSetup.modules:null, casSetup.onlyReview);
+  var pool = collectCasCliniques(casSetup.year, null, casSetup.onlyReview);
   if (!pool.length) return;
   casSession = { items: shuffle(pool), index:0, answers:[], currentSelection:null, showFeedback:false, currentFlag:false };
   navigate("#/cas-run");
@@ -2277,7 +2269,7 @@ function renderCasRun(){
   var sel = casSession.currentSelection;
   var showFeedback = casSession.showFeedback;
   var html = "";
-  html += '<div class="row between quiz-progress" style="margin-bottom:10px;"><span>Cas ' + (casSession.index+1) + ' / ' + casSession.items.length + '</span><span class="tag deep">' + esc(c.moduleName) + '</span></div>';
+  html += '<div class="row between quiz-progress" style="margin-bottom:10px;"><span>Cas ' + (casSession.index+1) + ' / ' + casSession.items.length + '</span></div>';
   html += '<div class="bar" style="margin-bottom:14px;"><span style="width:' + pct(casSession.index, casSession.items.length) + '%"></span></div>';
 
   html += '<div class="card">';
@@ -2327,7 +2319,7 @@ function renderCasResult(){
   '</div>';
   if (missed.length){
     html += '<div class="card"><h3 style="font-size:15px; margin-bottom:8px;">Cas à revoir (' + missed.length + ')</h3>' +
-      missed.map(function(a){ return '<div class="small" style="padding:7px 0; border-bottom:1px solid var(--line);">❌ ' + esc(a.titre) + ' <span class="faint">— ' + esc(a.moduleName) + '</span></div>'; }).join("") +
+      missed.map(function(a){ return '<div class="small" style="padding:7px 0; border-bottom:1px solid var(--line);">❌ ' + esc(a.titre) + '</div>'; }).join("") +
     '</div>';
   }
   html += '<div class="row wrap" style="margin-top:4px;">';
@@ -3852,12 +3844,7 @@ function handleAction(action, el, ev){
       break;
 
     /* Cas cliniques setup */
-    case "cas-set-year": casSetup.year = el.getAttribute("data-year"); casSetup.modules=[]; render(); break;
-    case "cas-toggle-module":
-      var cmid = el.getAttribute("data-module");
-      var cpos = casSetup.modules.indexOf(cmid);
-      if (cpos===-1) casSetup.modules.push(cmid); else casSetup.modules.splice(cpos,1);
-      break;
+    case "cas-set-year": casSetup.year = el.getAttribute("data-year"); render(); break;
     case "cas-toggle-review": casSetup.onlyReview = !casSetup.onlyReview; render(); break;
     case "cas-start": startCas(); break;
 
