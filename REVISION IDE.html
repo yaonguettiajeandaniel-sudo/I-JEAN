@@ -2571,7 +2571,21 @@ function renderQuizRun(){
     '</div>';
   });
 
-  if (showFeedback && q.explanation) html += '<div class="faint" style="margin-top:10px; padding-top:10px; border-top:1px solid var(--line);">💡 ' + nl2br(q.explanation) + '</div>';
+  if (showFeedback){
+    if (q.explanation){
+      html += '<div class="faint" style="margin-top:10px; padding-top:10px; border-top:1px solid var(--line);">💡 ' + nl2br(q.explanation) + '</div>';
+    } else {
+      loadCourseExcerpt(q.moduleId, q.id, q.question);
+      var exc = courseExcerptCache[q.moduleId + "::" + q.id];
+      if (exc === undefined || exc === null){
+        html += '<div class="faint" style="margin-top:10px; padding-top:10px; border-top:1px solid var(--line);">🔎 Recherche d\'un passage dans ton cours…</div>';
+      } else if (exc === false){
+        html += '<div class="faint" style="margin-top:10px; padding-top:10px; border-top:1px solid var(--line);">Pas d\'explication enregistrée, et aucun passage trouvé dans les cours chargés pour cette matière. Ajoute le cours correspondant dans l\'onglet 📎 Documents (ou dans la rubrique Cours), ou envoie-moi ce sujet en conversation pour que je vérifie et complète l\'explication.</div>';
+      } else {
+        html += '<div class="faint" style="margin-top:10px; padding-top:10px; border-top:1px solid var(--line);"><strong>📘 D\'après ton cours (' + esc(exc.fileName) + ')</strong><br>' + esc(exc.snippet) + '</div>';
+      }
+    }
+  }
 
   html += '<div class="foot" style="margin-top:14px; justify-content:space-between;">' +
     '<button class="btn sm" data-action="quiz-toggle-flag">' + (quizSession.currentFlag ? '🔁 Marqué à revoir' : '🔁 Marquer à revoir') + '</button>';
@@ -4167,6 +4181,39 @@ function extractKeywords(text){
 }
 function normalizeForSearch(s){
   return (s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
+}
+/* Trouve, dans les documents de cours chargés pour une matière, le
+   paragraphe le plus pertinent pour une question donnée (le plus de
+   mots-clés en commun). Sert de courte explication « prise dans le
+   cours » quand une question QCM/QCD n'a pas d'explication enregistrée.
+   Entièrement local/hors-ligne : simple recherche de mots-clés, pas
+   d'IA — cohérent avec le choix d'une appli gratuite et sans serveur. */
+var courseExcerptCache = {}; /* moduleId::questionId -> {fileName,snippet} | false (rien trouvé) | null (en cours) */
+function loadCourseExcerpt(moduleId, questionId, text){
+  var key = moduleId + "::" + questionId;
+  if (courseExcerptCache[key] !== undefined) return;
+  courseExcerptCache[key] = null;
+  dbGetByModule(moduleId).then(function(docs){
+    var keywords = extractKeywords(text);
+    if (!keywords.length || !docs.length){ courseExcerptCache[key] = false; render(); return; }
+    var best = null, bestScore = 0;
+    docs.forEach(function(d){
+      if (!d.text) return;
+      var paragraphs = d.text.split(/\n{1,}/).filter(function(p){ return p.trim().length > 20; });
+      paragraphs.forEach(function(p){
+        var normP = normalizeForSearch(p);
+        var score = keywords.filter(function(kw){ return normP.indexOf(kw) !== -1; }).length;
+        if (score > bestScore){
+          bestScore = score;
+          var snippet = p.trim().replace(/\s+/g," ");
+          if (snippet.length > 320) snippet = snippet.slice(0,320) + "…";
+          best = { fileName: d.fileName, snippet: snippet };
+        }
+      });
+    });
+    courseExcerptCache[key] = best || false;
+    render();
+  }).catch(function(){ courseExcerptCache[key] = false; render(); });
 }
 function searchInCourses(query){
   var keywords = extractKeywords(query);
