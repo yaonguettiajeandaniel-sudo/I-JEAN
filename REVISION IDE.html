@@ -338,6 +338,13 @@
     margin-top:10px; background:var(--deep-soft); border:1px solid var(--deep); border-radius:10px;
     padding:10px 12px; font-size:13.5px; line-height:1.55;
   }
+
+  /* ---- Regroupement par UE (classification) dans Programme et Cours ---- */
+  .ue-group{ margin-top:18px; }
+  .ue-group-head{
+    font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-faint);
+    padding:0 2px 7px; margin-bottom:8px; border-bottom:1px solid var(--line);
+  }
 </style>
 </head>
 <body>
@@ -361,6 +368,10 @@ function uid(){ return Math.random().toString(36).slice(2,9) + Date.now().toStri
 function makeModule(name, extra){
   var m = { id: uid(), name: name, cours: [], qcm: [], qcd: [], exercices: [], casClinique: [] };
   if (extra) {
+    if (extra.ue) m.ue = extra.ue;
+    if (extra.ueCode) m.ueCode = extra.ueCode;
+    if (extra.credits !== undefined) m.credits = extra.credits;
+    if (extra.semestre !== undefined) m.semestre = extra.semestre;
     if (extra.cours) m.cours = extra.cours.map(function(c){ return Object.assign({ id: uid(), reviewLater:false, lastReviewed:null }, c); });
     if (extra.qcm) m.qcm = extra.qcm.map(function(q){ return Object.assign({ id: uid(), reviewLater:false, lastResult:null }, q); });
     if (extra.qcd) m.qcd = extra.qcd.map(function(q){ return Object.assign({ id: uid(), reviewLater:false, lastResult:null }, q); });
@@ -665,62 +676,201 @@ function buildSeed(){
             ]
           }),
 
-          makeModule("Connaissance de Base du Corps Humain et de son Fonctionnement I", {
-            cours: [{ title: "Programme officiel (UE CHF 1110 — 5 crédits, Semestre 1)", body: "ECUE :\n- Anatomie Physiologie : Cellules et tissus, ostéologie, myologie, système nerveux — CHF 1111 — 3 crédits\n- Anatomie physiologie obstétricale — CHF 1112 — 2 crédits\n\nSource : Point des crédits Licence 1, maquette officielle INFAS (Antenne d'Abengourou)." }]
+          makeModule("Anatomie Physiologie : Cellules et tissus, ostéologie, myologie, système nerveux", {
+            ue: "Connaissance de Base du Corps Humain et de son Fonctionnement I", ueCode: "CHF 1110", credits: 3.0, semestre: 1,
+            cours: [{ title: "Programme officiel", body: "Code : CHF 1111 — 3 crédit(s) (Semestre 1)\nUE : Connaissance de Base du Corps Humain et de son Fonctionnement I (CHF 1110)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
           }),
-          makeModule("Santé Infantile", {
-            cours: [{ title: "Programme officiel (UE SIN 1110 — 5 crédits, Semestre 1)", body: "ECUE :\n- Soins aux enfants — SIN 1111 — 2 crédits\n- Pédiatrie — SIN 1112 — 1 crédit\n- Diététique — SIN 1113 — 2 crédits\n\nSource : Point des crédits Licence 1, maquette officielle INFAS (Antenne d'Abengourou)." }]
+          makeModule("Anatomie physiologie obstétricale", {
+            ue: "Connaissance de Base du Corps Humain et de son Fonctionnement I", ueCode: "CHF 1110", credits: 2.0, semestre: 1,
+            cours: [{ title: "Programme officiel", body: "Code : CHF 1112 — 2 crédit(s) (Semestre 1)\nUE : Connaissance de Base du Corps Humain et de son Fonctionnement I (CHF 1110)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
           }),
-          makeModule("Notions de Base sur les Situations Cliniques se Référant aux Pathologies I", {
-            cours: [{ title: "Programme officiel (UE NBS 1110 — 2 crédits, Semestre 1)", body: "ECUE :\n- Bactériologie — NBS 1111 — 1 crédit\n- Parasitologie — NBS 1112 — 1 crédit\n\nSource : Point des crédits Licence 1, maquette officielle INFAS (Antenne d'Abengourou)." }]
+          makeModule("Soins aux enfants", {
+            ue: "Santé Infantile", ueCode: "SIN 1110", credits: 2.0, semestre: 1,
+            cours: [{ title: "Programme officiel", body: "Code : SIN 1111 — 2 crédit(s) (Semestre 1)\nUE : Santé Infantile (SIN 1110)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
           }),
-          makeModule("Santé Publique (UE L1)", {
-            cours: [{ title: "Programme officiel (UE SPB 1110 — 4 crédits, Semestre 1)", body: "ECUE :\n- Étude du milieu — SPB 1111 — 2 crédits\n- Nutrition — SPB 1112 — 1 crédit\n- Système National de santé — SPB 1113 — 1 crédit\n\nSource : Point des crédits Licence 1, maquette officielle INFAS (Antenne d'Abengourou)." }]
+          makeModule("Pédiatrie", {
+            ue: "Santé Infantile", ueCode: "SIN 1110", credits: 1.0, semestre: 1,
+            cours: [{ title: "Programme officiel", body: "Code : SIN 1112 — 1 crédit(s) (Semestre 1)\nUE : Santé Infantile (SIN 1110)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
           }),
-          makeModule("Pathologies Médico-Chirurgicales", {
-            cours: [{ title: "Programme officiel (UE PMC 1120 — 4 crédits, Semestre 1)", body: "ECUE :\n- IST/VIH — PMC 1121 — 1 crédit\n- Pathologies chirurgicales / Sémiologie — PMC 1122 — 1 crédit\n- Pathologies médicales / Sémiologie — PMC 1123 — 2 crédits\n\nSource : Point des crédits Licence 1, maquette officielle INFAS (Antenne d'Abengourou)." }]
+          makeModule("Diététique", {
+            ue: "Santé Infantile", ueCode: "SIN 1110", credits: 2.0, semestre: 1,
+            cours: [{ title: "Programme officiel", body: "Code : SIN 1113 — 2 crédit(s) (Semestre 1)\nUE : Santé Infantile (SIN 1110)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
           }),
-          makeModule("Santé Humaine", {
-            cours: [{ title: "Programme officiel (UE SHU 1120 — 3 crédits, Semestre 1)", body: "ECUE :\n- Théorie et concepts des Soins Infirmiers / Obstétricaux / Relation d'aide — SHU 1121 — 1 crédit\n- Psycho-sociologie — SHU 1122 — 1 crédit\n- Anthropologie de la santé — SHU 1123 — 1 crédit\n\nSource : Point des crédits Licence 1, maquette officielle INFAS (Antenne d'Abengourou)." }]
+          makeModule("Bactériologie", {
+            ue: "Notions de Base sur les Situations Cliniques se Référant aux Pathologies I", ueCode: "NBS 1110", credits: 1.0, semestre: 1,
+            cours: [{ title: "Programme officiel", body: "Code : NBS 1111 — 1 crédit(s) (Semestre 1)\nUE : Notions de Base sur les Situations Cliniques se Référant aux Pathologies I (NBS 1110)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
           }),
-          makeModule("Initiation à la Recherche", {
-            cours: [{ title: "Programme officiel (UE IRE 1130 — 1 crédit, Semestre 1)", body: "ECUE :\n- Généralité de la recherche en Soins Infirmiers et Obstétricaux — IRE 1131 — 0,5 crédit\n- Revue de littérature et Notre étude — IRE 1132 — 0,5 crédit\n\nSource : Point des crédits Licence 1, maquette officielle INFAS (Antenne d'Abengourou)." }]
+          makeModule("Parasitologie", {
+            ue: "Notions de Base sur les Situations Cliniques se Référant aux Pathologies I", ueCode: "NBS 1110", credits: 1.0, semestre: 1,
+            cours: [{ title: "Programme officiel", body: "Code : NBS 1112 — 1 crédit(s) (Semestre 1)\nUE : Notions de Base sur les Situations Cliniques se Référant aux Pathologies I (NBS 1110)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
           }),
-          makeModule("Méthodes et Techniques de Base en Soins Infirmiers et Obstétricaux (Phase I)", {
-            cours: [{ title: "Programme officiel (UE MSO 1130 — 3 crédits, Semestre 1)", body: "ECUE :\n- Techniques de soins de base en médecine et en chirurgie — MSO 1131 — 1 crédit\n- Secourisme — MSO 1132 — 1 crédit\n- Prévention des infections / Hygiène hospitalière — MSO 1133 — 1 crédit\n\nSource : Point des crédits Licence 1, maquette officielle INFAS (Antenne d'Abengourou)." }]
+          makeModule("Étude du milieu", {
+            ue: "Santé Publique", ueCode: "SPB 1110", credits: 2.0, semestre: 1,
+            cours: [{ title: "Programme officiel", body: "Code : SPB 1111 — 2 crédit(s) (Semestre 1)\nUE : Santé Publique (SPB 1110)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
           }),
-          makeModule("Connaissances de Base Liées aux Fonctions Infirmières et Sages-Femmes", {
-            cours: [{ title: "Programme officiel (UE CFI 1140 — 2 crédits, Semestre 1)", body: "ECUE :\n- Déontologie et éthique professionnelle — CFI 1141 — 0,5 crédit\n- Législation du travail — CFI 1142 — 1 crédit\n- Profession infirmière / sage-femme — CFI 1143 — 0,5 crédit\n\nSource : Point des crédits Licence 1, maquette officielle INFAS (Antenne d'Abengourou)." }]
+          makeModule("Nutrition", {
+            ue: "Santé Publique", ueCode: "SPB 1110", credits: 1.0, semestre: 1,
+            cours: [{ title: "Programme officiel", body: "Code : SPB 1112 — 1 crédit(s) (Semestre 1)\nUE : Santé Publique (SPB 1110)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
           }),
-          makeModule("Outils de Communication I", {
-            cours: [{ title: "Programme officiel (UE OMC 1140 — 1 crédit, Semestre 1)", body: "ECUE :\n- Anglais de la santé — OMC 1141 — 0,5 crédit\n- Informatique : Bureautique — OMC 1142 — 0,5 crédit\n\nSource : Point des crédits Licence 1, maquette officielle INFAS (Antenne d'Abengourou)." }]
+          makeModule("Système National de santé", {
+            ue: "Santé Publique", ueCode: "SPB 1110", credits: 1.0, semestre: 1,
+            cours: [{ title: "Programme officiel", body: "Code : SPB 1113 — 1 crédit(s) (Semestre 1)\nUE : Santé Publique (SPB 1110)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
           }),
-          makeModule("Connaissance de Base du Corps Humain et de son Fonctionnement II", {
-            cours: [{ title: "Programme officiel (UE CHF 1210 — 3 crédits, Semestre 2)", body: "ECUE :\n- Anatomie Physiologie : appareil respiratoire, appareil cardiovasculaire, appareil urinaire, appareil reproducteur — CHF 1211 — 2 crédits\n- Anatomie physiologie obstétricale : bassin osseux, bassin mou — CHF 1212 — 1 crédit\n\nSource : Point des crédits Licence 1, maquette officielle INFAS (Antenne d'Abengourou)." }]
+          makeModule("IST/VIH", {
+            ue: "Pathologies Médico-Chirurgicales", ueCode: "PMC 1120", credits: 1.0, semestre: 1,
+            cours: [{ title: "Programme officiel", body: "Code : PMC 1121 — 1 crédit(s) (Semestre 1)\nUE : Pathologies Médico-Chirurgicales (PMC 1120)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
           }),
-          makeModule("Prise en Charge des Affections Courantes", {
-            cours: [{ title: "Programme officiel (UE PAC 1210 — 5 crédits, Semestre 2)", body: "ECUE :\n- Maladies parasitaires et infectieuses — PAC 1211 — 2 crédits\n- Pathologies respiratoires — PAC 1212 — 2 crédits\n- Maladies non transmissibles — PAC 1213 — 1 crédit\n\nSource : Point des crédits Licence 1, maquette officielle INFAS (Antenne d'Abengourou)." }]
+          makeModule("Pathologies chirurgicales / Sémiologie", {
+            ue: "Pathologies Médico-Chirurgicales", ueCode: "PMC 1120", credits: 1.0, semestre: 1,
+            cours: [{ title: "Programme officiel", body: "Code : PMC 1122 — 1 crédit(s) (Semestre 1)\nUE : Pathologies Médico-Chirurgicales (PMC 1120)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
           }),
-          makeModule("Techniques de Laboratoire (UE L1)", {
-            cours: [{ title: "Programme officiel (UE TLB 1210 — 3 crédits, Semestre 2)", body: "ECUE :\n- Biochimie — TLB 1211 — 1 crédit\n- Immunologie — TLB 1212 — 1 crédit\n- Hématologie — TLB 1213 — 1 crédit\n\nSource : Point des crédits Licence 1, maquette officielle INFAS (Antenne d'Abengourou)." }]
+          makeModule("Pathologies médicales / Sémiologie", {
+            ue: "Pathologies Médico-Chirurgicales", ueCode: "PMC 1120", credits: 2.0, semestre: 1,
+            cours: [{ title: "Programme officiel", body: "Code : PMC 1123 — 2 crédit(s) (Semestre 1)\nUE : Pathologies Médico-Chirurgicales (PMC 1120)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
           }),
-          makeModule("Santé Communautaire", {
-            cours: [{ title: "Programme officiel (UE SCO 1220 — 4 crédits, Semestre 2)", body: "ECUE :\n- Hygiène et assainissement — SCO 1221 — 1 crédit\n- Soins de santé primaire — SCO 1222 — 1 crédit\n- Généralités sur l'épidémiologie — SCO 1223 — 1 crédit\n- IEC / CCC — SCO 1224 — 1 crédit\n\nSource : Point des crédits Licence 1, maquette officielle INFAS (Antenne d'Abengourou)." }]
+          makeModule("Théorie et concepts des Soins Infirmiers / Obstétricaux / Relation d'aide", {
+            ue: "Santé Humaine", ueCode: "SHU 1120", credits: 1.0, semestre: 1,
+            cours: [{ title: "Programme officiel", body: "Code : SHU 1121 — 1 crédit(s) (Semestre 1)\nUE : Santé Humaine (SHU 1120)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
           }),
-          makeModule("Stage de Découverte", {
-            cours: [{ title: "Programme officiel (UE STG 1220 — 7 crédits, Semestre 2)", body: "ECUE :\n- Stage péri urbain + rapport — STG 1221 — 3 crédits\n- Stages en milieu hospitalier + rapport — STG 1222 — 4 crédits\n\nSource : Point des crédits Licence 1, maquette officielle INFAS (Antenne d'Abengourou)." }]
+          makeModule("Psycho-sociologie", {
+            ue: "Santé Humaine", ueCode: "SHU 1120", credits: 1.0, semestre: 1,
+            cours: [{ title: "Programme officiel", body: "Code : SHU 1122 — 1 crédit(s) (Semestre 1)\nUE : Santé Humaine (SHU 1120)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
           }),
-          makeModule("Méthodes et Techniques de Base en Soins Infirmiers et Obstétricaux (Phase II)", {
-            cours: [{ title: "Programme officiel (UE MSO 1230 — 3 crédits, Semestre 2)", body: "ECUE :\n- Démarche de soin — MSO 1231 — 1 crédit\n- Techniques de soins de base — MSO 1232 — 1 crédit\n- Soins infirmiers obstétricaux / néonataux de base / infantiles — MSO 1233 — 1 crédit\n\nSource : Point des crédits Licence 1, maquette officielle INFAS (Antenne d'Abengourou)." }]
+          makeModule("Anthropologie de la santé", {
+            ue: "Santé Humaine", ueCode: "SHU 1120", credits: 1.0, semestre: 1,
+            cours: [{ title: "Programme officiel", body: "Code : SHU 1123 — 1 crédit(s) (Semestre 1)\nUE : Santé Humaine (SHU 1120)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
           }),
-          makeModule("Processus de Rédaction d'un Rapport de Stage", {
-            cours: [{ title: "Programme officiel (UE PRR 1230 — 1 crédit, Semestre 2)", body: "ECUE :\n- Informatique : Internet — PRR 1231 — 0,5 crédit\n- Méthodologie de rédaction de rapport de stage — PRR 1232 — 0,5 crédit\n\nSource : Point des crédits Licence 1, maquette officielle INFAS (Antenne d'Abengourou)." }]
+          makeModule("Généralité de la recherche en Soins Infirmiers et Obstétricaux", {
+            ue: "Initiation à la Recherche", ueCode: "IRE 1130", credits: 0.5, semestre: 1,
+            cours: [{ title: "Programme officiel", body: "Code : IRE 1131 — 0,5 crédit(s) (Semestre 1)\nUE : Initiation à la Recherche (IRE 1130)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
           }),
-          makeModule("Sport et Santé", {
-            cours: [{ title: "Programme officiel (UE SSA 1240 — 2 crédits, Semestre 2)", body: "ECUE :\n- Sport et pathologies — SSA 1241 — 1 crédit\n- Sport et société — SSA 1242 — 1 crédit\n\nSource : Point des crédits Licence 1, maquette officielle INFAS (Antenne d'Abengourou)." }]
+          makeModule("Revue de littérature et Notre étude", {
+            ue: "Initiation à la Recherche", ueCode: "IRE 1130", credits: 0.5, semestre: 1,
+            cours: [{ title: "Programme officiel", body: "Code : IRE 1132 — 0,5 crédit(s) (Semestre 1)\nUE : Initiation à la Recherche (IRE 1130)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
           }),
-          makeModule("Droit", {
-            cours: [{ title: "Programme officiel (UE DRT 1240 — 2 crédits, Semestre 2)", body: "ECUE :\n- Droit administratif — DRT 1241 — 1 crédit\n- Droit civil — DRT 1242 — 1 crédit\n\nSource : Point des crédits Licence 1, maquette officielle INFAS (Antenne d'Abengourou)." }]
+          makeModule("Techniques de soins de base en médecine et en chirurgie", {
+            ue: "Méthodes et Techniques de Base en Soins Infirmiers et Obstétricaux (Phase I)", ueCode: "MSO 1130", credits: 1.0, semestre: 1,
+            cours: [{ title: "Programme officiel", body: "Code : MSO 1131 — 1 crédit(s) (Semestre 1)\nUE : Méthodes et Techniques de Base en Soins Infirmiers et Obstétricaux (Phase I) (MSO 1130)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
+          }),
+          makeModule("Secourisme", {
+            ue: "Méthodes et Techniques de Base en Soins Infirmiers et Obstétricaux (Phase I)", ueCode: "MSO 1130", credits: 1.0, semestre: 1,
+            cours: [{ title: "Programme officiel", body: "Code : MSO 1132 — 1 crédit(s) (Semestre 1)\nUE : Méthodes et Techniques de Base en Soins Infirmiers et Obstétricaux (Phase I) (MSO 1130)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
+          }),
+          makeModule("Prévention des infections / Hygiène hospitalière", {
+            ue: "Méthodes et Techniques de Base en Soins Infirmiers et Obstétricaux (Phase I)", ueCode: "MSO 1130", credits: 1.0, semestre: 1,
+            cours: [{ title: "Programme officiel", body: "Code : MSO 1133 — 1 crédit(s) (Semestre 1)\nUE : Méthodes et Techniques de Base en Soins Infirmiers et Obstétricaux (Phase I) (MSO 1130)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
+          }),
+          makeModule("Déontologie et éthique professionnelle", {
+            ue: "Connaissances de Base Liées aux Fonctions Infirmières et Sages-Femmes", ueCode: "CFI 1140", credits: 0.5, semestre: 1,
+            cours: [{ title: "Programme officiel", body: "Code : CFI 1141 — 0,5 crédit(s) (Semestre 1)\nUE : Connaissances de Base Liées aux Fonctions Infirmières et Sages-Femmes (CFI 1140)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
+          }),
+          makeModule("Législation du travail", {
+            ue: "Connaissances de Base Liées aux Fonctions Infirmières et Sages-Femmes", ueCode: "CFI 1140", credits: 1.0, semestre: 1,
+            cours: [{ title: "Programme officiel", body: "Code : CFI 1142 — 1 crédit(s) (Semestre 1)\nUE : Connaissances de Base Liées aux Fonctions Infirmières et Sages-Femmes (CFI 1140)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
+          }),
+          makeModule("Profession infirmière / sage-femme", {
+            ue: "Connaissances de Base Liées aux Fonctions Infirmières et Sages-Femmes", ueCode: "CFI 1140", credits: 0.5, semestre: 1,
+            cours: [{ title: "Programme officiel", body: "Code : CFI 1143 — 0,5 crédit(s) (Semestre 1)\nUE : Connaissances de Base Liées aux Fonctions Infirmières et Sages-Femmes (CFI 1140)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
+          }),
+          makeModule("Anglais de la santé", {
+            ue: "Outils de Communication I", ueCode: "OMC 1140", credits: 0.5, semestre: 1,
+            cours: [{ title: "Programme officiel", body: "Code : OMC 1141 — 0,5 crédit(s) (Semestre 1)\nUE : Outils de Communication I (OMC 1140)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
+          }),
+          makeModule("Informatique : Bureautique", {
+            ue: "Outils de Communication I", ueCode: "OMC 1140", credits: 0.5, semestre: 1,
+            cours: [{ title: "Programme officiel", body: "Code : OMC 1142 — 0,5 crédit(s) (Semestre 1)\nUE : Outils de Communication I (OMC 1140)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
+          }),
+          makeModule("Anatomie Physiologie : appareil respiratoire, appareil cardiovasculaire, appareil urinaire, appareil reproducteur", {
+            ue: "Connaissance de Base du Corps Humain et de son Fonctionnement II", ueCode: "CHF 1210", credits: 2.0, semestre: 2,
+            cours: [{ title: "Programme officiel", body: "Code : CHF 1211 — 2 crédit(s) (Semestre 2)\nUE : Connaissance de Base du Corps Humain et de son Fonctionnement II (CHF 1210)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
+          }),
+          makeModule("Anatomie physiologie obstétricale : bassin osseux, bassin mou", {
+            ue: "Connaissance de Base du Corps Humain et de son Fonctionnement II", ueCode: "CHF 1210", credits: 1.0, semestre: 2,
+            cours: [{ title: "Programme officiel", body: "Code : CHF 1212 — 1 crédit(s) (Semestre 2)\nUE : Connaissance de Base du Corps Humain et de son Fonctionnement II (CHF 1210)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
+          }),
+          makeModule("Maladies parasitaires et infectieuses", {
+            ue: "Prise en Charge des Affections Courantes", ueCode: "PAC 1210", credits: 2.0, semestre: 2,
+            cours: [{ title: "Programme officiel", body: "Code : PAC 1211 — 2 crédit(s) (Semestre 2)\nUE : Prise en Charge des Affections Courantes (PAC 1210)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
+          }),
+          makeModule("Pathologies respiratoires", {
+            ue: "Prise en Charge des Affections Courantes", ueCode: "PAC 1210", credits: 2.0, semestre: 2,
+            cours: [{ title: "Programme officiel", body: "Code : PAC 1212 — 2 crédit(s) (Semestre 2)\nUE : Prise en Charge des Affections Courantes (PAC 1210)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
+          }),
+          makeModule("Maladies non transmissibles", {
+            ue: "Prise en Charge des Affections Courantes", ueCode: "PAC 1210", credits: 1.0, semestre: 2,
+            cours: [{ title: "Programme officiel", body: "Code : PAC 1213 — 1 crédit(s) (Semestre 2)\nUE : Prise en Charge des Affections Courantes (PAC 1210)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
+          }),
+          makeModule("Biochimie", {
+            ue: "Techniques de Laboratoire", ueCode: "TLB 1210", credits: 1.0, semestre: 2,
+            cours: [{ title: "Programme officiel", body: "Code : TLB 1211 — 1 crédit(s) (Semestre 2)\nUE : Techniques de Laboratoire (TLB 1210)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
+          }),
+          makeModule("Immunologie", {
+            ue: "Techniques de Laboratoire", ueCode: "TLB 1210", credits: 1.0, semestre: 2,
+            cours: [{ title: "Programme officiel", body: "Code : TLB 1212 — 1 crédit(s) (Semestre 2)\nUE : Techniques de Laboratoire (TLB 1210)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
+          }),
+          makeModule("Hématologie", {
+            ue: "Techniques de Laboratoire", ueCode: "TLB 1210", credits: 1.0, semestre: 2,
+            cours: [{ title: "Programme officiel", body: "Code : TLB 1213 — 1 crédit(s) (Semestre 2)\nUE : Techniques de Laboratoire (TLB 1210)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
+          }),
+          makeModule("Hygiène et assainissement", {
+            ue: "Santé Communautaire", ueCode: "SCO 1220", credits: 1.0, semestre: 2,
+            cours: [{ title: "Programme officiel", body: "Code : SCO 1221 — 1 crédit(s) (Semestre 2)\nUE : Santé Communautaire (SCO 1220)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
+          }),
+          makeModule("Soins de santé primaire", {
+            ue: "Santé Communautaire", ueCode: "SCO 1220", credits: 1.0, semestre: 2,
+            cours: [{ title: "Programme officiel", body: "Code : SCO 1222 — 1 crédit(s) (Semestre 2)\nUE : Santé Communautaire (SCO 1220)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
+          }),
+          makeModule("Généralités sur l'épidémiologie", {
+            ue: "Santé Communautaire", ueCode: "SCO 1220", credits: 1.0, semestre: 2,
+            cours: [{ title: "Programme officiel", body: "Code : SCO 1223 — 1 crédit(s) (Semestre 2)\nUE : Santé Communautaire (SCO 1220)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
+          }),
+          makeModule("IEC / CCC", {
+            ue: "Santé Communautaire", ueCode: "SCO 1220", credits: 1.0, semestre: 2,
+            cours: [{ title: "Programme officiel", body: "Code : SCO 1224 — 1 crédit(s) (Semestre 2)\nUE : Santé Communautaire (SCO 1220)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
+          }),
+          makeModule("Stage péri urbain + rapport", {
+            ue: "Stage de Découverte", ueCode: "STG 1220", credits: 3.0, semestre: 2,
+            cours: [{ title: "Programme officiel", body: "Code : STG 1221 — 3 crédit(s) (Semestre 2)\nUE : Stage de Découverte (STG 1220)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
+          }),
+          makeModule("Stages en milieu hospitalier + rapport", {
+            ue: "Stage de Découverte", ueCode: "STG 1220", credits: 4.0, semestre: 2,
+            cours: [{ title: "Programme officiel", body: "Code : STG 1222 — 4 crédit(s) (Semestre 2)\nUE : Stage de Découverte (STG 1220)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
+          }),
+          makeModule("Démarche de soin", {
+            ue: "Méthodes et Techniques de Base en Soins Infirmiers et Obstétricaux (Phase II)", ueCode: "MSO 1230", credits: 1.0, semestre: 2,
+            cours: [{ title: "Programme officiel", body: "Code : MSO 1231 — 1 crédit(s) (Semestre 2)\nUE : Méthodes et Techniques de Base en Soins Infirmiers et Obstétricaux (Phase II) (MSO 1230)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
+          }),
+          makeModule("Techniques de soins de base", {
+            ue: "Méthodes et Techniques de Base en Soins Infirmiers et Obstétricaux (Phase II)", ueCode: "MSO 1230", credits: 1.0, semestre: 2,
+            cours: [{ title: "Programme officiel", body: "Code : MSO 1232 — 1 crédit(s) (Semestre 2)\nUE : Méthodes et Techniques de Base en Soins Infirmiers et Obstétricaux (Phase II) (MSO 1230)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
+          }),
+          makeModule("Soins infirmiers obstétricaux / néonataux de base / infantiles", {
+            ue: "Méthodes et Techniques de Base en Soins Infirmiers et Obstétricaux (Phase II)", ueCode: "MSO 1230", credits: 1.0, semestre: 2,
+            cours: [{ title: "Programme officiel", body: "Code : MSO 1233 — 1 crédit(s) (Semestre 2)\nUE : Méthodes et Techniques de Base en Soins Infirmiers et Obstétricaux (Phase II) (MSO 1230)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
+          }),
+          makeModule("Informatique : Internet", {
+            ue: "Processus de Rédaction d'un Rapport de Stage", ueCode: "PRR 1230", credits: 0.5, semestre: 2,
+            cours: [{ title: "Programme officiel", body: "Code : PRR 1231 — 0,5 crédit(s) (Semestre 2)\nUE : Processus de Rédaction d'un Rapport de Stage (PRR 1230)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
+          }),
+          makeModule("Méthodologie de rédaction de rapport de stage", {
+            ue: "Processus de Rédaction d'un Rapport de Stage", ueCode: "PRR 1230", credits: 0.5, semestre: 2,
+            cours: [{ title: "Programme officiel", body: "Code : PRR 1232 — 0,5 crédit(s) (Semestre 2)\nUE : Processus de Rédaction d'un Rapport de Stage (PRR 1230)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
+          }),
+          makeModule("Sport et pathologies", {
+            ue: "Sport et Santé", ueCode: "SSA 1240", credits: 1.0, semestre: 2,
+            cours: [{ title: "Programme officiel", body: "Code : SSA 1241 — 1 crédit(s) (Semestre 2)\nUE : Sport et Santé (SSA 1240)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
+          }),
+          makeModule("Sport et société", {
+            ue: "Sport et Santé", ueCode: "SSA 1240", credits: 1.0, semestre: 2,
+            cours: [{ title: "Programme officiel", body: "Code : SSA 1242 — 1 crédit(s) (Semestre 2)\nUE : Sport et Santé (SSA 1240)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
+          }),
+          makeModule("Droit administratif", {
+            ue: "Droit", ueCode: "DRT 1240", credits: 1.0, semestre: 2,
+            cours: [{ title: "Programme officiel", body: "Code : DRT 1241 — 1 crédit(s) (Semestre 2)\nUE : Droit (DRT 1240)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
+          }),
+          makeModule("Droit civil", {
+            ue: "Droit", ueCode: "DRT 1240", credits: 1.0, semestre: 2,
+            cours: [{ title: "Programme officiel", body: "Code : DRT 1242 — 1 crédit(s) (Semestre 2)\nUE : Droit (DRT 1240)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
           })
         ]
       },
@@ -1281,14 +1431,29 @@ function buildSeed(){
             ]
           }),
 
-          makeModule("Méthodes et Techniques de Base en Soins Infirmiers et Obstétricaux", {
-            cours: [{ title: "Programme officiel (UE MSO 1310 — 5 crédits, Semestre 3)", body: "ECUE :\n- Soins Infirmiers obstétricaux / néonataux (SONU) — MSO 1311 — 2 crédits\n- Techniques de soins infirmiers — MSO 1312 — 3 crédits\n\nSource : Point des crédits Licence 2 IDE, maquette officielle INFAS (Antenne d'Abengourou)." }]
+          makeModule("Soins Infirmiers obstétricaux / néonataux (SONU)", {
+            ue: "Méthodes et Techniques de Base en Soins Infirmiers et Obstétricaux", ueCode: "MSO 1310", credits: 2.0, semestre: 3,
+            cours: [{ title: "Programme officiel", body: "Code : MSO 1311 — 2 crédit(s) (Semestre 3)\nUE : Méthodes et Techniques de Base en Soins Infirmiers et Obstétricaux (MSO 1310)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
           }),
-          makeModule("Situation Clinique : Physiologie et Pathologies du Corps Humain I", {
-            cours: [{ title: "Programme officiel (UE SCP 1310 — 4 crédits, Semestre 3)", body: "ECUE :\n- Pathologies obstétricales — SCP 1311 — 2 crédits\n- Pathologies gynécologiques — SCP 1312 — 2 crédits\n\nSource : Point des crédits Licence 2 IDE, maquette officielle INFAS (Antenne d'Abengourou)." }]
+          makeModule("Techniques de soins infirmiers", {
+            ue: "Méthodes et Techniques de Base en Soins Infirmiers et Obstétricaux", ueCode: "MSO 1310", credits: 3.0, semestre: 3,
+            cours: [{ title: "Programme officiel", body: "Code : MSO 1312 — 3 crédit(s) (Semestre 3)\nUE : Méthodes et Techniques de Base en Soins Infirmiers et Obstétricaux (MSO 1310)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
           }),
-          makeModule("Soins Infirmiers dans les Pathologies Chirurgicales", {
-            cours: [{ title: "Programme officiel (UE PIC 1320 — 2 crédits, Semestre 3)", body: "ECUE :\n- Traumatologie — PIC 1321 — 1 crédit\n- Chirurgie digestive — PIC 1322 — 1 crédit\n\nSource : Point des crédits Licence 2 IDE, maquette officielle INFAS (Antenne d'Abengourou)." }],
+          makeModule("Pathologies obstétricales", {
+            ue: "Situation Clinique : Physiologie et Pathologies du Corps Humain I", ueCode: "SCP 1310", credits: 2.0, semestre: 3,
+            cours: [{ title: "Programme officiel", body: "Code : SCP 1311 — 2 crédit(s) (Semestre 3)\nUE : Situation Clinique : Physiologie et Pathologies du Corps Humain I (SCP 1310)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
+          }),
+          makeModule("Pathologies gynécologiques", {
+            ue: "Situation Clinique : Physiologie et Pathologies du Corps Humain I", ueCode: "SCP 1310", credits: 2.0, semestre: 3,
+            cours: [{ title: "Programme officiel", body: "Code : SCP 1312 — 2 crédit(s) (Semestre 3)\nUE : Situation Clinique : Physiologie et Pathologies du Corps Humain I (SCP 1310)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
+          }),
+          makeModule("Traumatologie", {
+            ue: "Soins Infirmiers dans les Pathologies Chirurgicales", ueCode: "PIC 1320", credits: 1.0, semestre: 3,
+            cours: [{ title: "Programme officiel", body: "Code : PIC 1321 — 1 crédit(s) (Semestre 3)\nUE : Soins Infirmiers dans les Pathologies Chirurgicales (PIC 1320)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
+          }),
+          makeModule("Chirurgie digestive", {
+            ue: "Soins Infirmiers dans les Pathologies Chirurgicales", ueCode: "PIC 1320", credits: 1.0, semestre: 3,
+            cours: [{ title: "Programme officiel", body: "Code : PIC 1322 — 1 crédit(s) (Semestre 3)\nUE : Soins Infirmiers dans les Pathologies Chirurgicales (PIC 1320)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }],
             casClinique: [{
               titre: "Douleur de l'hypochondre droit fébrile",
               anamnese: "Une patiente de 45 ans, sans antécédent particulier, se présente aux urgences pour une douleur brutale de l'hypochondre droit apparue quelques heures après un repas copieux et riche en graisses. La douleur irradie vers l'omoplate droite. Elle rapporte des nausées, un épisode de vomissement, et une température mesurée à 38,4°C. À l'interrogatoire, elle ne rapporte pas de coloration jaune de la peau ni des yeux, et ses urines sont de couleur normale.",
@@ -1309,47 +1474,125 @@ function buildSeed(){
               cat: "CAT infirmière : mettre le patient à jeun, poser une voie veineuse, administrer les antalgiques prescrits sans masquer excessivement l'évolution clinique avant l'avis chirurgical, préparer le bilan biologique (NFS, CRP) et l'échographie abdominale demandés, et prévenir le chirurgien en urgence en vue d'une éventuelle appendicectomie."
             }]
           }),
-          makeModule("Soins Infirmiers dans les Pathologies Médicales I", {
-            cours: [{ title: "Programme officiel (UE SIM 1320 — 4 crédits, Semestre 3)", body: "ECUE :\n- Affections transmissibles — SIM 1321 — 1 crédit\n- Affections non transmissibles — SIM 1322 — 1 crédit\n- VIH-SIDA — SIM 1323 — 1 crédit\n- Dispositif minimum en situation d'urgence — SIM 1324 — 1 crédit\n\nSource : Point des crédits Licence 2 IDE, maquette officielle INFAS (Antenne d'Abengourou)." }]
+          makeModule("Affections transmissibles", {
+            ue: "Soins Infirmiers dans les Pathologies Médicales I", ueCode: "SIM 1320", credits: 1.0, semestre: 3,
+            cours: [{ title: "Programme officiel", body: "Code : SIM 1321 — 1 crédit(s) (Semestre 3)\nUE : Soins Infirmiers dans les Pathologies Médicales I (SIM 1320)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
           }),
-          makeModule("Stage de Socialisation", {
-            cours: [{ title: "Programme officiel (UE STG 1320 — 9 crédits, Semestre 3)", body: "ECUE :\n- Stages cliniques (milieu hospitalier, centre de santé) + rapport — STG 1321 — 5 crédits\n- Stage communautaire + rapport — STG 1322 — 4 crédits\n\nSource : Point des crédits Licence 2 IDE, maquette officielle INFAS (Antenne d'Abengourou)." }]
+          makeModule("Affections non transmissibles", {
+            ue: "Soins Infirmiers dans les Pathologies Médicales I", ueCode: "SIM 1320", credits: 1.0, semestre: 3,
+            cours: [{ title: "Programme officiel", body: "Code : SIM 1322 — 1 crédit(s) (Semestre 3)\nUE : Soins Infirmiers dans les Pathologies Médicales I (SIM 1320)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
           }),
-          makeModule("Stratégie de Communication", {
-            cours: [{ title: "Programme officiel (UE SCM 1330 — 2 crédits, Semestre 3)", body: "ECUE :\n- IEC / CCC, CIP, Plaidoyer — SCM 1331 — 1 crédit\n- Mobilisation sociale et communautaire — SCM 1332 — 1 crédit\n\nSource : Point des crédits Licence 2 IDE, maquette officielle INFAS (Antenne d'Abengourou)." }]
+          makeModule("VIH-SIDA", {
+            ue: "Soins Infirmiers dans les Pathologies Médicales I", ueCode: "SIM 1320", credits: 1.0, semestre: 3,
+            cours: [{ title: "Programme officiel", body: "Code : SIM 1323 — 1 crédit(s) (Semestre 3)\nUE : Soins Infirmiers dans les Pathologies Médicales I (SIM 1320)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
           }),
-          makeModule("Soins Promotionnels, Préventifs et Réadaptatifs Mère-Enfant", {
-            cours: [{ title: "Programme officiel (UE SPP 1330 — 2 crédits, Semestre 3)", body: "ECUE :\n- Suivi post natal — SPP 1331 — 1 crédit\n- Consultation des enfants sains — SPP 1332 — 1 crédit\n\nSource : Point des crédits Licence 2 IDE, maquette officielle INFAS (Antenne d'Abengourou)." }]
+          makeModule("Dispositif minimum en situation d'urgence", {
+            ue: "Soins Infirmiers dans les Pathologies Médicales I", ueCode: "SIM 1320", credits: 1.0, semestre: 3,
+            cours: [{ title: "Programme officiel", body: "Code : SIM 1324 — 1 crédit(s) (Semestre 3)\nUE : Soins Infirmiers dans les Pathologies Médicales I (SIM 1320)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
           }),
-          makeModule("Développement Personnel", {
-            cours: [{ title: "Programme officiel (UE DEP 1340 — 2 crédits, Semestre 3)", body: "ECUE :\n- Technique d'animation — DEP 1341 — 1 crédit\n- Sport / Musique / Atelier d'art / Montage de vidéo et photo — DEP 1342 — 1 crédit\n\nSource : Point des crédits Licence 2 IDE, maquette officielle INFAS (Antenne d'Abengourou)." }]
+          makeModule("Stages cliniques (milieu hospitalier, centre de santé) + rapport", {
+            ue: "Stage de Socialisation", ueCode: "STG 1320", credits: 5.0, semestre: 3,
+            cours: [{ title: "Programme officiel", body: "Code : STG 1321 — 5 crédit(s) (Semestre 3)\nUE : Stage de Socialisation (STG 1320)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
           }),
-          makeModule("Santé de la Reproduction", {
-            cours: [{ title: "Programme officiel (UE SRP 1410 — 3 crédits, Semestre 4)", body: "ECUE :\n- Planification familiale / Technologie contraceptive — SRP 1411 — 2 crédits\n- Santé sexuelle / Santé de la reproduction des adolescents et des jeunes / Approche genre — SRP 1412 — 1 crédit\n\nSource : Point des crédits Licence 2 IDE, maquette officielle INFAS (Antenne d'Abengourou)." }]
+          makeModule("Stage communautaire + rapport", {
+            ue: "Stage de Socialisation", ueCode: "STG 1320", credits: 4.0, semestre: 3,
+            cours: [{ title: "Programme officiel", body: "Code : STG 1322 — 4 crédit(s) (Semestre 3)\nUE : Stage de Socialisation (STG 1320)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
           }),
-          makeModule("Pathologies Gynéco-Obstétricales et Reproductrices", {
-            cours: [{ title: "Programme officiel (UE PGO 1410 — 3 crédits, Semestre 4)", body: "ECUE :\n- Pathologies obstétricales — PGO 1411 — 1 crédit\n- Pathologies gynécologiques — PGO 1412 — 1 crédit\n- Affections de l'appareil reproducteur — PGO 1413 — 1 crédit\n\nSource : Point des crédits Licence 2 IDE, maquette officielle INFAS (Antenne d'Abengourou)." }]
+          makeModule("IEC / CCC, CIP, Plaidoyer", {
+            ue: "Stratégie de Communication", ueCode: "SCM 1330", credits: 1.0, semestre: 3,
+            cours: [{ title: "Programme officiel", body: "Code : SCM 1331 — 1 crédit(s) (Semestre 3)\nUE : Stratégie de Communication (SCM 1330)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
           }),
-          makeModule("Prise en Charge des Pathologies Médicales", {
-            cours: [{ title: "Programme officiel (UE PCP 1420 — 3 crédits, Semestre 4)", body: "ECUE :\n- Affections respiratoires — PCP 1421 — 1 crédit\n- Pathologies digestives — PCP 1422 — 1 crédit\n- Pathologies urinaires — PCP 1423 — 1 crédit\n\nSource : Point des crédits Licence 2 IDE, maquette officielle INFAS (Antenne d'Abengourou)." }]
+          makeModule("Mobilisation sociale et communautaire", {
+            ue: "Stratégie de Communication", ueCode: "SCM 1330", credits: 1.0, semestre: 3,
+            cours: [{ title: "Programme officiel", body: "Code : SCM 1332 — 1 crédit(s) (Semestre 3)\nUE : Stratégie de Communication (SCM 1330)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
           }),
-          makeModule("Prise en Charge des Troubles Physiologiques et Comportementaux", {
-            cours: [{ title: "Programme officiel (UE PTC 1420 — 3 crédits, Semestre 4)", body: "ECUE :\n- Gérontologie / andropause / ménopause — PTC 1421 — 1 crédit\n- Drogue, tabagisme et alcoolisme — PTC 1422 — 1 crédit\n- Psychologie médicale — PTC 1423 — 1 crédit\n\nSource : Point des crédits Licence 2 IDE, maquette officielle INFAS (Antenne d'Abengourou)." }]
+          makeModule("Suivi post natal", {
+            ue: "Soins Promotionnels, Préventifs et Réadaptatifs Mère-Enfant", ueCode: "SPP 1330", credits: 1.0, semestre: 3,
+            cours: [{ title: "Programme officiel", body: "Code : SPP 1331 — 1 crédit(s) (Semestre 3)\nUE : Soins Promotionnels, Préventifs et Réadaptatifs Mère-Enfant (SPP 1330)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
           }),
-          makeModule("Prise en Charge Thérapeutique", {
-            cours: [{ title: "Programme officiel (UE PCT 1420 — 2 crédits, Semestre 4)", body: "ECUE :\n- Pharmacologie générale — PCT 1421 — 1 crédit\n- Pharmacologie spécialisée — PCT 1422 — 1 crédit\n\nSource : Point des crédits Licence 2 IDE, maquette officielle INFAS (Antenne d'Abengourou)." }]
+          makeModule("Consultation des enfants sains", {
+            ue: "Soins Promotionnels, Préventifs et Réadaptatifs Mère-Enfant", ueCode: "SPP 1330", credits: 1.0, semestre: 3,
+            cours: [{ title: "Programme officiel", body: "Code : SPP 1332 — 1 crédit(s) (Semestre 3)\nUE : Soins Promotionnels, Préventifs et Réadaptatifs Mère-Enfant (SPP 1330)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
           }),
-          makeModule("Stages de Socialisation Professionnelle", {
-            cours: [{ title: "Programme officiel (UE STG 1420 — 8 crédits, Semestre 4)", body: "ECUE :\n- Stages cliniques (milieu hospitalier, centre de santé) + rapport — STG 1421 — 6 crédits\n- Stages communautaires + rapport — STG 1422 — 2 crédits\n\nSource : Point des crédits Licence 2 IDE, maquette officielle INFAS (Antenne d'Abengourou)." }]
+          makeModule("Technique d'animation", {
+            ue: "Développement Personnel", ueCode: "DEP 1340", credits: 1.0, semestre: 3,
+            cours: [{ title: "Programme officiel", body: "Code : DEP 1341 — 1 crédit(s) (Semestre 3)\nUE : Développement Personnel (DEP 1340)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
           }),
-          makeModule("Initiation à la Méthodologie de la Recherche", {
-            cours: [{ title: "Programme officiel (UE IMR 1430 — 2 crédits, Semestre 4)", body: "ECUE :\n- Technique d'enquête — IMR 1431 — 1 crédit\n- Recherche documentaire — IMR 1432 — 1 crédit\n\nSource : Point des crédits Licence 2 IDE, maquette officielle INFAS (Antenne d'Abengourou)." }]
+          makeModule("Sport / Musique / Atelier d'art / Sport / Montage de vidéo et photo", {
+            ue: "Développement Personnel", ueCode: "DEP 1340", credits: 1.0, semestre: 3,
+            cours: [{ title: "Programme officiel", body: "Code : DEP 1342 — 1 crédit(s) (Semestre 3)\nUE : Développement Personnel (DEP 1340)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
           }),
-          makeModule("Méthodes et Techniques de Soins Infirmiers et Obstétricaux Spécialisés", {
-            cours: [{ title: "Programme officiel (UE MTS 1430 — 4 crédits, Semestre 4)", body: "ECUE :\n- Soins infirmiers spécialisés en obstétrique — MTS 1431 — 2 crédits\n- Soins infirmiers obstétricaux / néonataux (SONU, SONUC, SONUB, PCIMNE et PTMNE) — MTS 1432 — 2 crédits\n\nSource : Point des crédits Licence 2 IDE, maquette officielle INFAS (Antenne d'Abengourou)." }]
+          makeModule("Planification familiale / Technologie contraceptive", {
+            ue: "Santé de la Reproduction", ueCode: "SRP 1410", credits: 2.0, semestre: 4,
+            cours: [{ title: "Programme officiel", body: "Code : SRP 1411 — 2 crédit(s) (Semestre 4)\nUE : Santé de la Reproduction (SRP 1410)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
           }),
-          makeModule("Outils de Communication", {
-            cours: [{ title: "Programme officiel (UE OMC 1440 — 2 crédits, Semestre 4)", body: "ECUE :\n- Anglais de la santé — OMC 1441 — 1 crédit\n- Informatique : Traitement des données — OMC 1442 — 1 crédit\n\nSource : Point des crédits Licence 2 IDE, maquette officielle INFAS (Antenne d'Abengourou)." }]
+          makeModule("Santé sexuelle / Santé de la reproduction des adolescents et des jeunes / Approche genre", {
+            ue: "Santé de la Reproduction", ueCode: "SRP 1410", credits: 1.0, semestre: 4,
+            cours: [{ title: "Programme officiel", body: "Code : SRP 1412 — 1 crédit(s) (Semestre 4)\nUE : Santé de la Reproduction (SRP 1410)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
+          }),
+          makeModule("Affections de l'appareil reproducteur", {
+            ue: "Pathologies Gynéco-Obstétricales et Reproductrices", ueCode: "PGO 1410", credits: 1.0, semestre: 4,
+            cours: [{ title: "Programme officiel", body: "Code : PGO 1413 — 1 crédit(s) (Semestre 4)\nUE : Pathologies Gynéco-Obstétricales et Reproductrices (PGO 1410)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
+          }),
+          makeModule("Affections respiratoires", {
+            ue: "Prise en Charge des Pathologies Médicales", ueCode: "PCP 1420", credits: 1.0, semestre: 4,
+            cours: [{ title: "Programme officiel", body: "Code : PCP 1421 — 1 crédit(s) (Semestre 4)\nUE : Prise en Charge des Pathologies Médicales (PCP 1420)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
+          }),
+          makeModule("Pathologies digestives", {
+            ue: "Prise en Charge des Pathologies Médicales", ueCode: "PCP 1420", credits: 1.0, semestre: 4,
+            cours: [{ title: "Programme officiel", body: "Code : PCP 1422 — 1 crédit(s) (Semestre 4)\nUE : Prise en Charge des Pathologies Médicales (PCP 1420)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
+          }),
+          makeModule("Pathologies urinaires", {
+            ue: "Prise en Charge des Pathologies Médicales", ueCode: "PCP 1420", credits: 1.0, semestre: 4,
+            cours: [{ title: "Programme officiel", body: "Code : PCP 1423 — 1 crédit(s) (Semestre 4)\nUE : Prise en Charge des Pathologies Médicales (PCP 1420)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
+          }),
+          makeModule("Gérontologie / andropause / ménopause", {
+            ue: "Prise en Charge des Troubles Physiologiques et Comportementaux", ueCode: "PTC 1420", credits: 1.0, semestre: 4,
+            cours: [{ title: "Programme officiel", body: "Code : PTC 1421 — 1 crédit(s) (Semestre 4)\nUE : Prise en Charge des Troubles Physiologiques et Comportementaux (PTC 1420)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
+          }),
+          makeModule("Drogue, tabagisme et alcoolisme", {
+            ue: "Prise en Charge des Troubles Physiologiques et Comportementaux", ueCode: "PTC 1420", credits: 1.0, semestre: 4,
+            cours: [{ title: "Programme officiel", body: "Code : PTC 1422 — 1 crédit(s) (Semestre 4)\nUE : Prise en Charge des Troubles Physiologiques et Comportementaux (PTC 1420)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
+          }),
+          makeModule("Psychologie médicale", {
+            ue: "Prise en Charge des Troubles Physiologiques et Comportementaux", ueCode: "PTC 1420", credits: 1.0, semestre: 4,
+            cours: [{ title: "Programme officiel", body: "Code : PTC 1423 — 1 crédit(s) (Semestre 4)\nUE : Prise en Charge des Troubles Physiologiques et Comportementaux (PTC 1420)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
+          }),
+          makeModule("Pharmacologie générale", {
+            ue: "Prise en Charge Thérapeutique", ueCode: "PCT 1420", credits: 1.0, semestre: 4,
+            cours: [{ title: "Programme officiel", body: "Code : PCT 1421 — 1 crédit(s) (Semestre 4)\nUE : Prise en Charge Thérapeutique (PCT 1420)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
+          }),
+          makeModule("Pharmacologie spécialisée", {
+            ue: "Prise en Charge Thérapeutique", ueCode: "PCT 1420", credits: 1.0, semestre: 4,
+            cours: [{ title: "Programme officiel", body: "Code : PCT 1422 — 1 crédit(s) (Semestre 4)\nUE : Prise en Charge Thérapeutique (PCT 1420)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
+          }),
+          makeModule("Stages communautaires + rapport", {
+            ue: "Stages de Socialisation Professionnelle", ueCode: "STG 1420", credits: 2.0, semestre: 4,
+            cours: [{ title: "Programme officiel", body: "Code : STG 1422 — 2 crédit(s) (Semestre 4)\nUE : Stages de Socialisation Professionnelle (STG 1420)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
+          }),
+          makeModule("Technique d'enquête", {
+            ue: "Initiation à la Méthodologie de la Recherche", ueCode: "IMR 1430", credits: 1.0, semestre: 4,
+            cours: [{ title: "Programme officiel", body: "Code : IMR 1431 — 1 crédit(s) (Semestre 4)\nUE : Initiation à la Méthodologie de la Recherche (IMR 1430)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
+          }),
+          makeModule("Recherche documentaire", {
+            ue: "Initiation à la Méthodologie de la Recherche", ueCode: "IMR 1430", credits: 1.0, semestre: 4,
+            cours: [{ title: "Programme officiel", body: "Code : IMR 1432 — 1 crédit(s) (Semestre 4)\nUE : Initiation à la Méthodologie de la Recherche (IMR 1430)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
+          }),
+          makeModule("Soins infirmiers spécialisés en obstétrique", {
+            ue: "Méthodes et Techniques de Soins Infirmiers et Obstétricaux Spécialisés", ueCode: "MTS 1430", credits: 2.0, semestre: 4,
+            cours: [{ title: "Programme officiel", body: "Code : MTS 1431 — 2 crédit(s) (Semestre 4)\nUE : Méthodes et Techniques de Soins Infirmiers et Obstétricaux Spécialisés (MTS 1430)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
+          }),
+          makeModule("Soins infirmiers obstétricaux / néonataux (SONU, SONUC, SONUB, PCIMNE et PTMNE)", {
+            ue: "Méthodes et Techniques de Soins Infirmiers et Obstétricaux Spécialisés", ueCode: "MTS 1430", credits: 2.0, semestre: 4,
+            cours: [{ title: "Programme officiel", body: "Code : MTS 1432 — 2 crédit(s) (Semestre 4)\nUE : Méthodes et Techniques de Soins Infirmiers et Obstétricaux Spécialisés (MTS 1430)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
+          }),
+          makeModule("Anglais de la santé", {
+            ue: "Outils de Communication", ueCode: "OMC 1440", credits: 1.0, semestre: 4,
+            cours: [{ title: "Programme officiel", body: "Code : OMC 1441 — 1 crédit(s) (Semestre 4)\nUE : Outils de Communication (OMC 1440)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
+          }),
+          makeModule("Informatique : Traitement des données", {
+            ue: "Outils de Communication", ueCode: "OMC 1440", credits: 1.0, semestre: 4,
+            cours: [{ title: "Programme officiel", body: "Code : OMC 1442 — 1 crédit(s) (Semestre 4)\nUE : Outils de Communication (OMC 1440)\n\nSource : maquette officielle INFAS (Antenne d'Abengourou)." }]
           })
         ]
       },
@@ -1400,7 +1643,7 @@ var state = null;
 function loadState(){
   try {
     var raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) { state = JSON.parse(raw); mergeSeedIntoState(); return; }
+    if (raw) { state = JSON.parse(raw); mergeSeedIntoState(); migrateUeToEcue(); return; }
   } catch(e){ /* ignore corrupted storage */ }
   state = buildSeed();
   saveState();
@@ -1438,6 +1681,65 @@ function mergeSeedIntoState(){
           changed = true;
         });
       });
+    });
+  });
+  if (changed) saveState();
+}
+/* Nettoie les anciennes matières de niveau UE (remplacées par leurs ECUE
+   individuelles) sur les appareils qui avaient déjà reçu l'ancienne
+   structure. Une ancienne matière n'est retirée que si elle ne contient
+   aucun contenu ajouté par l'utilisateur (sinon elle reste, par sécurité). */
+var OLD_UE_MODULE_NAMES = {
+  a1: [
+    "Connaissance de Base du Corps Humain et de son Fonctionnement I", "Santé Infantile",
+    "Notions de Base sur les Situations Cliniques se Référant aux Pathologies I", "Santé Publique (UE L1)",
+    "Pathologies Médico-Chirurgicales", "Santé Humaine", "Initiation à la Recherche",
+    "Méthodes et Techniques de Base en Soins Infirmiers et Obstétricaux (Phase I)",
+    "Connaissances de Base Liées aux Fonctions Infirmières et Sages-Femmes", "Outils de Communication I",
+    "Connaissance de Base du Corps Humain et de son Fonctionnement II", "Prise en Charge des Affections Courantes",
+    "Techniques de Laboratoire (UE L1)", "Santé Communautaire", "Stage de Découverte",
+    "Méthodes et Techniques de Base en Soins Infirmiers et Obstétricaux (Phase II)",
+    "Processus de Rédaction d'un Rapport de Stage", "Sport et Santé", "Droit"
+  ],
+  a2: [
+    "Méthodes et Techniques de Base en Soins Infirmiers et Obstétricaux",
+    "Situation Clinique : Physiologie et Pathologies du Corps Humain I",
+    "Soins Infirmiers dans les Pathologies Chirurgicales", "Soins Infirmiers dans les Pathologies Médicales I",
+    "Stage de Socialisation", "Stratégie de Communication",
+    "Soins Promotionnels, Préventifs et Réadaptatifs Mère-Enfant", "Développement Personnel",
+    "Santé de la Reproduction", "Pathologies Gynéco-Obstétricales et Reproductrices",
+    "Prise en Charge des Pathologies Médicales", "Prise en Charge des Troubles Physiologiques et Comportementaux",
+    "Prise en Charge Thérapeutique", "Stages de Socialisation Professionnelle",
+    "Initiation à la Méthodologie de la Recherche", "Méthodes et Techniques de Soins Infirmiers et Obstétricaux Spécialisés",
+    "Outils de Communication"
+  ]
+};
+function migrateUeToEcue(){
+  if (!state || !state.years) return;
+  var changed = false;
+  Object.keys(OLD_UE_MODULE_NAMES).forEach(function(yearId){
+    var y = findYear(yearId);
+    if (!y) return;
+    OLD_UE_MODULE_NAMES[yearId].forEach(function(oldName){
+      var idx = y.modules.findIndex(function(m){ return m.name === oldName; });
+      if (idx === -1) return;
+      var old = y.modules[idx];
+      if (oldName === "Soins Infirmiers dans les Pathologies Chirurgicales" && old.casClinique && old.casClinique.length){
+        var target = y.modules.find(function(m){ return m.name === "Chirurgie digestive"; });
+        if (target){
+          var existingTitles = target.casClinique.map(function(c){ return c.titre; });
+          old.casClinique.forEach(function(c){
+            if (existingTitles.indexOf(c.titre) === -1) target.casClinique.push(c);
+          });
+          old.casClinique = [];
+        }
+      }
+      var hasRealContent = old.qcm.length || old.qcd.length || old.exercices.length || (old.casClinique&&old.casClinique.length) ||
+        old.cours.some(function(c){ return c.title !== "Programme officiel"; });
+      if (!hasRealContent){
+        y.modules.splice(idx, 1);
+        changed = true;
+      }
     });
   });
   if (changed) saveState();
@@ -1924,6 +2226,23 @@ var moduleSubTab = {}; /* moduleId -> 'cours'|'qcm'|'qcd'|'exercices'|'docs' */
 var docsCache = {}; /* moduleId -> array of document records (loaded lazily from IndexedDB) */
 var openChapters = {}; /* coursId -> bool, utilisé dans la rubrique Cours (lecture par chapitre) */
 
+function groupModulesByUE(modules){
+  var ungrouped = [];
+  var groups = [];
+  var groupIndex = {};
+  modules.forEach(function(m){
+    if (!m.ue){ ungrouped.push(m); return; }
+    if (groupIndex[m.ue] === undefined){
+      groupIndex[m.ue] = groups.length;
+      groups.push({ ue: m.ue, ueCode: m.ueCode || "", modules: [] });
+    }
+    groups[groupIndex[m.ue]].modules.push(m);
+  });
+  return { ungrouped: ungrouped, groups: groups };
+}
+function renderUeGroupHeader(g){
+  return '<div class="ue-group-head">' + esc(g.ue) + (g.ueCode ? ' <span class="faint">(' + esc(g.ueCode) + ')</span>' : '') + '</div>';
+}
 function renderProgramme(yearId){
   var vy = visibleYears();
   var y = findYear(yearId);
@@ -1935,7 +2254,13 @@ function renderProgramme(yearId){
 
   html += '<div class="faint" style="margin-bottom:10px;">' + esc(y.note||"") + '</div>';
 
-  y.modules.forEach(function(m){ html += renderModule(y, m); });
+  var grouped = groupModulesByUE(y.modules);
+  grouped.ungrouped.forEach(function(m){ html += renderModule(y, m); });
+  grouped.groups.forEach(function(g){
+    html += '<div class="ue-group">' + renderUeGroupHeader(g);
+    g.modules.forEach(function(m){ html += renderModule(y, m); });
+    html += '</div>';
+  });
 
   html += '<div class="row wrap" style="margin-top:6px; gap:8px;">' +
     '<button class="btn" style="flex:1;" data-action="add-module" data-year="' + y.id + '">➕ Ajouter une matière</button>' +
@@ -1961,26 +2286,34 @@ function renderCoursRubrique(yearId){
   if (!y.modules.length){
     html += '<div class="empty">Aucune matière pour cette année. Ajoute des matières depuis Programme.</div>';
   }
-  y.modules.forEach(function(m){
-    var isOpen = !!openModules[m.id];
-    var docCount = (docsCache[m.id]||[]).length;
-    html += '<div class="module ' + (isOpen?'open':'') + '">';
-    html += '<div class="mhead" data-action="toggle-module" data-module="' + m.id + '">' +
-      '<div><h3>' + esc(m.name) + '</h3><div class="faint" style="margin-top:3px;">' + m.cours.length + ' chapitre(s) · ' + docCount + ' document(s)</div></div>' +
-      '<span class="chevron">▶</span>' +
-    '</div>';
-    if (isOpen){
-      html += '<div class="mbody">';
-      html += renderCoursChapters(y, m);
-      html += '<div style="margin-top:16px; padding-top:14px; border-top:1px solid var(--line);">' +
-        '<h4 style="font-size:13.5px; margin:0 0 8px;">📎 Document du cours</h4>' +
-        '<p class="faint" style="margin-bottom:8px;">Charge ici le document numérique définitif de cette matière (PDF, Word ou PowerPoint) : il reste enregistré en permanence sur cet appareil.</p>' +
-        renderDocsList(y, m) +
-      '</div>';
-      html += '</div>';
-    }
+  var grouped = groupModulesByUE(y.modules);
+  grouped.ungrouped.forEach(function(m){ html += renderCoursModuleCard(y, m); });
+  grouped.groups.forEach(function(g){
+    html += '<div class="ue-group">' + renderUeGroupHeader(g);
+    g.modules.forEach(function(m){ html += renderCoursModuleCard(y, m); });
     html += '</div>';
   });
+  return html;
+}
+function renderCoursModuleCard(y, m){
+  var isOpen = !!openModules[m.id];
+  var docCount = (docsCache[m.id]||[]).length;
+  var html = '<div class="module ' + (isOpen?'open':'') + '">';
+  html += '<div class="mhead" data-action="toggle-module" data-module="' + m.id + '">' +
+    '<div><h3>' + esc(m.name) + '</h3><div class="faint" style="margin-top:3px;">' + m.cours.length + ' chapitre(s) · ' + docCount + ' document(s)</div></div>' +
+    '<span class="chevron">▶</span>' +
+  '</div>';
+  if (isOpen){
+    html += '<div class="mbody">';
+    html += renderCoursChapters(y, m);
+    html += '<div style="margin-top:16px; padding-top:14px; border-top:1px solid var(--line);">' +
+      '<h4 style="font-size:13.5px; margin:0 0 8px;">📎 Document du cours</h4>' +
+      '<p class="faint" style="margin-bottom:8px;">Charge ici le document numérique définitif de cette matière (PDF, Word ou PowerPoint) : il reste enregistré en permanence sur cet appareil.</p>' +
+      renderDocsList(y, m) +
+    '</div>';
+    html += '</div>';
+  }
+  html += '</div>';
   return html;
 }
 function renderCoursChapters(y, m){
@@ -3174,6 +3507,65 @@ function ensureMammoth(){
   if (window.mammoth) return Promise.resolve();
   return loadScript("vendor-mammoth.min.js");
 }
+function ensureJsPdf(){
+  if (window.jspdf) return Promise.resolve();
+  return loadScript("vendor-jspdf.min.js");
+}
+/* Génère un vrai fichier PDF (ouvrable dans n'importe quel lecteur PDF)
+   à partir d'un texte brut, avec retour à la ligne et pagination
+   automatiques. Utilisé pour que les cours chargés en .docx/.pptx soient
+   disponibles uniquement en PDF pour l'étudiant, quel que soit le format
+   d'origine du fichier importé. */
+function textToPdfBlob(title, text){
+  return ensureJsPdf().then(function(){
+    var jsPDF = window.jspdf.jsPDF;
+    var doc = new jsPDF({ unit: "pt", format: "a4" });
+    var margin = 48;
+    var pageWidth = doc.internal.pageSize.getWidth();
+    var pageHeight = doc.internal.pageSize.getHeight();
+    var maxWidth = pageWidth - margin * 2;
+    var y = margin;
+    doc.setFont("helvetica", "bold"); doc.setFontSize(14);
+    doc.splitTextToSize(title || "Cours", maxWidth).forEach(function(line){ doc.text(line, margin, y); y += 18; });
+    y += 12;
+    doc.setFont("helvetica", "normal"); doc.setFontSize(11);
+    var lineHeight = 15;
+    doc.splitTextToSize(text || "(document sans texte extrait)", maxWidth).forEach(function(line){
+      if (y > pageHeight - margin){ doc.addPage(); y = margin; }
+      doc.text(line, margin, y);
+      y += lineHeight;
+    });
+    return doc.output("blob");
+  });
+}
+function fileToDataUrl(file){
+  return new Promise(function(resolve, reject){
+    var reader = new FileReader();
+    reader.onload = function(){ resolve(reader.result); };
+    reader.onerror = function(){ reject(new Error("Lecture du fichier impossible.")); };
+    reader.readAsDataURL(file);
+  });
+}
+/* Insère une photo sur une page PDF unique, centrée et mise à l'échelle. */
+function imageToPdfBlob(dataUrl, imgFormat){
+  return ensureJsPdf().then(function(){
+    var jsPDF = window.jspdf.jsPDF;
+    var doc = new jsPDF({ unit: "pt", format: "a4" });
+    var pageWidth = doc.internal.pageSize.getWidth();
+    var pageHeight = doc.internal.pageSize.getHeight();
+    return new Promise(function(resolve){
+      var img = new Image();
+      img.onload = function(){
+        var margin = 30;
+        var ratio = Math.min((pageWidth - margin*2)/img.width, (pageHeight - margin*2)/img.height, 1);
+        var w = img.width * ratio, h = img.height * ratio;
+        doc.addImage(dataUrl, imgFormat, (pageWidth-w)/2, (pageHeight-h)/2, w, h);
+        resolve(doc.output("blob"));
+      };
+      img.src = dataUrl;
+    });
+  });
+}
 function extractTextFromPDF(arrayBuffer){
   return ensurePdfJs().then(function(){
     return window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
@@ -3685,10 +4077,40 @@ function handleDocUpload(files, yearId, moduleId, moduleName){
             showToast("⛔ " + file.name + " : " + rejectReason.replace(/^⛔ /,""));
             return;
           }
-          return dbPut({
-            id: uid(), yearId: yearId, moduleId: moduleId, moduleName: moduleName,
-            fileName: file.name, mimeType: file.type || "", size: file.size, kind: kind,
-            text: text, uploadedAt: Date.now(), blob: file
+          /* Le cours doit être disponible uniquement en PDF pour l'étudiant,
+             même s'il a été importé en .docx/.pptx/photo : on convertit
+             systématiquement vers un vrai fichier PDF avant de l'enregistrer. */
+          if (kind === "pdf"){
+            return dbPut({
+              id: uid(), yearId: yearId, moduleId: moduleId, moduleName: moduleName,
+              fileName: file.name, mimeType: file.type || "application/pdf", size: file.size, kind: "pdf",
+              text: text, uploadedAt: Date.now(), blob: file
+            });
+          }
+          if (kind === "docx" || kind === "pptx"){
+            var titleBase = file.name.replace(/\.(docx|pptx)$/i, "");
+            return textToPdfBlob(titleBase, text).then(function(pdfBlob){
+              return dbPut({
+                id: uid(), yearId: yearId, moduleId: moduleId, moduleName: moduleName,
+                fileName: titleBase + ".pdf", mimeType: "application/pdf", size: pdfBlob.size, kind: "pdf",
+                text: text, uploadedAt: Date.now(), blob: pdfBlob
+              });
+            }).catch(function(err){
+              showToast("Conversion en PDF impossible pour " + file.name + " (" + err.message + ").");
+            });
+          }
+          return fileToDataUrl(file).then(function(dataUrl){
+            var imgFormat = /\.png$/i.test(file.name) ? "PNG" : "JPEG";
+            return imageToPdfBlob(dataUrl, imgFormat).then(function(pdfBlob){
+              var pdfName = file.name.replace(/\.(png|jpe?g|gif|webp)$/i, ".pdf");
+              return dbPut({
+                id: uid(), yearId: yearId, moduleId: moduleId, moduleName: moduleName,
+                fileName: pdfName, mimeType: "application/pdf", size: pdfBlob.size, kind: "pdf",
+                text: "", uploadedAt: Date.now(), blob: pdfBlob
+              });
+            });
+          }).catch(function(err){
+            showToast("Conversion en PDF impossible pour " + file.name + " (" + err.message + ").");
           });
         });
       });
