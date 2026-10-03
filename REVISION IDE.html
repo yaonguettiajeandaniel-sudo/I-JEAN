@@ -2344,13 +2344,13 @@ function renderModule(y, m){
   var docCount = (docsCache[m.id] || []).length;
   var counts = { cours:m.cours.length, qcm:m.qcm.length, qcd:m.qcd.length, exercices:m.exercices.length, cas:(m.casClinique||[]).length, docs:docCount };
   var html = '<div class="module ' + (isOpen?'open':'') + '">';
-  html += '<div class="mhead" data-action="toggle-module" data-module="' + m.id + '">' +
+  html += '<div class="mhead" data-action="module-primary-click" data-year="' + y.id + '" data-module="' + m.id + '" title="Ouvrir le cours PDF de cette matière">' +
     '<div><h3>' + esc(m.name) + '</h3>' +
     '<div class="faint" style="margin-top:3px;">' + counts.cours + ' cours · ' + counts.qcm + ' QCM · ' + counts.qcd + ' QCD · ' + counts.exercices + ' exercices · ' + counts.cas + ' cas cliniques · ' + counts.docs + ' documents</div></div>' +
     '<div class="row" style="gap:6px;">' +
       '<button class="icon-btn" style="width:30px;height:30px;" data-action="rename-module" data-year="' + y.id + '" data-module="' + m.id + '" title="Renommer">✏️</button>' +
       '<button class="icon-btn" style="width:30px;height:30px;" data-action="delete-module" data-year="' + y.id + '" data-module="' + m.id + '" title="Supprimer">🗑️</button>' +
-      '<span class="chevron">▶</span>' +
+      '<button class="icon-btn" style="width:30px;height:30px;" data-action="toggle-module" data-module="' + m.id + '" title="Gérer le contenu (cours, QCM, QCD, exercices, documents...)"><span class="chevron">▶</span></button>' +
     '</div>' +
   '</div>';
 
@@ -4293,6 +4293,18 @@ function handleAction(action, el, ev){
     case "toggle-module":
       openModules[moduleId] = !openModules[moduleId];
       render();
+      break;
+    case "module-primary-click":
+      dbGetByModule(moduleId).then(function(docs){
+        docs.sort(function(a,b){ return b.uploadedAt - a.uploadedAt; });
+        docsCache[moduleId] = docs;
+        if (docs.length){
+          openDocFile(docs[0].id);
+        } else {
+          openModules[moduleId] = !openModules[moduleId];
+        }
+        render();
+      });
       break;
     case "toggle-chapter":
       openChapters[itemId] = !openChapters[itemId];
