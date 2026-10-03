@@ -2341,7 +2341,8 @@ function renderCoursChapters(y, m){
 
 function renderModule(y, m){
   var isOpen = !!openModules[m.id];
-  var sub = moduleSubTab[m.id] || "cours";
+  var sub = moduleSubTab[m.id] || "exercices";
+  if (sub !== "exercices" && sub !== "docs") sub = "exercices";
   var docCount = (docsCache[m.id] || []).length;
   var counts = { cours:m.cours.length, qcm:m.qcm.length, qcd:m.qcd.length, exercices:m.exercices.length, cas:(m.casClinique||[]).length, docs:docCount };
   var html = '<div class="module ' + (isOpen?'open':'') + '">';
@@ -2351,23 +2352,19 @@ function renderModule(y, m){
     '<div class="row" style="gap:6px;">' +
       '<button class="icon-btn" style="width:30px;height:30px;" data-action="rename-module" data-year="' + y.id + '" data-module="' + m.id + '" title="Renommer">✏️</button>' +
       '<button class="icon-btn" style="width:30px;height:30px;" data-action="delete-module" data-year="' + y.id + '" data-module="' + m.id + '" title="Supprimer">🗑️</button>' +
-      '<button class="icon-btn" style="width:30px;height:30px;" data-action="toggle-module" data-module="' + m.id + '" title="Gérer le contenu (cours, QCM, QCD, exercices, documents...)"><span class="chevron">▶</span></button>' +
+      '<button class="icon-btn" style="width:30px;height:30px;" data-action="toggle-module" data-module="' + m.id + '" title="Gérer le contenu (exercices, documents)"><span class="chevron">▶</span></button>' +
     '</div>' +
   '</div>';
 
   if (isOpen){
     html += '<div class="mbody">';
     html += '<div class="subtabs">' +
-      ['cours','qcm','qcd','exercices','cas','docs'].map(function(k){
-        var lbl = { cours:"📘 Cours", qcm:"☑️ QCM", qcd:"🔘 QCD", exercices:"✏️ Exercices", cas:"🩻 Cas clinique", docs:"📎 Documents" }[k];
+      ['exercices','docs'].map(function(k){
+        var lbl = { exercices:"✏️ Exercices", docs:"📎 Documents" }[k];
         return '<button class="' + (sub===k?'active':'') + '" data-action="module-subtab" data-module="' + m.id + '" data-sub="' + k + '">' + lbl + ' (' + counts[k] + ')</button>';
       }).join("") + '</div>';
 
-    if (sub === "cours") html += renderCoursList(y, m);
-    if (sub === "qcm") html += renderQuestionList(y, m, "qcm");
-    if (sub === "qcd") html += renderQuestionList(y, m, "qcd");
     if (sub === "exercices") html += renderExoList(y, m);
-    if (sub === "cas") html += renderCasList(y, m);
     if (sub === "docs") html += renderDocsList(y, m);
 
     html += '</div>';
