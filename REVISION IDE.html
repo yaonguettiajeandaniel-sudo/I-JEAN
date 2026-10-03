@@ -1941,7 +1941,6 @@ function parseHash(){
   var view = parts[0];
   var params = {};
   if (view === "programme") { params.year = parts[1] || "a1"; }
-  if (view === "cours") { params.year = parts[1] || "a1"; }
   if (view === "quiz-run") { /* uses in-memory quiz session */ }
   return { view: view, params: params };
 }
@@ -2004,7 +2003,6 @@ function render(){
   html += renderHeader();
   if (route.view === "accueil") html += renderAccueil();
   else if (route.view === "programme") html += renderProgramme(route.params.year || "a1");
-  else if (route.view === "cours") html += renderCoursRubrique(route.params.year || "a1");
   else if (route.view === "quiz") html += renderQuizSetup();
   else if (route.view === "quiz-run") html += renderQuizRun();
   else if (route.view === "exercices") html += renderExoSetup();
@@ -2088,7 +2086,7 @@ function onEnterApp(){
 }
 
 function renderHeader(){
-  var titles = { accueil:"La Syncope", programme:"Programme", cours:"Cours", quiz:"Réviser", "quiz-run":"Quiz en cours", exercices:"Exercices", "exercices-run":"Exercice", cas:"Cas Cliniques", "cas-run":"Cas clinique", diplome:"Diplôme d'État", reglages:"Réglages", telegram:"Import Telegram" };
+  var titles = { accueil:"La Syncope", programme:"Cours", quiz:"Réviser", "quiz-run":"Quiz en cours", exercices:"Exercices", "exercices-run":"Exercice", cas:"Cas Cliniques", "cas-run":"Cas clinique", diplome:"Diplôme d'État", reglages:"Réglages", telegram:"Import Telegram" };
   return (
     '<header class="top">' +
       '<div class="brand">' +
@@ -2107,8 +2105,7 @@ function renderHeader(){
 function renderBottomNav(){
   var items = [
     { hash:"#/accueil", view:"accueil", ic:"🏠", label:"Accueil" },
-    { hash:"#/programme/a1", view:"programme", ic:"📚", label:"Programme" },
-    { hash:"#/cours/a1", view:"cours", ic:"📘", label:"Cours" },
+    { hash:"#/programme/a1", view:"programme", ic:"📚", label:"Cours" },
     { hash:"#/exercices", view:"exercices", ic:"✏️", label:"Exercices" },
     { hash:"#/cas", view:"cas", ic:"🩻", label:"Cas" },
     { hash:"#/diplome", view:"diplome", ic:"🎓", label:"Diplôme" }
@@ -2223,9 +2220,8 @@ function renderAccueil(){
    VUE : PROGRAMME
    ========================================================= */
 var openModules = {}; /* moduleId -> bool */
-var moduleSubTab = {}; /* moduleId -> 'cours'|'qcm'|'qcd'|'exercices'|'docs' */
+var moduleSubTab = {}; /* moduleId -> 'exercices'|'docs' */
 var docsCache = {}; /* moduleId -> array of document records (loaded lazily from IndexedDB) */
-var openChapters = {}; /* coursId -> bool, utilisé dans la rubrique Cours (lecture par chapitre) */
 
 function groupModulesByUE(modules){
   var ungrouped = [];
@@ -2270,75 +2266,6 @@ function renderProgramme(yearId){
   return html;
 }
 
-/* =========================================================
-   VUE : COURS (lecture des cours, organisée par programme de matière)
-   ========================================================= */
-function renderCoursRubrique(yearId){
-  var vy = visibleYears();
-  var y = findYear(yearId);
-  if (!y || vy.indexOf(y) === -1) y = vy[0] || state.years[0];
-  var html = "";
-  html += '<div class="tabs" style="margin-bottom:12px;">' + vy.map(function(yy){
-    return '<button class="' + (yy.id===y.id?'active':'') + '" data-action="go" data-hash="#/cours/' + yy.id + '">' + esc(yy.label) + '</button>';
-  }).join("") + '</div>';
-
-  html += '<p class="small muted" style="margin-bottom:12px;">Les cours de ' + esc(y.label) + ', classés par matière selon le programme officiel.</p>';
-
-  if (!y.modules.length){
-    html += '<div class="empty">Aucune matière pour cette année. Ajoute des matières depuis Programme.</div>';
-  }
-  var grouped = groupModulesByUE(y.modules);
-  grouped.ungrouped.forEach(function(m){ html += renderCoursModuleCard(y, m); });
-  grouped.groups.forEach(function(g){
-    html += '<div class="ue-group">' + renderUeGroupHeader(g);
-    g.modules.forEach(function(m){ html += renderCoursModuleCard(y, m); });
-    html += '</div>';
-  });
-  return html;
-}
-function renderCoursModuleCard(y, m){
-  var isOpen = !!openModules[m.id];
-  var docCount = (docsCache[m.id]||[]).length;
-  var html = '<div class="module ' + (isOpen?'open':'') + '">';
-  html += '<div class="mhead" data-action="toggle-module" data-module="' + m.id + '">' +
-    '<div><h3>' + esc(m.name) + '</h3><div class="faint" style="margin-top:3px;">' + m.cours.length + ' chapitre(s) · ' + docCount + ' document(s)</div></div>' +
-    '<span class="chevron">▶</span>' +
-  '</div>';
-  if (isOpen){
-    html += '<div class="mbody">';
-    html += renderCoursChapters(y, m);
-    html += '<div style="margin-top:16px; padding-top:14px; border-top:1px solid var(--line);">' +
-      '<h4 style="font-size:13.5px; margin:0 0 8px;">📎 Document du cours</h4>' +
-      '<p class="faint" style="margin-bottom:8px;">Charge ici le document numérique définitif de cette matière (PDF, Word ou PowerPoint) : il reste enregistré en permanence sur cet appareil.</p>' +
-      renderDocsList(y, m) +
-    '</div>';
-    html += '</div>';
-  }
-  html += '</div>';
-  return html;
-}
-function renderCoursChapters(y, m){
-  if (!m.cours.length) return '<div class="empty small">Aucun chapitre pour l\'instant dans cette matière.</div>';
-  var html = "";
-  m.cours.forEach(function(c){
-    var isOpen = !!openChapters[c.id];
-    html += '<div class="item">' +
-      '<div class="ihead" data-action="toggle-chapter" data-item="' + c.id + '" style="cursor:pointer;">' +
-        '<div style="min-width:0;"><strong class="small">' + esc(c.title) + '</strong> ' + (c.lastReviewed ? '<span class="tag good">lu</span>' : '<span class="tag">non lu</span>') + (c.reviewLater ? ' <span class="tag warn">à revoir</span>' : '') + '</div>' +
-        '<span class="chevron" style="' + (isOpen?'transform:rotate(90deg);':'') + '">▶</span>' +
-      '</div>';
-    if (isOpen){
-      html += '<p style="margin-top:8px;">' + nl2br(c.body) + '</p>' +
-        '<div class="row wrap" style="margin-top:8px; gap:8px;">' +
-          '<button class="btn sm" style="flex:1;" data-action="toggle-cours-read" data-year="'+y.id+'" data-module="'+m.id+'" data-item="'+c.id+'">' + (c.lastReviewed?'↺ Marquer non lu':'✓ Marquer comme lu') + '</button>' +
-          '<button class="btn sm" style="flex:1;" data-action="toggle-cours-review" data-year="'+y.id+'" data-module="'+m.id+'" data-item="'+c.id+'">🔁 ' + (c.reviewLater?'Retirer « à revoir »':'Marquer à revoir') + '</button>' +
-        '</div>';
-    }
-    html += '</div>';
-  });
-  return html;
-}
-
 function renderModule(y, m){
   var isOpen = !!openModules[m.id];
   var sub = moduleSubTab[m.id] || "exercices";
@@ -2370,56 +2297,6 @@ function renderModule(y, m){
     html += '</div>';
   }
   html += '</div>';
-  return html;
-}
-
-function renderCoursList(y, m){
-  var html = "";
-  if (!m.cours.length) html += '<div class="empty small">Aucun cours pour l\'instant.</div>';
-  m.cours.forEach(function(c){
-    html += '<div class="item">' +
-      '<div class="ihead">' +
-        '<div style="min-width:0;"><strong class="small">' + esc(c.title) + '</strong> ' + (c.lastReviewed ? '<span class="tag good">lu</span>' : '<span class="tag">non lu</span>') + (c.reviewLater ? ' <span class="tag warn">à revoir</span>' : '') + '</div>' +
-        '<div class="iactions">' +
-          '<button class="btn sm" data-action="toggle-cours-read" data-year="'+y.id+'" data-module="'+m.id+'" data-item="'+c.id+'">' + (c.lastReviewed?'↺':'✓') + '</button>' +
-          '<button class="btn sm" data-action="toggle-cours-review" data-year="'+y.id+'" data-module="'+m.id+'" data-item="'+c.id+'">🔁</button>' +
-          '<button class="btn sm" data-action="edit-cours" data-year="'+y.id+'" data-module="'+m.id+'" data-item="'+c.id+'">✏️</button>' +
-          '<button class="btn sm danger" data-action="delete-cours" data-year="'+y.id+'" data-module="'+m.id+'" data-item="'+c.id+'">🗑️</button>' +
-        '</div>' +
-      '</div>' +
-      '<p>' + nl2br(c.body) + '</p>' +
-    '</div>';
-  });
-  html += '<div class="row wrap"><button class="btn" style="flex:1;" data-action="add-cours" data-year="'+y.id+'" data-module="'+m.id+'">➕ Ajouter un cours</button>' +
-    '<button class="btn" style="flex:1;" data-action="import-start" data-year="'+y.id+'" data-module="'+m.id+'" data-kind="cours">📥 Importer (PDF/Word/PPT)</button></div>';
-  return html;
-}
-
-function renderQuestionList(y, m, kind){
-  var list = m[kind];
-  var html = "";
-  if (!list.length) html += '<div class="empty small">Aucune question ' + kind.toUpperCase() + ' pour l\'instant.</div>';
-  list.forEach(function(q){
-    var resultTag = q.lastResult === true ? '<span class="tag good">réussi</span>' : (q.lastResult === false ? '<span class="tag bad">raté</span>' : '');
-    html += '<div class="item">' +
-      '<div class="ihead">' +
-        '<div style="min-width:0;"><strong class="small">' + esc(q.question) + '</strong> ' + resultTag + (q.reviewLater ? ' <span class="tag warn">à revoir</span>' : '') + '</div>' +
-        '<div class="iactions">' +
-          '<button class="btn sm" data-action="toggle-q-review" data-year="'+y.id+'" data-module="'+m.id+'" data-kind="'+kind+'" data-item="'+q.id+'">🔁</button>' +
-          '<button class="btn sm" data-action="edit-question" data-year="'+y.id+'" data-module="'+m.id+'" data-kind="'+kind+'" data-item="'+q.id+'">✏️</button>' +
-          '<button class="btn sm danger" data-action="delete-question" data-year="'+y.id+'" data-module="'+m.id+'" data-kind="'+kind+'" data-item="'+q.id+'">🗑️</button>' +
-        '</div>' +
-      '</div>' +
-      q.options.map(function(opt,i){
-        var isCorrect = q.correct.indexOf(i) !== -1;
-        return '<div class="opt' + (isCorrect?' correct':'') + '">' + (isCorrect?'✓ ':'') + esc(opt) + '</div>';
-      }).join("") +
-      (q.explanation ? '<p class="faint" style="margin-top:8px;">💡 ' + nl2br(q.explanation) + '</p>' : "") +
-      '<button class="btn sm" style="margin-top:8px;" data-action="search-courses" data-query="' + escAttr(q.question) + '">🔍 Chercher dans mes cours</button>' +
-    '</div>';
-  });
-  html += '<div class="row wrap"><button class="btn" style="flex:1;" data-action="add-question" data-year="'+y.id+'" data-module="'+m.id+'" data-kind="'+kind+'">➕ Ajouter une question ' + kind.toUpperCase() + '</button>' +
-    '<button class="btn" style="flex:1;" data-action="import-start" data-year="'+y.id+'" data-module="'+m.id+'" data-kind="'+kind+'">📥 Importer (PDF/Word/PPT)</button></div>';
   return html;
 }
 
@@ -2578,7 +2455,7 @@ function renderQuizRun(){
       if (exc === undefined || exc === null){
         html += '<div class="faint" style="margin-top:10px; padding-top:10px; border-top:1px solid var(--line);">🔎 Recherche d\'un passage dans ton cours…</div>';
       } else if (exc === false){
-        html += '<div class="faint" style="margin-top:10px; padding-top:10px; border-top:1px solid var(--line);">Pas d\'explication enregistrée, et aucun passage trouvé dans les cours chargés pour cette matière. Ajoute le cours correspondant dans l\'onglet 📎 Documents (ou dans la rubrique Cours), ou envoie-moi ce sujet en conversation pour que je vérifie et complète l\'explication.</div>';
+        html += '<div class="faint" style="margin-top:10px; padding-top:10px; border-top:1px solid var(--line);">Pas d\'explication enregistrée, et aucun passage trouvé dans les cours chargés pour cette matière. Ajoute le cours correspondant dans l\'onglet 📎 Documents de cette matière, ou envoie-moi ce sujet en conversation pour que je vérifie et complète l\'explication.</div>';
       } else {
         html += '<div class="faint" style="margin-top:10px; padding-top:10px; border-top:1px solid var(--line);"><strong>📘 D\'après ton cours (' + esc(exc.fileName) + ')</strong><br>' + esc(exc.snippet) + '</div>';
       }
@@ -3342,91 +3219,6 @@ function modalTocImportReview(defaultYearId, items){
 }
 
 /* --- Cours --- */
-function modalCours(yearId, moduleId, itemId){
-  var m = findModule(yearId, moduleId);
-  var item = itemId ? m.cours.find(function(c){return c.id===itemId;}) : null;
-  var body = fieldText("Titre du cours", "c-title", item?item.title:"", "Ex : Les voies d'administration") +
-    fieldTextarea("Contenu", "c-body", item?item.body:"", "Écris ou colle ton résumé de cours ici…");
-  openModal(item?"Modifier le cours":"Ajouter un cours", body, {
-    onSubmit: function(){
-      var title = document.getElementById("c-title").value.trim();
-      var text = document.getElementById("c-body").value.trim();
-      if (!title) return showToast("Le titre est requis.");
-      if (item){ item.title = title; item.body = text; }
-      else { m.cours.push({ id: uid(), title: title, body: text, reviewLater:false, lastReviewed:null }); }
-      saveState(); closeModal(); render(); showToast("Cours enregistré.");
-    }
-  });
-}
-
-/* --- QCM / QCD --- */
-function modalQuestion(yearId, moduleId, kind, itemId){
-  var m = findModule(yearId, moduleId);
-  var item = itemId ? m[kind].find(function(q){return q.id===itemId;}) : null;
-  var options = item ? item.options.slice() : ["",""];
-  var correct = item ? item.correct.slice() : [];
-  function renderOptions(){
-    return options.map(function(opt,i){
-      return '<div class="opt-row" data-opt-row="' + i + '">' +
-        '<input type="' + (kind==="qcm"?"checkbox":"radio") + '" name="q-correct" data-correct-idx="' + i + '" ' + (correct.indexOf(i)!==-1?'checked':'') + '>' +
-        '<input type="text" data-opt-idx="' + i + '" value="' + escAttr(opt) + '" placeholder="Option ' + (i+1) + '">' +
-        (options.length>2 ? '<button type="button" class="icon-btn" style="width:32px;height:32px;" data-remove-opt="' + i + '">✕</button>' : '') +
-      '</div>';
-    }).join("");
-  }
-  var body = fieldText("Question", "q-text", item?item.question:"", "Énoncé de la question") +
-    '<label class="field"><span>Options (coche la ou les bonnes réponses)</span><div id="q-options">' + renderOptions() + '</div>' +
-    '<button type="button" class="btn sm" id="q-add-opt" style="margin-top:6px;">➕ Ajouter une option</button></label>' +
-    fieldTextarea("Explication (optionnel)", "q-explain", item?item.explanation:"", "Pourquoi cette réponse est correcte…");
-
-  openModal((item?"Modifier la question ":"Ajouter une question ") + kind.toUpperCase(), body, {
-    onMount: function(){
-      function bindOptEvents(){
-        document.querySelectorAll("#q-options [data-opt-idx]").forEach(function(inp){
-          inp.oninput = function(){ options[+inp.getAttribute("data-opt-idx")] = inp.value; };
-        });
-        document.querySelectorAll("#q-options [data-correct-idx]").forEach(function(inp){
-          inp.onchange = function(){
-            var idx = +inp.getAttribute("data-correct-idx");
-            if (kind==="qcd"){ correct = [idx]; }
-            else { var pos = correct.indexOf(idx); if (inp.checked && pos===-1) correct.push(idx); if (!inp.checked && pos!==-1) correct.splice(pos,1); }
-          };
-        });
-        document.querySelectorAll("#q-options [data-remove-opt]").forEach(function(btn){
-          btn.onclick = function(){
-            var idx = +btn.getAttribute("data-remove-opt");
-            options.splice(idx,1);
-            correct = correct.filter(function(c){return c!==idx;}).map(function(c){return c>idx?c-1:c;});
-            document.getElementById("q-options").innerHTML = renderOptions();
-            bindOptEvents();
-          };
-        });
-      }
-      bindOptEvents();
-      document.getElementById("q-add-opt").onclick = function(){
-        options.push("");
-        document.getElementById("q-options").innerHTML = renderOptions();
-        bindOptEvents();
-      };
-    },
-    onSubmit: function(){
-      var question = document.getElementById("q-text").value.trim();
-      var cleanOptions = options.map(function(o){return o.trim();});
-      var validIdx = [];
-      cleanOptions.forEach(function(o,i){ if (o) validIdx.push(i); });
-      var finalOptions = validIdx.map(function(i){ return cleanOptions[i]; });
-      var finalCorrect = correct.filter(function(c){ return validIdx.indexOf(c)!==-1; }).map(function(c){ return validIdx.indexOf(c); });
-      var explanation = document.getElementById("q-explain").value.trim();
-      if (!question) return showToast("La question est requise.");
-      if (finalOptions.length < 2) return showToast("Au moins 2 options sont nécessaires.");
-      if (!finalCorrect.length) return showToast("Sélectionne au moins une bonne réponse.");
-      if (item){ item.question=question; item.options=finalOptions; item.correct=finalCorrect; item.explanation=explanation; }
-      else { m[kind].push({ id: uid(), question:question, options:finalOptions, correct:finalCorrect, explanation:explanation, reviewLater:false, lastResult:null }); }
-      saveState(); closeModal(); render(); showToast("Question enregistrée.");
-    }
-  });
-}
-
 /* --- Exercice --- */
 function modalExo(yearId, moduleId, itemId){
   var m = findModule(yearId, moduleId);
@@ -3441,58 +3233,6 @@ function modalExo(yearId, moduleId, itemId){
       if (item){ item.statement = statement; item.correction = correction; }
       else { m.exercices.push({ id: uid(), statement: statement, correction: correction, reviewLater:false, mastered:false }); }
       saveState(); closeModal(); render(); showToast("Exercice enregistré.");
-    }
-  });
-}
-
-/* --- Cas clinique (simulation de consultation) --- */
-function modalCas(yearId, moduleId, itemId){
-  var m = findModule(yearId, moduleId);
-  var item = itemId ? (m.casClinique||[]).find(function(c){return c.id===itemId;}) : null;
-  var options = item ? item.options.slice() : ["","","","",""];
-  var correct = item ? item.correct : 0;
-  function renderOptions(){
-    return options.map(function(opt,i){
-      return '<div class="opt-row" data-opt-row="' + i + '">' +
-        '<input type="radio" name="cas-correct" data-cas-correct-idx="' + i + '" ' + (correct===i?'checked':'') + '>' +
-        '<input type="text" data-cas-opt-idx="' + i + '" value="' + escAttr(opt) + '" placeholder="Diagnostic proposé ' + (i+1) + '">' +
-      '</div>';
-    }).join("");
-  }
-  var body =
-    fieldText("Titre du cas", "cas-titre", item?item.titre:"", "Ex : Douleur de l'hypochondre droit fébrile") +
-    fieldTextarea("Anamnèse / mise en situation", "cas-anamnese", item?item.anamnese:"", "Le patient se présente avec…") +
-    fieldTextarea("Triade caractéristique (optionnel)", "cas-triade", item?item.triade:"", "Ex : triade de Charcot : douleur + fièvre + ictère…") +
-    '<label class="field"><span>5 propositions de diagnostic (coche la bonne réponse)</span><div id="cas-options">' + renderOptions() + '</div></label>' +
-    fieldTextarea("Explication du diagnostic", "cas-explication", item?item.explication:"", "Pourquoi ce diagnostic plutôt que les autres…") +
-    fieldTextarea("CAT — Conduite à tenir", "cas-cat", item?item.cat:"", "Ce que l'infirmier doit faire concrètement…");
-  openModal(item?"Modifier le cas clinique":"Ajouter un cas clinique", body, {
-    onMount: function(){
-      document.querySelectorAll("#cas-options [data-cas-opt-idx]").forEach(function(inp){
-        inp.oninput = function(){ options[+inp.getAttribute("data-cas-opt-idx")] = inp.value; };
-      });
-      document.querySelectorAll("#cas-options [data-cas-correct-idx]").forEach(function(inp){
-        inp.onchange = function(){ correct = +inp.getAttribute("data-cas-correct-idx"); };
-      });
-    },
-    onSubmit: function(){
-      var titre = document.getElementById("cas-titre").value.trim();
-      var anamnese = document.getElementById("cas-anamnese").value.trim();
-      var triade = document.getElementById("cas-triade").value.trim();
-      var explication = document.getElementById("cas-explication").value.trim();
-      var cat = document.getElementById("cas-cat").value.trim();
-      var opts = options.map(function(o){ return o.trim(); }).filter(function(o){ return o; });
-      if (!titre || !anamnese) return showToast("Le titre et l'anamnèse sont requis.");
-      if (opts.length < 2) return showToast("Ajoute au moins 2 propositions de diagnostic.");
-      if (correct >= opts.length) correct = 0;
-      var diagnostic = opts[correct];
-      if (!m.casClinique) m.casClinique = [];
-      if (item){
-        item.titre=titre; item.anamnese=anamnese; item.triade=triade; item.options=opts; item.correct=correct; item.diagnostic=diagnostic; item.explication=explication; item.cat=cat;
-      } else {
-        m.casClinique.push({ id: uid(), titre:titre, anamnese:anamnese, triade:triade, options:opts, correct:correct, diagnostic:diagnostic, explication:explication, cat:cat, reviewLater:false, lastResult:null });
-      }
-      saveState(); closeModal(); render(); showToast("Cas clinique enregistré.");
     }
   });
 }
@@ -4353,10 +4093,6 @@ function handleAction(action, el, ev){
         render();
       });
       break;
-    case "toggle-chapter":
-      openChapters[itemId] = !openChapters[itemId];
-      render();
-      break;
     case "module-subtab":
       moduleSubTab[moduleId] = el.getAttribute("data-sub");
       render();
@@ -4388,60 +4124,12 @@ function handleAction(action, el, ev){
       navigate("#/programme/" + yearId);
       break;
 
-    case "add-cours": modalCours(yearId, moduleId); break;
-    case "edit-cours": modalCours(yearId, moduleId, itemId); break;
-    case "delete-cours":
-      if (confirm("Supprimer ce cours ?")){
-        var m1 = findModule(yearId, moduleId);
-        m1.cours = m1.cours.filter(function(c){return c.id!==itemId;});
-        saveState(); render();
-      }
-      break;
-    case "toggle-cours-read":
-      var m2 = findModule(yearId, moduleId);
-      var c1 = m2.cours.find(function(c){return c.id===itemId;});
-      c1.lastReviewed = c1.lastReviewed ? null : Date.now();
-      saveState(); render();
-      break;
-    case "toggle-cours-review":
-      var m3 = findModule(yearId, moduleId);
-      var c2 = m3.cours.find(function(c){return c.id===itemId;});
-      c2.reviewLater = !c2.reviewLater;
-      saveState(); render();
-      break;
-
-    case "add-question": modalQuestion(yearId, moduleId, kind); break;
-    case "edit-question": modalQuestion(yearId, moduleId, kind, itemId); break;
-    case "delete-question":
-      if (confirm("Supprimer cette question ?")){
-        var m4 = findModule(yearId, moduleId);
-        m4[kind] = m4[kind].filter(function(q){return q.id!==itemId;});
-        saveState(); render();
-      }
-      break;
-    case "toggle-q-review":
-      var m5 = findModule(yearId, moduleId);
-      var q1 = m5[kind].find(function(q){return q.id===itemId;});
-      q1.reviewLater = !q1.reviewLater;
-      saveState(); render();
-      break;
-
     case "add-exo": modalExo(yearId, moduleId); break;
     case "edit-exo": modalExo(yearId, moduleId, itemId); break;
     case "delete-exo":
       if (confirm("Supprimer cet exercice ?")){
         var m6 = findModule(yearId, moduleId);
         m6.exercices = m6.exercices.filter(function(e){return e.id!==itemId;});
-        saveState(); render();
-      }
-      break;
-
-    case "add-cas": modalCas(yearId, moduleId); break;
-    case "edit-cas": modalCas(yearId, moduleId, itemId); break;
-    case "delete-cas":
-      if (confirm("Supprimer ce cas clinique ?")){
-        var m7 = findModule(yearId, moduleId);
-        m7.casClinique = (m7.casClinique||[]).filter(function(c){return c.id!==itemId;});
         saveState(); render();
       }
       break;
