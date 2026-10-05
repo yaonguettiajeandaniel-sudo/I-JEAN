@@ -910,7 +910,322 @@ function buildSeed(){
                 diagnostic: "Crise de goutte aiguë",
                 explication: "Le profil (homme, diurétiques, consommation d'alcool) associé à une monoarthrite brutale du gros orteil (podagre) est très typique de la crise de goutte aiguë. L'arthrite septique doit toujours être évoquée et écartée en cas de doute (fièvre élevée, altération de l'état général) car c'est une urgence. La pseudogoutte touche plus souvent le genou et le sujet âgé. Le rhumatisme articulaire aigu touche surtout l'enfant et l'adolescent, dans les suites d'une angine. La polyarthrite rhumatoïde débutante est en général symétrique et touche plusieurs petites articulations.",
                 cat: "CAT infirmière : mettre l'articulation au repos, appliquer de la glace, administrer les anti-inflammatoires prescrits (sauf contre-indication), réaliser le bilan biologique demandé (uricémie, NFS, CRP), participer à l'élimination d'une arthrite septique par ponction articulaire en cas de doute, et sensibiliser le patient sur l'arrêt de l'alcool et l'adaptation éventuelle du traitement diurétique avec le médecin."
-              }
+              },
+            {
+              titre: 'Vincent P. a une douleur thoracique',
+              anamnese: 'Vincent, 56 ans, hypertendu et fumeur, décrit une douleur rétrosternale constrictive depuis 25 minutes, irradiant au bras gauche, apparue au repos avec sueurs et nausées. L\'ECG montre un sus-décalage persistant du segment ST dans deux dérivations contiguës.',
+              options: ['Angor stable', 'Infarctus aigu du myocarde avec sus-décalage ST', 'Péricardite aiguë', 'Reflux gastro-œsophagien'],
+              correct: 1,
+              diagnostic: 'Infarctus aigu du myocarde avec sus-décalage ST',
+              explication: 'La douleur prolongée au repos avec sus-décalage ST est typique d\'un STEMI. (Source : Recueil de 50 cas cliniques \u2014 diagnostic diff\u00e9rentiel, INFAS.)',
+              cat: ''
+            },
+            {
+              titre: 'Monsieur B. a un mal de gorge qui traîne',
+              anamnese: 'Depuis 3 semaines, Monsieur B. a une odynophagie persistante, une dysphonie et une gêne à la déglutition. Il fume depuis 25 ans. Il n\'a pas de fièvre. Une adénopathie cervicale est palpée.',
+              options: ['Pharyngite virale banale', 'Cancer ORL à explorer', 'Angine streptococcique aiguë', 'Reflux isolé'],
+              correct: 1,
+              diagnostic: 'Cancer ORL à explorer',
+              explication: 'La persistance, le tabagisme, la dysphonie et l\'adénopathie imposent de rechercher une lésion ORL, notamment tumorale. (Source : Recueil de 50 cas cliniques \u2014 diagnostic diff\u00e9rentiel, INFAS.)',
+              cat: ''
+            },
+            {
+              titre: 'Monsieur D. a des diarrhées',
+              anamnese: 'Depuis 24 heures, Monsieur D. a 8 selles liquides, sans sang, avec vomissements et crampes abdominales. Plusieurs collègues ont les mêmes symptômes après un repas collectif.',
+              options: ['Gastro-entérite aiguë infectieuse', 'Rectocolite hémorragique', 'Cancer colorectal', 'Appendicite'],
+              correct: 0,
+              diagnostic: 'Gastro-entérite aiguë infectieuse',
+              explication: 'Le début brutal, les selles liquides et les cas groupés après un repas évoquent une gastro-entérite aiguë. (Source : Recueil de 50 cas cliniques \u2014 diagnostic diff\u00e9rentiel, INFAS.)',
+              cat: ''
+            },
+            {
+              titre: 'Madame F., âgée de 30 ans, est fatiguée',
+              anamnese: 'Fatigue progressive, pâleur, dyspnée à l\'effort et palpitations. Les règles sont très abondantes. NFS : Hb 8,7 g/dL, VGM diminué, ferritine basse.',
+              options: ['Anémie ferriprive', 'Hyperthyroïdie', 'Dépression', 'Insuffisance rénale aiguë'],
+              correct: 0,
+              diagnostic: 'Anémie ferriprive',
+              explication: 'Anémie microcytaire avec ferritine basse et pertes menstruelles abondantes = carence martiale. (Source : Recueil de 50 cas cliniques \u2014 diagnostic diff\u00e9rentiel, INFAS.)',
+              cat: ''
+            },
+            {
+              titre: 'Monsieur C. est fatigué depuis 10 jours',
+              anamnese: 'Fatigue récente associée à fièvre, céphalées, myalgies et douleurs articulaires. Il revient d\'une zone où le paludisme circule. La goutte épaisse est positive.',
+              options: ['Paludisme', 'Hypothyroïdie', 'Anémie ferriprive', 'BPCO'],
+              correct: 0,
+              diagnostic: 'Paludisme',
+              explication: 'Dans ce contexte épidémiologique, fièvre et goutte épaisse positive confirment l\'orientation palustre. (Source : Recueil de 50 cas cliniques \u2014 diagnostic diff\u00e9rentiel, INFAS.)',
+              cat: ''
+            },
+            {
+              titre: 'Madame P., 73 ans, est de plus en plus fatiguée',
+              anamnese: 'Depuis plusieurs mois : fatigue, constipation, frilosité, peau sèche et prise de poids. Le pouls est à 54/min. TSH très élevée et T4L basse.',
+              options: ['Hyperthyroïdie', 'Hypothyroïdie', 'Anémie aiguë', 'Insuffisance cardiaque droite'],
+              correct: 1,
+              diagnostic: 'Hypothyroïdie',
+              explication: 'Frilosité, constipation, bradycardie et TSH élevée avec T4L basse indiquent une hypothyroïdie primaire. (Source : Recueil de 50 cas cliniques \u2014 diagnostic diff\u00e9rentiel, INFAS.)',
+              cat: ''
+            },
+            {
+              titre: 'Mademoiselle M. fait des malaises et voudrait que ça cesse',
+              anamnese: 'Elle a des malaises brefs en position debout prolongée, précédés de nausées, sueurs et sensation de chaleur. Elle récupère rapidement en position allongée. ECG normal.',
+              options: ['Syncope vasovagale', 'Épilepsie', 'AVC', 'Hypoglycémie sévère'],
+              correct: 0,
+              diagnostic: 'Syncope vasovagale',
+              explication: 'Les prodromes neurovégétatifs et le déclenchement orthostatique avec récupération rapide sont typiques du malaise vagal. (Source : Recueil de 50 cas cliniques \u2014 diagnostic diff\u00e9rentiel, INFAS.)',
+              cat: ''
+            },
+            {
+              titre: 'Bertrand, 22 ans, a fait un malaise à son travail',
+              anamnese: 'Après avoir sauté le déjeuner, Bertrand devient pâle, tremblant, en sueur et confus. La glycémie capillaire est à 0,48 g/L. Les symptômes disparaissent après apport de sucre.',
+              options: ['Hypoglycémie', 'Syncope vagale', 'AVC', 'Crise d\'asthme'],
+              correct: 0,
+              diagnostic: 'Hypoglycémie',
+              explication: 'Les symptômes neurovégétatifs et la glycémie basse corrigée par le sucre définissent une hypoglycémie symptomatique. (Source : Recueil de 50 cas cliniques \u2014 diagnostic diff\u00e9rentiel, INFAS.)',
+              cat: ''
+            },
+            {
+              titre: 'Monsieur L., 78 ans, a eu un malaise au lever',
+              anamnese: 'Au lever du lit, il ressent vertiges et faiblesse sans perte de connaissance. PA couchée 135/75 mmHg ; après 3 minutes debout 105/60 mmHg, avec reproduction des symptômes.',
+              options: ['Hypotension orthostatique', 'Vertige positionnel bénin', 'Hypoglycémie', 'Infarctus'],
+              correct: 0,
+              diagnostic: 'Hypotension orthostatique',
+              explication: 'Une chute tensionnelle significative associée aux symptômes lors du passage debout évoque une hypotension orthostatique. (Source : Recueil de 50 cas cliniques \u2014 diagnostic diff\u00e9rentiel, INFAS.)',
+              cat: ''
+            },
+            {
+              titre: 'Monsieur M. a une fièvre qui ne baisse pas',
+              anamnese: 'Fièvre quotidienne depuis 7 jours avec frissons, céphalées, grande fatigue et splénomégalie. Il revient d\'une région impaludée. Une goutte épaisse est positive pour Plasmodium.',
+              options: ['Paludisme', 'Grippe', 'Tuberculose pulmonaire', 'Angine'],
+              correct: 0,
+              diagnostic: 'Paludisme',
+              explication: 'Fièvre prolongée, splénomégalie et test parasitologique positif orientent vers le paludisme. (Source : Recueil de 50 cas cliniques \u2014 diagnostic diff\u00e9rentiel, INFAS.)',
+              cat: ''
+            },
+            {
+              titre: 'Monsieur E. a mal au dos',
+              anamnese: 'Douleur lombaire apparue après le port d\'une charge lourde, mécanique, augmentée par certains mouvements, sans fièvre, sans traumatisme majeur et sans déficit neurologique.',
+              options: ['Lombalgie mécanique commune', 'Pyélonéphrite', 'Fracture vertébrale', 'Méningite'],
+              correct: 0,
+              diagnostic: 'Lombalgie mécanique commune',
+              explication: 'Le caractère mécanique déclenché par un effort sans signe d\'alarme évoque une lombalgie commune. (Source : Recueil de 50 cas cliniques \u2014 diagnostic diff\u00e9rentiel, INFAS.)',
+              cat: ''
+            },
+            {
+              titre: 'Madame D. a mal à l\'épaule',
+              anamnese: 'Douleur de l\'épaule majorée lors de l\'élévation active, surtout entre 60 et 120°, sans traumatisme. La mobilité passive est presque conservée.',
+              options: ['Syndrome de conflit/souffrance de la coiffe des rotateurs', 'Fracture du col fémoral', 'Arthrite septique du genou', 'Cervicalgie'],
+              correct: 0,
+              diagnostic: 'Syndrome de conflit/souffrance de la coiffe des rotateurs',
+              explication: 'Douleur à l\'élévation active avec mobilité passive conservée évoque une atteinte de la coiffe/conflit sous-acromial. (Source : Recueil de 50 cas cliniques \u2014 diagnostic diff\u00e9rentiel, INFAS.)',
+              cat: ''
+            },
+            {
+              titre: 'Madame C. a mal au cou',
+              anamnese: 'Douleur cervicale après une mauvaise posture prolongée, avec contracture musculaire et limitation modérée des mouvements. Pas de fièvre ni déficit neurologique.',
+              options: ['Cervicalgie commune mécanique', 'Méningite', 'AVC', 'Fracture cervicale instable'],
+              correct: 0,
+              diagnostic: 'Cervicalgie commune mécanique',
+              explication: 'Le contexte postural et l\'absence de signes neurologiques ou infectieux orientent vers une cervicalgie mécanique. (Source : Recueil de 50 cas cliniques \u2014 diagnostic diff\u00e9rentiel, INFAS.)',
+              cat: ''
+            },
+            {
+              titre: 'Monsieur S. a mal au genou',
+              anamnese: 'Il a 67 ans, une douleur du genou évoluant depuis plusieurs années, aggravée par la marche, avec crépitations et raideur matinale inférieure à 30 minutes. Pas de fièvre.',
+              options: ['Gonarthrose', 'Arthrite septique', 'Goutte aiguë', 'Fracture'],
+              correct: 0,
+              diagnostic: 'Gonarthrose',
+              explication: 'Douleur mécanique, crépitations et courte raideur matinale chez un sujet âgé = gonarthrose. (Source : Recueil de 50 cas cliniques \u2014 diagnostic diff\u00e9rentiel, INFAS.)',
+              cat: ''
+            },
+            {
+              titre: 'Monsieur A. a des problèmes avec l\'alcool',
+              anamnese: 'Il boit quotidiennement depuis plusieurs années. Il tremble le matin, transpire et devient anxieux lorsqu\'il retarde sa consommation. Il a déjà eu besoin d\'augmenter les quantités pour obtenir le même effet.',
+              options: ['Trouble de l\'usage de l\'alcool avec dépendance', 'Intoxication aiguë uniquement', 'Dépression isolée', 'Schizophrénie'],
+              correct: 0,
+              diagnostic: 'Trouble de l\'usage de l\'alcool avec dépendance',
+              explication: 'Craving/conduite compulsive, tolérance et signes de sevrage indiquent une dépendance à l\'alcool. (Source : Recueil de 50 cas cliniques \u2014 diagnostic diff\u00e9rentiel, INFAS.)',
+              cat: ''
+            },
+            {
+              titre: 'Madame S. a des palpitations',
+              anamnese: 'Palpitations rapides, régulières, débutant et cessant brutalement. Lors d\'un épisode, FC 180/min, QRS fins et rythme régulier. Elle est stable hémodynamiquement.',
+              options: ['Tachycardie supraventriculaire paroxystique', 'Fibrillation auriculaire', 'Bradycardie sinusale', 'Extrasystoles ventriculaires isolées'],
+              correct: 0,
+              diagnostic: 'Tachycardie supraventriculaire paroxystique',
+              explication: 'Une tachycardie régulière à QRS fins avec début et fin brutaux évoque une TSV paroxystique. (Source : Recueil de 50 cas cliniques \u2014 diagnostic diff\u00e9rentiel, INFAS.)',
+              cat: ''
+            },
+            {
+              titre: 'Monsieur T. trouve que les battements de son cœur sont irréguliers',
+              anamnese: 'Il ressent des palpitations irrégulières. ECG : rythme totalement irrégulier, absence d\'ondes P organisées et complexes QRS généralement fins.',
+              options: ['Fibrillation auriculaire', 'Flutter auriculaire régulier', 'Tachycardie sinusale', 'Bloc AV complet'],
+              correct: 0,
+              diagnostic: 'Fibrillation auriculaire',
+              explication: 'Le rythme irrégulièrement irrégulier et l\'absence d\'ondes P organisées sont caractéristiques de la fibrillation auriculaire. (Source : Recueil de 50 cas cliniques \u2014 diagnostic diff\u00e9rentiel, INFAS.)',
+              cat: ''
+            },
+            {
+              titre: 'Madame S. se gratte',
+              anamnese: 'Prurit intense surtout nocturne, touchant espaces interdigitaux, poignets et abdomen. Son conjoint présente également un prurit depuis quelques jours. On observe de fins sillons cutanés.',
+              options: ['Gale', 'Urticaire aiguë', 'Psoriasis', 'Zona'],
+              correct: 0,
+              diagnostic: 'Gale',
+              explication: 'Prurit nocturne, sillons et atteinte des proches sont très évocateurs de la gale. (Source : Recueil de 50 cas cliniques \u2014 diagnostic diff\u00e9rentiel, INFAS.)',
+              cat: ''
+            },
+            {
+              titre: 'Monsieur Robert C. urine de plus en plus souvent',
+              anamnese: 'Robert, 68 ans, présente depuis 2 ans une pollakiurie, surtout nocturne, avec diminution de la force du jet et sensation de vidange incomplète. Pas de fièvre ni douleur.',
+              options: ['Hyperplasie bénigne de la prostate', 'Cystite aiguë', 'Pyélonéphrite', 'Calcul urinaire aigu'],
+              correct: 0,
+              diagnostic: 'Hyperplasie bénigne de la prostate',
+              explication: 'Chez l\'homme âgé, les symptômes urinaires obstructifs chroniques évoquent une HBP. (Source : Recueil de 50 cas cliniques \u2014 diagnostic diff\u00e9rentiel, INFAS.)',
+              cat: ''
+            },
+            {
+              titre: 'Monsieur P. a de la fièvre et une gêne en urinant',
+              anamnese: 'Fièvre à 39°C, frissons, dysurie et douleur lombaire droite. À l\'examen, douleur à la percussion lombaire.',
+              options: ['Pyélonéphrite aiguë', 'Cystite simple', 'Prostatite chronique asymptomatique', 'Colique hépatique'],
+              correct: 0,
+              diagnostic: 'Pyélonéphrite aiguë',
+              explication: 'Fièvre, frissons, dysurie et douleur lombaire avec percussion douloureuse indiquent une infection urinaire haute. (Source : Recueil de 50 cas cliniques \u2014 diagnostic diff\u00e9rentiel, INFAS.)',
+              cat: ''
+            },
+            {
+              titre: 'Madame F. trouve que Géraldine est « fatiguée »',
+              anamnese: 'Géraldine, 16 ans, est pâle, essoufflée à l\'effort et somnolente. Elle a des règles longues et abondantes. Hb 7,9 g/dL, VGM bas.',
+              options: ['Anémie ferriprive', 'Anémie hémolytique aiguë', 'Hyperthyroïdie', 'Insuffisance hépatique'],
+              correct: 0,
+              diagnostic: 'Anémie ferriprive',
+              explication: 'L\'anémie microcytaire chez une adolescente avec règles abondantes évoque une carence martiale. (Source : Recueil de 50 cas cliniques \u2014 diagnostic diff\u00e9rentiel, INFAS.)',
+              cat: ''
+            },
+            {
+              titre: 'Sébastien A., 15 ans, a de l\'acné',
+              anamnese: 'Comédons ouverts et fermés, papules et quelques pustules sur le visage et le dos, sans nodules profonds ni fièvre.',
+              options: ['Acné vulgaire', 'Rosacée', 'Gale', 'Impétigo'],
+              correct: 0,
+              diagnostic: 'Acné vulgaire',
+              explication: 'La présence de comédons, papules et pustules chez l\'adolescent est caractéristique de l\'acné vulgaire. (Source : Recueil de 50 cas cliniques \u2014 diagnostic diff\u00e9rentiel, INFAS.)',
+              cat: ''
+            },
+            {
+              titre: 'Mademoiselle Catherine M., toxicomane, veut du Subutex®',
+              anamnese: 'Catherine consomme des opioïdes depuis plusieurs années. Elle demande un traitement de substitution. Elle présente une dépendance aux opioïdes sans détresse respiratoire actuelle.',
+              options: ['Trouble de l\'usage des opioïdes nécessitant une prise en charge spécialisée', 'Asthme', 'Sevrage alcoolique', 'Épilepsie'],
+              correct: 0,
+              diagnostic: 'Trouble de l\'usage des opioïdes nécessitant une prise en charge spécialisée',
+              explication: 'Le tableau relève d\'un trouble de l\'usage des opioïdes et d\'une prise en charge de substitution encadrée. (Source : Recueil de 50 cas cliniques \u2014 diagnostic diff\u00e9rentiel, INFAS.)',
+              cat: ''
+            },
+            {
+              titre: 'Monsieur Robert D. a maigri',
+              anamnese: 'Robert, 52 ans, a perdu 9 kg en 4 mois sans régime. Il présente polyurie, polydipsie et fatigue. Glycémie à jeun répétée à 2,1 g/L.',
+              options: ['Diabète sucré', 'Hyperthyroïdie certaine', 'Tuberculose certaine', 'Dépression seule'],
+              correct: 0,
+              diagnostic: 'Diabète sucré',
+              explication: 'Polyurie-polydipsie avec hyperglycémie à jeun diagnostique orientent fortement vers un diabète sucré. (Source : Recueil de 50 cas cliniques \u2014 diagnostic diff\u00e9rentiel, INFAS.)',
+              cat: ''
+            },
+            {
+              titre: 'Madame A. perd la mémoire',
+              anamnese: 'Madame A., 76 ans, présente depuis 3 ans un déclin progressif de la mémoire récente, puis des difficultés dans les activités quotidiennes. Pas de début brutal ni fluctuation majeure.',
+              options: ['Maladie d\'Alzheimer', 'AVC aigu', 'Délirium fébrile', 'Épilepsie'],
+              correct: 0,
+              diagnostic: 'Maladie d\'Alzheimer',
+              explication: 'Le déclin cognitif progressif et insidieux avec retentissement fonctionnel évoque une maladie d\'Alzheimer. (Source : Recueil de 50 cas cliniques \u2014 diagnostic diff\u00e9rentiel, INFAS.)',
+              cat: ''
+            },
+            {
+              titre: 'Monsieur L. a des tremblements',
+              anamnese: 'Monsieur L., 69 ans, présente un tremblement de repos asymétrique, une bradykinésie et une rigidité. La marche est devenue lente avec diminution du ballant d\'un bras.',
+              options: ['Maladie de Parkinson', 'Tremblement physiologique', 'Hyperthyroïdie', 'Crise d\'angoisse'],
+              correct: 0,
+              diagnostic: 'Maladie de Parkinson',
+              explication: 'Association tremblement de repos, bradykinésie et rigidité = syndrome parkinsonien, typiquement maladie de Parkinson. (Source : Recueil de 50 cas cliniques \u2014 diagnostic diff\u00e9rentiel, INFAS.)',
+              cat: ''
+            },
+            {
+              titre: 'Madame M. a des fourmillements dans la main droite',
+              anamnese: 'Fourmillements nocturnes du pouce, index et majeur droits, réveillant la patiente. Ils diminuent lorsqu\'elle secoue la main. Pas de déficit moteur important.',
+              options: ['Syndrome du canal carpien', 'AVC', 'Radiculopathie lombaire', 'Polyneuropathie aiguë'],
+              correct: 0,
+              diagnostic: 'Syndrome du canal carpien',
+              explication: 'Le territoire médian et les paresthésies nocturnes sont typiques du syndrome du canal carpien. (Source : Recueil de 50 cas cliniques \u2014 diagnostic diff\u00e9rentiel, INFAS.)',
+              cat: ''
+            },
+            {
+              titre: 'Madame P. a très mal à la tête',
+              anamnese: 'Céphalée brutale, maximale en quelques secondes, décrite comme la pire de sa vie, avec vomissements et raideur de nuque. Aucun antécédent similaire.',
+              options: ['Hémorragie sous-arachnoïdienne', 'Céphalée de tension', 'Sinusite banale', 'Migraine sans aura typique'],
+              correct: 0,
+              diagnostic: 'Hémorragie sous-arachnoïdienne',
+              explication: 'Une céphalée en coup de tonnerre impose de rechercher une hémorragie sous-arachnoïdienne. (Source : Recueil de 50 cas cliniques \u2014 diagnostic diff\u00e9rentiel, INFAS.)',
+              cat: ''
+            },
+            {
+              titre: 'Monsieur M. veut faire un « check up »',
+              anamnese: 'Monsieur M., 45 ans, asymptomatique, souhaite un bilan général. Il est sédentaire, fume et a une pression artérielle élevée lors de deux consultations.',
+              options: ['Évaluation préventive des facteurs de risque cardiovasculaire', 'Scanner corps entier systématique', 'Antibiothérapie préventive', 'IRM cérébrale obligatoire'],
+              correct: 0,
+              diagnostic: 'Évaluation préventive des facteurs de risque cardiovasculaire',
+              explication: 'Le dépistage pertinent porte sur les facteurs de risque cardiovasculaire et les mesures préventives adaptées, pas sur une imagerie systématique. (Source : Recueil de 50 cas cliniques \u2014 diagnostic diff\u00e9rentiel, INFAS.)',
+              cat: ''
+            },
+            {
+              titre: 'On a trouvé une « boule » à la thyroïde à Madame B.',
+              anamnese: 'Madame B., 49 ans, présente un nodule thyroïdien découvert à la palpation. Elle est euthyroïdienne cliniquement. Le nodule est ferme et mesure 2 cm.',
+              options: ['Nodule thyroïdien nécessitant une évaluation échographique et biologique', 'Cancer certain', 'Kyste ovarien', 'Adénite cervicale certaine'],
+              correct: 0,
+              diagnostic: 'Nodule thyroïdien nécessitant une évaluation échographique et biologique',
+              explication: 'Un nodule thyroïdien doit être caractérisé, notamment par TSH et échographie, avec cytoponction selon les critères. (Source : Recueil de 50 cas cliniques \u2014 diagnostic diff\u00e9rentiel, INFAS.)',
+              cat: ''
+            },
+            {
+              titre: 'Mademoiselle C. a des brûlures urinaires',
+              anamnese: 'Brûlures mictionnelles, pollakiurie et urgenturie depuis 2 jours. Pas de fièvre, pas de douleur lombaire, pas de vomissements.',
+              options: ['Cystite aiguë simple', 'Pyélonéphrite aiguë', 'Appendicite', 'Colique néphrétique compliquée'],
+              correct: 0,
+              diagnostic: 'Cystite aiguë simple',
+              explication: 'Dysurie-pollakiurie sans fièvre ni douleur lombaire = cystite simple probable. (Source : Recueil de 50 cas cliniques \u2014 diagnostic diff\u00e9rentiel, INFAS.)',
+              cat: ''
+            },
+            {
+              titre: 'On a découvert que Madame V. a une glycémie élevée',
+              anamnese: 'Madame V., 47 ans, sans symptôme, a deux glycémies à jeun à 1,34 g/L et 1,38 g/L à des jours différents.',
+              options: ['Diabète sucré', 'Hypoglycémie', 'Glycémie normale', 'Diabète insipide'],
+              correct: 0,
+              diagnostic: 'Diabète sucré',
+              explication: 'Une glycémie à jeun ≥ 1,26 g/L à deux reprises est compatible avec le diagnostic de diabète. (Source : Recueil de 50 cas cliniques \u2014 diagnostic diff\u00e9rentiel, INFAS.)',
+              cat: ''
+            },
+            {
+              titre: 'Madame A. a un diabète déséquilibré',
+              anamnese: 'Diabète connu depuis 8 ans. HbA1c à 10,2 %, polyurie et polydipsie. Elle oublie fréquemment ses traitements. Pas de douleur abdominale ni respiration de Kussmaul.',
+              options: ['Diabète insuffisamment contrôlé', 'Acidocétose diabétique certaine', 'Hypoglycémie sévère', 'Diabète insipide'],
+              correct: 0,
+              diagnostic: 'Diabète insuffisamment contrôlé',
+              explication: 'Une HbA1c très élevée avec hyperglycémie chronique indique un diabète mal contrôlé ; les critères d\'acidocétose ne sont pas présents ici. (Source : Recueil de 50 cas cliniques \u2014 diagnostic diff\u00e9rentiel, INFAS.)',
+              cat: ''
+            },
+            {
+              titre: 'Monsieur E., âgé de 74 ans, diabétique, a une créatininémie élevée',
+              anamnese: 'Diabète depuis 15 ans et hypertension. Créatinine élevée de façon persistante depuis plus de 3 mois, albuminurie présente. Pas de déshydratation aiguë.',
+              options: ['Maladie rénale chronique probablement diabétique', 'Insuffisance rénale aiguë par déshydratation', 'Cystite', 'Hépatite aiguë'],
+              correct: 0,
+              diagnostic: 'Maladie rénale chronique probablement diabétique',
+              explication: 'La persistance >3 mois avec albuminurie chez un diabétique évoque une maladie rénale chronique, souvent néphropathie diabétique. (Source : Recueil de 50 cas cliniques \u2014 diagnostic diff\u00e9rentiel, INFAS.)',
+              cat: ''
+            },
+            {
+              titre: 'Madame V. a la tête qui tourne',
+              anamnese: 'Madame V., 61 ans, décrit depuis quelques jours de brefs épisodes de vertige rotatoire déclenchés lorsqu\'elle se couche ou tourne la tête. Chaque crise dure moins d\'une minute. Examen neurologique normal entre les épisodes.',
+              options: ['Vertige positionnel paroxystique bénin', 'AVC du tronc cérébral', 'Hypoglycémie permanente', 'Méningite'],
+              correct: 0,
+              diagnostic: 'Vertige positionnel paroxystique bénin',
+              explication: 'Vertige rotatoire bref, positionnel, reproductible et sans déficit neurologique = VPPB. (Source : Recueil de 50 cas cliniques \u2014 diagnostic diff\u00e9rentiel, INFAS.)',
+              cat: ''
+            }
             ]
           }),
           makeModule("Pathologie chirurgicale"),
@@ -925,6 +1240,14 @@ function buildSeed(){
               diagnostic: "Occlusion intestinale aiguë sur bride",
               explication: "L'antécédent de chirurgie abdominale (appendicectomie) est un facteur de risque classique de bride/adhérence responsable d'occlusion intestinale. L'arrêt des matières et des gaz avec météorisme oriente fortement vers l'occlusion, alors que la gastro-entérite donnerait plutôt une diarrhée. La colique néphrétique ne donne pas d'arrêt du transit. La pancréatite aiguë donne une douleur épigastrique transfixiante. La péritonite par perforation donnerait une contracture abdominale généralisée et un tableau septique plus marqué.",
               cat: "CAT infirmière : mettre le patient à jeun strict, participer à la pose d'une sonde nasogastrique en aspiration douce pour décomprimer l'estomac, poser une voie veineuse pour réhydratation et rééquilibration hydro-électrolytique, surveiller les constantes et la diurèse, préparer le bilan biologique et l'imagerie demandés (radiographie de l'abdomen sans préparation ou scanner), et prévenir le chirurgien pour la suite de la prise en charge."
+            }, {
+              titre: 'Amélie s\'est tordu la cheville',
+              anamnese: 'Après inversion de la cheville, Amélie présente douleur et œdème de la face latérale. Elle peut marcher avec difficulté. Pas de déformation. Douleur à la palpation du ligament talo-fibulaire antérieur.',
+              options: ['Entorse latérale de cheville', 'Luxation de hanche', 'Fracture ouverte', 'Tendinite d\'Achille'],
+              correct: 0,
+              diagnostic: 'Entorse latérale de cheville',
+              explication: 'Le mécanisme d\'inversion et l\'atteinte du ligament latéral sont typiques d\'une entorse latérale. (Source : Recueil de 50 cas cliniques \u2014 diagnostic diff\u00e9rentiel, INFAS.)',
+              cat: ''
             }]
           }),
           makeModule("Pédiatrie et Soins de l'enfant", {
@@ -937,6 +1260,14 @@ function buildSeed(){
               diagnostic: "Invagination intestinale aiguë",
               explication: "Les crises paroxystiques avec intervalles libres, associées aux rectorragies typiques (« gelée de groseille »), sont très évocatrices de l'invagination intestinale aiguë, urgence chirurgicale fréquente chez le nourrisson. La gastro-entérite aiguë donne surtout une diarrhée, pas du sang. La colique du nourrisson ne s'accompagne ni de vomissements ni de sang. L'appendicite est rare et se présente différemment chez le nourrisson. La torsion d'un kyste de l'ovaire est un diagnostic différentiel possible mais beaucoup plus rare.",
               cat: "CAT infirmière : alerter immédiatement le médecin ou le pédiatre (urgence chirurgicale), mettre l'enfant à jeun, poser une voie veineuse pour réhydratation, surveiller les constantes et l'état de conscience, préparer l'enfant pour une échographie abdominale en urgence et une réduction (par lavement ou chirurgicale selon les cas), et rassurer les parents."
+            }, {
+              titre: 'Victor, 10 mois, a de la fièvre',
+              anamnese: 'Victor a 39,5°C depuis 24 heures, boit peu et présente une respiration rapide. Il tousse et ses parents signalent un tirage sous-costal. À l\'auscultation : crépitants localisés.',
+              options: ['Pneumonie', 'Otite externe', 'Gastro-entérite', 'Dermatite atopique'],
+              correct: 0,
+              diagnostic: 'Pneumonie',
+              explication: 'Chez le nourrisson, fièvre, toux, tachypnée, tirage et crépitants localisés sont compatibles avec une pneumonie. (Source : Recueil de 50 cas cliniques \u2014 diagnostic diff\u00e9rentiel, INFAS.)',
+              cat: ''
             }],
             cours: [{ title: "Signes de danger chez le nouveau-né et l'enfant (exemple)",
               body: "Signes devant alerter et nécessiter une consultation en urgence :\n\n- Fièvre élevée ou hypothermie\n- Difficulté respiratoire (tirage, geignement)\n- Refus de téter / de boire\n- Léthargie, enfant difficile à réveiller\n- Convulsions\n- Coloration anormale de la peau (pâleur, cyanose, ictère marqué)\n\nCes signes font partie de l'approche de prise en charge intégrée des maladies de l'enfant (PCIME)." }],
@@ -1016,6 +1347,51 @@ function buildSeed(){
             ]
           }),
           makeModule("Gynécologie et Obstétrique", {
+            casClinique: [{
+              titre: 'Madame Catherine F., enceinte de 2 mois, a de la fièvre',
+              anamnese: 'À 8 semaines d\'aménorrhée, Catherine présente fièvre à 39°C, céphalées et myalgies après contact avec une personne fébrile. Elle rapporte aussi une éruption maculopapuleuse et des adénopathies rétro-auriculaires.',
+              options: ['Rubéole', 'Cystite simple', 'Appendicite', 'Asthme'],
+              correct: 0,
+              diagnostic: 'Rubéole',
+              explication: 'Fièvre, éruption et adénopathies rétro-auriculaires dans une grossesse évoquent une rubéole, à confirmer rapidement. (Source : Recueil de 50 cas cliniques \u2014 diagnostic diff\u00e9rentiel, INFAS.)',
+              cat: ''
+            },
+            {
+              titre: 'Marion a mal au ventre',
+              anamnese: 'Marion, 24 ans, présente une douleur pelvienne aiguë unilatérale, avec retard de règles et petit saignement vaginal. Test de grossesse urinaire positif. Elle est pâle et étourdie.',
+              options: ['Grossesse extra-utérine', 'Cystite', 'Gastro-entérite', 'Dysménorrhée simple'],
+              correct: 0,
+              diagnostic: 'Grossesse extra-utérine',
+              explication: 'Grossesse positive + douleur pelvienne + saignement impose de suspecter une grossesse extra-utérine, potentiellement rompue. (Source : Recueil de 50 cas cliniques \u2014 diagnostic diff\u00e9rentiel, INFAS.)',
+              cat: ''
+            },
+            {
+              titre: 'Sonia B., 23 ans, veut prendre la pilule',
+              anamnese: 'Sonia, 23 ans, non fumeuse, sans antécédent thromboembolique, souhaite une contraception orale combinée. TA normale, examen sans particularité.',
+              options: ['Contraception orale combinée possible après évaluation des contre-indications', 'Pilule formellement contre-indiquée chez toute femme de 23 ans', 'Vasectomie obligatoire', 'Aucune contraception n\'est possible'],
+              correct: 0,
+              diagnostic: 'Contraception orale combinée possible après évaluation des contre-indications',
+              explication: 'En l\'absence de contre-indication, une contraception orale combinée peut être envisagée après conseil personnalisé. (Source : Recueil de 50 cas cliniques \u2014 diagnostic diff\u00e9rentiel, INFAS.)',
+              cat: ''
+            },
+            {
+              titre: 'Mademoiselle Stéphanie A. a des saignements sous pilule',
+              anamnese: 'Stéphanie prend une pilule combinée depuis 2 mois. Elle présente de petits saignements intermenstruels, sans douleur ni fièvre. Elle a oublié deux comprimés le mois dernier.',
+              options: ['Saignements irréguliers liés notamment aux oublis/à l\'adaptation contraceptive', 'Grossesse extra-utérine certaine', 'Cancer du col certain', 'Ménopause'],
+              correct: 0,
+              diagnostic: 'Saignements irréguliers liés notamment aux oublis/à l\'adaptation contraceptive',
+              explication: 'Les oublis et les premiers mois de pilule peuvent provoquer des saignements irréguliers ; il faut aussi vérifier observance et grossesse selon le contexte. (Source : Recueil de 50 cas cliniques \u2014 diagnostic diff\u00e9rentiel, INFAS.)',
+              cat: ''
+            },
+            {
+              titre: 'Madame H. se plaint de règles abondantes',
+              anamnese: 'Depuis 8 mois, règles très abondantes durant 8 jours, avec caillots et fatigue. Hb 9 g/dL. Elle n\'a pas de grossesse. L\'examen évoque un utérus augmenté de volume.',
+              options: ['Fibrome utérin avec ménorragies', 'Cystite', 'Appendicite', 'Vaginite'],
+              correct: 0,
+              diagnostic: 'Fibrome utérin avec ménorragies',
+              explication: 'Règles abondantes chroniques et utérus augmenté de volume évoquent un fibrome utérin. (Source : Recueil de 50 cas cliniques \u2014 diagnostic diff\u00e9rentiel, INFAS.)',
+              cat: ''
+            }],
             qcd: [
               { question: "Dans le placenta prævia associé à des métrorragies modérées, la césarienne s'impose en urgence.", options: ["Vrai","Faux"], correct: [1], explanation: "D'après le sujet corrigé INFAS L2 « Gynéco-Obstétrique n°1 »." },
               { question: "Dans l'HRP (hématome rétro-placentaire), l'étiologie la plus rencontrée est le traumatisme abdominal.", options: ["Vrai","Faux"], correct: [1], explanation: "D'après le sujet corrigé INFAS L2 « Gynéco-Obstétrique n°1 »." },
@@ -1306,6 +1682,50 @@ function buildSeed(){
               diagnostic: "Pneumothorax spontané",
               explication: "Le profil typique (adolescent longiligne), l'absence de fièvre, le début brutal et le tympanisme unilatéral avec abolition du murmure vésiculaire orientent vers un pneumothorax spontané. La crise d'asthme donnerait des sibilants bilatéraux plutôt qu'un tympanisme unilatéral. La pneumonie franche lobaire aiguë s'accompagnerait de fièvre et d'expectoration. L'embolie pulmonaire survient plutôt avec des facteurs de risque thromboemboliques. La péricardite aiguë donne une douleur positionnelle sans tympanisme thoracique.",
               cat: "CAT infirmière : oxygénothérapie, installer le patient en position demi-assise, ne pas le laisser seul, préparer une radiographie thoracique en urgence, prévenir le médecin en vue d'une éventuelle exsufflation ou d'un drainage thoracique, et surveiller étroitement la saturation en oxygène et la fréquence respiratoire."
+            }, {
+              titre: 'Monsieur S. tousse et ressent une oppression sur la poitrine',
+              anamnese: 'Un homme de 28 ans présente depuis 3 mois une toux sèche intermittente et une oppression thoracique, surtout la nuit et lors d\'un effort. Il rapporte des épisodes similaires après exposition à la poussière. Entre les crises, l\'examen est normal. La spirométrie montre un trouble obstructif réversible après bronchodilatateur.',
+              options: ['Pneumonie', 'Asthme bronchique', 'Embolie pulmonaire', 'Tuberculose pulmonaire'],
+              correct: 1,
+              diagnostic: 'Asthme bronchique',
+              explication: 'L\'obstruction bronchique réversible et les symptômes variables déclenchés par poussières/effort orientent vers l\'asthme. (Source : Recueil de 50 cas cliniques \u2014 diagnostic diff\u00e9rentiel, INFAS.)',
+              cat: ''
+            },
+            {
+              titre: 'Madame D., 38 ans, éprouve des difficultés à respirer',
+              anamnese: 'Dyspnée brutale après un long voyage en avion. Elle présente une douleur thoracique augmentée à l\'inspiration, une fréquence cardiaque à 112/min et une saturation à 91 %. Une jambe est légèrement douloureuse et augmentée de volume.',
+              options: ['Crise d\'asthme', 'Pneumothorax', 'Embolie pulmonaire', 'Bronchite aiguë'],
+              correct: 2,
+              diagnostic: 'Embolie pulmonaire',
+              explication: 'La dyspnée brutale, douleur pleurétique, tachycardie et contexte thromboembolique évoquent une embolie pulmonaire. (Source : Recueil de 50 cas cliniques \u2014 diagnostic diff\u00e9rentiel, INFAS.)',
+              cat: ''
+            },
+            {
+              titre: 'Monsieur G. a une bronchite',
+              anamnese: 'Depuis 5 jours, Monsieur G. présente une toux d\'abord sèche puis productive, rhinorrhée, fébricule à 37,8°C et gêne thoracique. Il n\'est ni dyspnéique ni altéré. L\'auscultation ne retrouve pas de foyer pulmonaire.',
+              options: ['Bronchite aiguë simple', 'Pneumonie lobaire', 'Tuberculose', 'Embolie pulmonaire'],
+              correct: 0,
+              diagnostic: 'Bronchite aiguë simple',
+              explication: 'Une toux aiguë sans foyer pulmonaire ni altération importante correspond à une bronchite aiguë. (Source : Recueil de 50 cas cliniques \u2014 diagnostic diff\u00e9rentiel, INFAS.)',
+              cat: ''
+            },
+            {
+              titre: 'Monsieur T. tousse tout le temps',
+              anamnese: 'Fumeur de 62 ans, Monsieur T. tousse avec expectoration presque quotidienne depuis plusieurs années. Il est essoufflé à la marche. La spirométrie montre un trouble obstructif persistant non complètement réversible.',
+              options: ['Asthme', 'BPCO', 'Pneumonie aiguë', 'Œdème aigu du poumon'],
+              correct: 1,
+              diagnostic: 'BPCO',
+              explication: 'Chez un fumeur avec toux chronique productive et obstruction persistante, la BPCO est le diagnostic le plus probable. (Source : Recueil de 50 cas cliniques \u2014 diagnostic diff\u00e9rentiel, INFAS.)',
+              cat: ''
+            },
+            {
+              titre: 'Madame M. a une jambe rouge et enflée',
+              anamnese: 'Depuis hier, mollet gauche douloureux, chaud et augmenté de volume. Elle revient d\'une chirurgie récente et a été peu mobile. Elle présente aussi une dyspnée brutale.',
+              options: ['Thrombose veineuse profonde avec suspicion d\'embolie pulmonaire', 'Érysipèle isolé', 'Insuffisance veineuse chronique', 'Crise de goutte'],
+              correct: 0,
+              diagnostic: 'Thrombose veineuse profonde avec suspicion d\'embolie pulmonaire',
+              explication: 'Le contexte thrombotique et le mollet unilatéralement douloureux imposent de suspecter une TVP ; la dyspnée fait craindre une EP. (Source : Recueil de 50 cas cliniques \u2014 diagnostic diff\u00e9rentiel, INFAS.)',
+              cat: ''
             }],
             qcm: [
               { question: "Les gaz du sang permettent d'analyser :",
@@ -1472,6 +1892,32 @@ function buildSeed(){
               diagnostic: "Appendicite aiguë",
               explication: "La douleur migratrice péri-ombilicale puis en fosse iliaque droite, associée à l'anorexie et au fébricule, est le tableau classique de l'appendicite aiguë. L'adénolymphite mésentérique (fréquente chez le jeune) suit souvent un épisode viral et évolue en général plus favorablement. La colique néphrétique droite donne une douleur colique avec signes urinaires. La diverticulite du cæcum est un diagnostic différentiel plus rare, plutôt chez le sujet âgé. La cholécystite aiguë se situe à l'hypochondre droit, pas en fosse iliaque droite.",
               cat: "CAT infirmière : mettre le patient à jeun, poser une voie veineuse, administrer les antalgiques prescrits sans masquer excessivement l'évolution clinique avant l'avis chirurgical, préparer le bilan biologique (NFS, CRP) et l'échographie abdominale demandés, et prévenir le chirurgien en urgence en vue d'une éventuelle appendicectomie."
+            }, {
+              titre: 'Madame M. a des douleurs abdominales en bas à droite',
+              anamnese: 'Douleur débutant autour de l\'ombilic puis migrant en fosse iliaque droite depuis 12 heures, nausées, température 38,2°C et défense localisée.',
+              options: ['Colique néphrétique droite', 'Appendicite aiguë', 'Gastro-entérite', 'Cholécystite'],
+              correct: 1,
+              diagnostic: 'Appendicite aiguë',
+              explication: 'La migration de la douleur vers la FID avec fièvre et défense est très évocatrice d\'appendicite. (Source : Recueil de 50 cas cliniques \u2014 diagnostic diff\u00e9rentiel, INFAS.)',
+              cat: ''
+            },
+            {
+              titre: 'Mademoiselle L. n\'arrête pas de vomir',
+              anamnese: 'Depuis 10 heures, Mademoiselle L. vomit de façon répétée et présente une douleur épigastrique. Elle est déshydratée. Elle a également une forte douleur de l\'hypochondre droit irradiant vers l\'épaule après un repas gras.',
+              options: ['Colique hépatique/lithiase biliaire symptomatique', 'Appendicite', 'Cystite', 'Migraine'],
+              correct: 0,
+              diagnostic: 'Colique hépatique/lithiase biliaire symptomatique',
+              explication: 'La douleur de l\'HCD après repas gras avec irradiation à l\'épaule et vomissements évoque une atteinte biliaire. (Source : Recueil de 50 cas cliniques \u2014 diagnostic diff\u00e9rentiel, INFAS.)',
+              cat: ''
+            },
+            {
+              titre: 'Stéphane, 15 ans, consulte avec sa mère car il a mal au ventre',
+              anamnese: 'Douleur abdominale commencée autour de l\'ombilic puis localisée en fosse iliaque droite, anorexie, nausées et fièvre à 38°C. Défense localisée.',
+              options: ['Appendicite aiguë', 'Gastro-entérite', 'Colique néphrétique', 'Hépatite virale'],
+              correct: 0,
+              diagnostic: 'Appendicite aiguë',
+              explication: 'La migration de la douleur vers la FID avec anorexie, fièvre et défense est typique de l\'appendicite. (Source : Recueil de 50 cas cliniques \u2014 diagnostic diff\u00e9rentiel, INFAS.)',
+              cat: ''
             }]
           }),
           makeModule("Affections transmissibles", {
