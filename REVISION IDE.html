@@ -4153,7 +4153,9 @@ var DEFAULT_COURSE_DOCS = {
   "Pathologie chirurgicale": [{ file: "course-docs/pathologie-chirurgicale.pdf", title: "Cours Pathologie chirurgicale.pdf" }],
   "VIH-SIDA": [{ file: "course-docs/vih-sida.pdf", title: "Cours VIH-SIDA.pdf" }],
   "Santé publique et Épidémiologie": [{ file: "course-docs/sante-publique.pdf", title: "Cours Santé publique — Chaîne du froid.pdf" }],
-  "Pathologies urinaires": [{ file: "course-docs/pathologies-urinaires.pdf", title: "Cours Pathologies urinaires.pdf" }]
+  "Pathologies urinaires": [{ file: "course-docs/pathologies-urinaires.pdf", title: "Cours Pathologies urinaires.pdf" }],
+  /* replace:true => tout autre document déjà présent pour cette matière est supprimé */
+  "Pathologie médicale": [{ file: "course-docs/pathologie-medicale.pdf", title: "Cours Pathologie médicale.pdf", replace: true }]
 };
 function ensureDefaultCourseDocs(){
   if (!state.defaultDocsSeeded) state.defaultDocsSeeded = {};
@@ -4166,29 +4168,35 @@ function ensureDefaultCourseDocs(){
       if (state.defaultDocsSeeded[seedKey]) return;
       dbGetByModule(m.id).then(function(existing){
         var already = existing.some(function(d){ return d.fileName === cfg.title; });
+        var toRemove = cfg.replace ? existing.filter(function(d){ return d.fileName !== cfg.title; }) : [];
+        var cleanup = Promise.all(toRemove.map(function(d){ return dbDeleteFile(d.id); }));
         if (already){
-          state.defaultDocsSeeded[seedKey] = true; saveState();
-          return;
-        }
-        return fetch(cfg.file).then(function(res){
-          if (!res.ok) throw new Error("HTTP " + res.status);
-          return res.arrayBuffer();
-        }).then(function(buf){
-          /* Le Blob doit être créé avant l'extraction du texte : pdf.js
-             détache le ArrayBuffer source une fois le document chargé,
-             ce qui viderait un Blob construit après coup. */
-          var blob = new Blob([buf], { type: "application/pdf" });
-          return extractTextForDoc("pdf", buf).catch(function(){ return ""; }).then(function(text){
-            return dbPut({
-              id: uid(), yearId: y.id, moduleId: m.id, moduleName: m.name,
-              fileName: cfg.title, mimeType: "application/pdf", size: blob.size, kind: "pdf",
-              text: text, uploadedAt: Date.now(), blob: blob
-            });
+          return cleanup.then(function(){
+            state.defaultDocsSeeded[seedKey] = true; saveState();
+            if (toRemove.length){ docsCache[m.id] = undefined; render(); }
           });
-        }).then(function(){
-          state.defaultDocsSeeded[seedKey] = true; saveState();
-          docsCache[m.id] = undefined;
-          render();
+        }
+        return cleanup.then(function(){
+          return fetch(cfg.file).then(function(res){
+            if (!res.ok) throw new Error("HTTP " + res.status);
+            return res.arrayBuffer();
+          }).then(function(buf){
+            /* Le Blob doit être créé avant l'extraction du texte : pdf.js
+               détache le ArrayBuffer source une fois le document chargé,
+               ce qui viderait un Blob construit après coup. */
+            var blob = new Blob([buf], { type: "application/pdf" });
+            return extractTextForDoc("pdf", buf).catch(function(){ return ""; }).then(function(text){
+              return dbPut({
+                id: uid(), yearId: y.id, moduleId: m.id, moduleName: m.name,
+                fileName: cfg.title, mimeType: "application/pdf", size: blob.size, kind: "pdf",
+                text: text, uploadedAt: Date.now(), blob: blob
+              });
+            });
+          }).then(function(){
+            state.defaultDocsSeeded[seedKey] = true; saveState();
+            docsCache[m.id] = undefined;
+            render();
+          });
         });
       }).catch(function(err){
         console.warn("Cours par défaut indisponible pour " + m.name + " (" + cfg.file + ")", err);
