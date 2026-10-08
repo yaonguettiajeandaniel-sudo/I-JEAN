@@ -1665,7 +1665,79 @@ function buildSeed(){
                 correct: [0], explanation: "Décès maternels = décès pendant l'accouchement + décès dans les 42 jours suivants = 15 + 20 = 35 (les décès survenus après 42 jours, soit 7 semaines, ne sont pas comptés comme maternels). Taux = 35 / 1305 (naissances vivantes) × 100 ≈ 2,68 %." },
               { question: "[Étude de cas Brouattakrou] Les enfants de 1 à 4 ans représentent environ 17,32 % de la population totale (46 234 habitants). Sachant que l'épidémie de rougeole a causé 45 décès dans cette tranche d'âge, quel est le Taux de Mortalité Juvénile (1-4 ans) de Brouattakrou pour 2022 ?",
                 options: ["0,49 %", "0,48 %", "0,56 %", "0,57 %"],
-                correct: [2], explanation: "Population 1-4 ans ≈ 17,32 % × 46 234 ≈ 8008 enfants. Taux = 45 (décès) / 8008 × 100 ≈ 0,56 %." }
+                correct: [2], explanation: "Population 1-4 ans ≈ 17,32 % × 46 234 ≈ 8008 enfants. Taux = 45 (décès) / 8008 × 100 ≈ 0,56 %." },
+              { question: "[Sujet 2 · Version A, Q20] Le nombre de doses et la voie d'administration correcte du vaccin ROTARIX sont :",
+                options: ["Deux doses de 0,5 ml en IM", "Trois doses de 0,5 ml en IM", "Deux doses de 2 ml par voie orale", "Trois doses de 2 ml par voie orale"],
+                correct: [2], explanation: "Le Rotarix s'administre en 2 doses par voie ORALE (jamais en injection) — le volume exact (1,5 ml selon le fabricant) est ici approché à 2 ml dans les options proposées ; retiens surtout : 2 doses, voie orale. D'après le sujet INFAS L2 « Sujet n°2, Version A » (sujet sans corrigé officiel)." },
+              { question: "[Sujet 2 · Version A, Q21] Le vaccin Penta est composé des antigènes suivants :",
+                options: ["Diphtérie - Haemophilus influenzae type C - Coqueluche - Tétanos - Hépatite B", "Hépatite B - Diphtérie - Haemophilus influenzae type B - Tétanos - Coqueluche", "Diphtérie - Tétanos - Coqueluche - Men A - Haemophilus influenzae type B", "Diphtérie - Typhoïde - Coqueluche - Hépatite B - Haemophilus influenzae type B"],
+                correct: [1], explanation: "Le vaccin pentavalent associe Diphtérie, Tétanos, Coqueluche, Hépatite B et Haemophilus influenzae type b (Hib). Les autres options contiennent une erreur (type C au lieu de type B, Men A au lieu d'Hépatite B, ou Typhoïde au lieu de Tétanos). D'après le sujet INFAS L2 « Sujet n°2, Version A »." },
+              { question: "[Sujet 2 · Version A, Q22] Cochez les deux formes d'accessibilité dans le système de santé :",
+                options: ["Accessibilité géographique", "Accessibilité médicale", "Accessibilité financière", "Accessibilité socio-culturelle"],
+                correct: [0,2], explanation: "Un bon système de santé doit être accessible géographiquement (physiquement) ET financièrement à tous. D'après le sujet INFAS L2 « Sujet n°2, Version A »." },
+              { question: "[Sujet 2 · Version A, Q23] L'ampleur d'un problème de santé fait allusion à deux indicateurs de santé. Lesquels ?",
+                options: ["La létalité", "L'incidence", "Le taux de mortalité", "La prévalence"],
+                correct: [1,3], explanation: "L'« ampleur » (fréquence) d'un problème de santé se mesure par l'incidence (nouveaux cas) et la prévalence (ensemble des cas) ; la létalité et la mortalité renseignent plutôt sur la « gravité » du problème. D'après le sujet INFAS L2 « Sujet n°2, Version A »." },
+              { question: "[Sujet 2 · Version A, Q24] Un des items suivants fait partie des huit composantes essentielles des Soins de Santé Primaires. Lequel ?",
+                options: ["Vaccination contre les principales maladies endémiques", "Prévention et lutte contre les épidémies locales", "Promotion de bonnes conditions alimentaires et nutritionnelles", "Traitement des maladies infectieuses et lésions courantes"],
+                correct: [2], explanation: "⚠️ Parmi les 8 composantes essentielles des SSP (déclaration d'Alma-Ata), celle qui correspond le plus exactement est « la promotion de bonnes conditions alimentaires et nutritionnelles ». Les autres options reformulent des composantes réelles mais avec un mot changé qui les rend inexactes dans ce sujet. Vérifie ce point avec ton cours. D'après le sujet INFAS L2 « Sujet n°2, Version A »." },
+              { question: "[Sujet 2 · Version A, Q25] Deux éléments entrent dans l'élaboration du budget d'un ESPC dans le cadre des SSP. Lesquels ?",
+                options: ["Achat des équipements du Centre", "L'investissement", "La somme à budgétiser", "L'entretien courant des locaux, du matériel et du mobilier", "Le fonctionnement", "Les dépenses de fonctionnement locales"],
+                correct: [1,4], explanation: "⚠️ Réponse incertaine : je retiens « l'investissement » et « le fonctionnement » comme les deux grandes catégories budgétaires de l'ESPC (les autres options étant plutôt des sous-postes de l'une ou l'autre). Vérifie avec ton cours sur le budget ESPC/SSP. D'après le sujet INFAS L2 « Sujet n°2, Version A »." },
+              { question: "[Sujet 2 · Version A, Q26] L'investissement est constitué de :",
+                options: ["Salaires du personnel non pris en charge par l'État", "Achat des équipements du centre", "Entretien courant des locaux, du matériel et du mobilier", "Fournitures techniques et administratives", "Construction d'un hangar ou préau pour la vaccination", "Consommation d'eau et d'électricité"],
+                correct: [1,4], explanation: "L'investissement regroupe les dépenses en capital (achat d'équipements, constructions) — ici l'achat des équipements du centre et la construction d'un hangar/préau. Les salaires, l'entretien courant, les fournitures et les charges d'eau/électricité relèvent du fonctionnement (dépenses récurrentes). D'après le sujet INFAS L2 « Sujet n°2, Version A »." },
+              { question: "[Sujet 2 · Version A, Q27] Trois éléments font partie des grandes dépenses d'un centre de santé. Lesquels ?",
+                options: ["Le Salaire du Personnel de Soutien", "Achat des équipements du centre", "L'Intéressement du Personnel", "Les dépenses obligatoires", "Le Fonds d'Aide Social", "Entretien courant des locaux, du matériel et du mobilier"],
+                correct: [0,2,4], explanation: "⚠️ Réponse incertaine : je n'ai pas la définition précise des « grandes dépenses » enseignée dans ton cours sur le budget ESPC — je propose Salaire du personnel de soutien, Intéressement du personnel et Fonds d'aide social, mais vérifie absolument ce point avec ton professeur ou ton cours. D'après le sujet INFAS L2 « Sujet n°2, Version A »." },
+              { question: "[Sujet 2 · Version A, Q28] Quelles sont les populations cibles du PEV ivoirien ?",
+                options: ["Enfant de 0 à 11 mois", "Enfant de 0 à 23 mois", "Femme en âge de reproduction", "Femme enceinte", "Jeune fille de 9 à 14 ans", "Jeune fille de 9 ans"],
+                correct: [0,2,3,5], explanation: "⚠️ Réponse incertaine sur certains items : les cibles classiques du PEV ivoirien sont les enfants de 0 à 11 mois, les femmes enceintes, les femmes en âge de procréer (pour le VAT) et, pour le vaccin HPV, les jeunes filles de 9 ans précisément (et non une tranche 9-14 ans). Vérifie ces cibles avec ton cours PEV à jour. D'après le sujet INFAS L2 « Sujet n°2, Version A »." },
+              { question: "[Sujet 2 · Version A, Q29] Parmi les propositions suivantes, cochez celle qui définit l'accoutumance :",
+                options: ["Un état résultant de l'absorption périodique ou continuelle de certaines substances chimiques", "Un phénomène par lequel l'organisme devient peu à peu insensible à un produit régulièrement absorbé", "La propriété que possède l'organisme de supporter des doses d'une substance"],
+                correct: [1], explanation: "⚠️ Réponse probable : l'accoutumance (tolérance) correspond au phénomène par lequel l'organisme devient progressivement moins sensible à un produit absorbé régulièrement, nécessitant des doses plus importantes pour le même effet. Les options A et C décrivent des notions proches (dépendance, tolérance) — vérifie la définition exacte retenue dans ton cours de pharmacologie. D'après le sujet INFAS L2 « Sujet n°2, Version A »." },
+              { question: "[Sujet 2 · Version A, Q30] Parmi les définitions suivantes, choisir celle qui correspond à la définition de la stratégie avancée :",
+                options: ["L'équipe mobile se déplace vers les populations des localités situées au-delà de 15 km des centres de santé pour administrer les actes de santé", "Le personnel de santé reste au centre de santé et reçoit les populations des localités situées dans un rayon de moins de 5 km autour dudit centre", "Le personnel de santé quitte le centre de santé et va vers les populations des localités situées entre 5 km et 15 km autour dudit centre pour les actes de santé"],
+                correct: [2], explanation: "La stratégie avancée correspond au déplacement du personnel de santé vers les populations situées entre 5 et 15 km du centre (par opposition à la stratégie fixe, <5 km, et la stratégie mobile, >15 km). D'après le sujet INFAS L2 « Sujet n°2, Version A »." },
+              { question: "[Sujet 2 · Version A — Étude de cas KOFFIKRO, Q31] Centre de santé de Koffikro : population estimée à 10 000 habitants au 31/12/2022 et à 10 500 habitants au 1er/01/2024 (soit environ 1 an d'écart). Quel est le taux d'accroissement annuel de la population de Koffikro ?",
+                options: ["0,05 %", "5 %", "0,5 %"],
+                correct: [1], explanation: "Taux d'accroissement annuel = (Pop fin − Pop début) / Pop début × 100 = (10 500 − 10 000) / 10 000 × 100 = 5 %. D'après le sujet INFAS L2 « Sujet n°2, Version A »." },
+              { question: "[Sujet 2 · Version A — Étude de cas KOFFIKRO, Q32] En appliquant ce taux d'accroissement annuel de 5 % à la population du 1er/01/2024 (10 500 habitants), quelle est la population totale de Koffikro fin 2024 ?",
+                options: ["10 553 hbts", "10 500 hbts", "11 025 hbts"],
+                correct: [2], explanation: "Population fin 2024 = Population début 2024 × (1 + taux) = 10 500 × 1,05 = 11 025 habitants. D'après le sujet INFAS L2 « Sujet n°2, Version A »." },
+              { question: "[Sujet 2 · Version A — Étude de cas KOFFIKRO, Q33] Quelle est la population moyenne de Koffikro en 2024 (population de début 10 500, population de fin 11 025) ?",
+                options: ["10 763 hbts", "10 503 hbts", "10 527 hbts"],
+                correct: [0], explanation: "Population moyenne = (Pop début + Pop fin) / 2 = (10 500 + 11 025) / 2 = 10 762,5 ≈ 10 763 habitants. D'après le sujet INFAS L2 « Sujet n°2, Version A »." },
+              { question: "[Sujet 2 · Version A — Étude de cas KOFFIKRO, Q34] Quel est le nombre d'enfants de 9 mois à 14 ans à Koffikro en 2024 ?",
+                options: ["4 844 enfts", "4 725 enfts", "4 962 enfts"],
+                correct: [0], explanation: "⚠️ Réponse probable (avec une proportion standard de 45 % appliquée à la population moyenne) : 45 % × 10 763 ≈ 4 844 enfants. Vérifie le pourcentage exact enseigné dans ton cours pour cette tranche d'âge. D'après le sujet INFAS L2 « Sujet n°2, Version A »." },
+              { question: "[Sujet 2 · Version A — Étude de cas KOFFIKRO, Q35] En 2024, parmi les 85 naissances enregistrées (dont 4 mort-nés), 3 décès de femmes enceintes sont survenus (2 pendant le travail, 1 de cause indéterminée) et 6 autres femmes enceintes sont décédées (4 à 43 jours avant le terme probable, donc pendant la grossesse, et 2 à 7 semaines/49 jours après l'accouchement, donc au-delà des 42 jours réglementaires). Quel est le taux de mortalité maternelle de Koffikro en 2024 ?",
+                options: ["7,40 %", "7,05 %", "7,30 %"],
+                correct: [0], explanation: "⚠️ Réponse probable : selon la définition OMS, un décès maternel survient pendant la grossesse ou dans les 42 jours suivant son issue, pour une cause liée à la grossesse (hors cause accidentelle). On retient donc : les 2 décès pendant le travail + les 4 décès survenus avant le terme (encore enceintes) = 6 décès maternels (le décès de cause indéterminée est exclu par prudence, et les 2 décès à 49 jours dépassent le seuil des 42 jours). Taux = 6 décès maternels / 81 naissances vivantes (85 − 4 mort-nés) × 100 ≈ 7,40 %. Ce calcul comporte une part d'interprétation : vérifie-le avec ton professeur. D'après le sujet INFAS L2 « Sujet n°2, Version A »." },
+              { question: "[Sujet 2 · Version A — Étude de cas KOFFIKRO, Q36] En 2024, Koffikro a enregistré 105 décès dus au paludisme, 35 décès dus à la diarrhée, et 9 décès de femmes enceintes (voir question précédente — hors mort-nés). Quel est le taux brut de mortalité à Koffikro en 2024 (population moyenne : 10 763 habitants) ?",
+                options: ["1,42 %", "1,38 %", "1,45 %"],
+                correct: [1], explanation: "⚠️ Réponse probable : Total des décès = 105 (paludisme) + 35 (diarrhée) + 9 (femmes enceintes décédées) = 149 décès (les mort-nés ne sont pas comptés comme décès dans le taux brut de mortalité, qui porte sur la population vivante). Taux = 149 / 10 763 × 100 ≈ 1,38 %. D'après le sujet INFAS L2 « Sujet n°2, Version A »." }
+            ],
+            qcd: [
+              { question: "[Sujet 2 · Version A, Q1] En matière de vaccination, l'intervalle maximum n'existe pas.", options: ["Vrai","Faux"], correct: [0], explanation: "Vrai : seul un intervalle MINIMUM doit être respecté entre les doses d'un même vaccin ; il n'y a pas de délai maximum au-delà duquel il faudrait recommencer le schéma vaccinal. D'après le sujet INFAS L2 « Sujet n°2, Version A » (sujet sans corrigé officiel joint)." },
+              { question: "[Sujet 2 · Version A, Q2] Les laboratoires périphériques du PNLT sont installés dans les centres de diagnostic et de traitement (CDT) des districts de santé.", options: ["Vrai","Faux"], correct: [0], explanation: "Vrai : les CDT sont le niveau périphérique du Programme National de Lutte contre la Tuberculose. D'après le sujet INFAS L2 « Sujet n°2, Version A »." },
+              { question: "[Sujet 2 · Version A, Q3] La finalité du monitorage est d'apporter les solutions correctives aux goulots d'étranglement.", options: ["Vrai","Faux"], correct: [0], explanation: "Vrai : le monitorage vise à identifier les difficultés (goulots d'étranglement) et à y apporter des solutions correctives. D'après le sujet INFAS L2 « Sujet n°2, Version A »." },
+              { question: "[Sujet 2 · Version A, Q4] La somme à budgétiser (élaboration du budget des ressources propres d'un ESPC dans le cadre des SSP) est aussi appelée recettes des six mois couverts par le monitorage.", options: ["Vrai","Faux"], correct: [1], explanation: "⚠️ Réponse incertaine — question formulée de façon confuse dans le sujet source. Je penche pour Faux, mais vérifie cette définition précise avec ton cours sur le budget ESPC/SSP. D'après le sujet INFAS L2 « Sujet n°2, Version A » (sans corrigé officiel)." },
+              { question: "[Sujet 2 · Version A, Q5] Les grandes dépenses d'un ESPC représentent 45 % des recettes brutes.", options: ["Vrai","Faux"], correct: [1], explanation: "⚠️ Réponse incertaine — je n'ai pas le pourcentage exact enseigné dans ton cours sur le budget ESPC. Vérifie ce chiffre. D'après le sujet INFAS L2 « Sujet n°2, Version A »." },
+              { question: "[Sujet 2 · Version A, Q6] En face d'un cas de paralysie flasque aiguë, il faut recueillir 3 échantillons de selles (8-10g) à un intervalle d'au moins 24-48 heures.", options: ["Vrai","Faux"], correct: [1], explanation: "Faux : la surveillance de la Paralysie Flasque Aiguë (PFA) de l'OMS exige 2 échantillons de selles (8-10g chacun), prélevés à au moins 24-48h d'intervalle — pas 3. D'après le sujet INFAS L2 « Sujet n°2, Version A »." },
+              { question: "[Sujet 2 · Version A, Q7] En face d'un cas de paralysie flasque aiguë, il est fortement recommandé de recueillir les échantillons de selles dans les 14 jours après l'apparition de la paralysie.", options: ["Vrai","Faux"], correct: [0], explanation: "Vrai : les échantillons de selles doivent être prélevés dans les 14 jours suivant le début de la paralysie pour maximiser les chances d'isoler le poliovirus. D'après le sujet INFAS L2 « Sujet n°2, Version A »." },
+              { question: "[Sujet 2 · Version A, Q8] Un cas de Syndrome Respiratoire Aigu Sévère clinique est défini chez toute personne présentant des antécédents de fièvre ou une fièvre documentée.", options: ["Vrai","Faux"], correct: [1], explanation: "⚠️ Faux (probable) : la définition de cas du SRAS/SARI de l'OMS exige, en plus de la fièvre, une toux ET un début des symptômes récent (moins de 10 jours) nécessitant une hospitalisation — la fièvre seule ne suffit pas. À vérifier avec ton cours. D'après le sujet INFAS L2 « Sujet n°2, Version A »." },
+              { question: "[Sujet 2 · Version A, Q9] Un cas suspect de rougeole est notifié quand un enfant en consultation présente une fièvre, une éruption, une toux ou un coryza ou une conjonctivite.", options: ["Vrai","Faux"], correct: [0], explanation: "⚠️ Vrai (probable) : cela correspond à la définition de cas standard de la rougeole (fièvre + éruption maculo-papuleuse + toux ou coryza ou conjonctivite). Vérifie ce point avec ton cours. D'après le sujet INFAS L2 « Sujet n°2, Version A »." },
+              { question: "[Sujet 2 · Version A, Q10] Il y a suspicion d'une épidémie de rougeole lorsque cinq cas suspects ou plus sont notifiés en un mois au sein d'une population de 100 000 habitants vivant dans une aire de santé.", options: ["Vrai","Faux"], correct: [0], explanation: "⚠️ Vrai (probable) : le seuil épidémique SIMR pour la rougeole est généralement de 5 cas suspects ou plus en un mois dans une aire de santé. Vérifie la mention précise du dénominateur de population avec ton cours SIMR. D'après le sujet INFAS L2 « Sujet n°2, Version A »." },
+              { question: "[Sujet 2 · Version A, Q11] Le vaccin anti-poliomyélitique oral contient une forme active du poliovirus qui favorise une réponse immunitaire de l'organisme.", options: ["Vrai","Faux"], correct: [0], explanation: "⚠️ Vrai (probable) : le VPO (vaccin polio oral) contient bien une forme vivante (atténuée) du poliovirus, par opposition au VPI (injectable) qui contient une forme inactivée. Vérifie la formulation exacte attendue par ton cours. D'après le sujet INFAS L2 « Sujet n°2, Version A »." },
+              { question: "[Sujet 2 · Version A, Q12] Le non-respect de la politique du flacon entamé est un facteur évitable de perte de vaccins.", options: ["Vrai","Faux"], correct: [0], explanation: "Vrai : le non-respect de la politique du flacon entamé (« open vial policy ») est une cause évitable de gaspillage de vaccins. D'après le sujet INFAS L2 « Sujet n°2, Version A »." },
+              { question: "[Sujet 2 · Version A, Q13] La vaccination contre les principales maladies infectieuses est une composante promotionnelle des SSP.", options: ["Vrai","Faux"], correct: [1], explanation: "Faux : parmi les 8 composantes essentielles des Soins de Santé Primaires (Alma-Ata), la vaccination est classée comme une composante PRÉVENTIVE, pas promotionnelle. D'après le sujet INFAS L2 « Sujet n°2, Version A »." },
+              { question: "[Sujet 2 · Version A, Q14] Le tuberculeux peut réaliser le traitement DOTS pendant qu'il est seul dans son cadre de vie.", options: ["Vrai","Faux"], correct: [1], explanation: "Faux : DOTS signifie « Directly Observed Treatment, Short-course » — traitement sous observation DIRECTE d'un agent de santé ou d'un accompagnant formé ; il ne peut donc pas être réalisé seul. D'après le sujet INFAS L2 « Sujet n°2, Version A »." },
+              { question: "[Sujet 2 · Version A, Q15] Un enfant qui présente les signes du SIDA peut recevoir le vaccin VPI.", options: ["Vrai","Faux"], correct: [0], explanation: "Vrai : le VPI (vaccin polio injectable) est un vaccin inactivé (non vivant), donc sans risque particulier chez un enfant immunodéprimé — contrairement aux vaccins vivants (VPO, BCG, rougeole) contre-indiqués en cas de SIDA symptomatique. D'après le sujet INFAS L2 « Sujet n°2, Version A »." },
+              { question: "[Sujet 2 · Version A, Q16] Le monitorage permet de déterminer quel groupe a bénéficié des services et comment.", options: ["Vrai","Faux"], correct: [0], explanation: "Vrai : c'est l'un des objectifs classiques du monitorage dans le suivi des programmes de santé. D'après le sujet INFAS L2 « Sujet n°2, Version A »." },
+              { question: "[Sujet 2 · Version A, Q17] L'étude de cas est une technique rigoureuse qui favorise l'implication de tout le monde dans l'analyse.", options: ["Vrai","Faux"], correct: [1], explanation: "⚠️ Faux (probable) : l'étude de cas porte sur l'analyse de cas sélectionnés, et n'est pas la technique la plus participative/inclusive du diagnostic communautaire (contrairement par exemple à la réunion communautaire). À vérifier avec ton cours. D'après le sujet INFAS L2 « Sujet n°2, Version A »." },
+              { question: "[Sujet 2 · Version A, Q18] Le diagnostic communautaire permet d'analyser les informations collectées dans la communauté et d'ignorer la participation et le changement de comportement de la communauté.", options: ["Vrai","Faux"], correct: [1], explanation: "Faux : au contraire, le diagnostic communautaire vise à FAVORISER la participation et le changement de comportement de la communauté, pas à les ignorer. D'après le sujet INFAS L2 « Sujet n°2, Version A »." },
+              { question: "[Sujet 2 · Version A, Q19] L'alcoolisme est l'ensemble de phénomènes pathologiques entraînés par l'abus de boissons alcoolisées.", options: ["Vrai","Faux"], correct: [0], explanation: "Vrai : c'est la définition classique de l'alcoolisme. D'après le sujet INFAS L2 « Sujet n°2, Version A »." }
             ],
             exercices: [
               { statement: "ÉTUDE DE CAS — Village de Bozi (district sanitaire de Bouaflé)\n\nBozi dispose d'un centre de santé où exercent 2 infirmiers et 1 sage-femme diplômés d'État. Le dispensaire et la maternité totalisent 18 lits. Le ratio personnel infirmier / lits du dispensaire est de 0,2.\n\nEn 2019, 140 naissances vivantes ont été enregistrées. La même année, le dispensaire a recensé 100 cas de rougeole chez les enfants de 0-11 mois (taux de létalité 4%) et 150 cas de paludisme chez les 0-5 ans.\n\nEn 2020, la population totale du village était de 2696 habitants, avec un taux de croissance annuel constant de 3%. On estime que les enfants de 0-5 ans représentent 20% de la population, et que le nombre de grossesses attendues représente 5% de la population.\n\nCalculer :\n1. La population de Bozi en fin 2019\n2. Le nombre de lits disponibles au dispensaire du village\n3. Le nombre de décès dû à la rougeole en 2019\n4. Le taux de prévalence du paludisme dans la tranche d'âge 0-5 ans en 2019\n5. Le nombre de grossesses attendues dans le village au cours de l'année 2018",
@@ -2563,7 +2635,7 @@ function renderBottomNav(){
     { hash:"#/diplome", view:"diplome", ic:"🎓", label:"Diplôme" }
   ];
   return '<nav class="bottom">' + items.map(function(it){
-    var quizRunTarget = (quizSession && quizSession.examType === "diplome") ? "diplome" : null;
+    var quizRunTarget = (quizSession && quizSession.examType === "diplome") ? "diplome" : (quizSession && quizSession.examType === "exercice" ? "exercices" : null);
     var active = route.view === it.view || (route.view==='quiz-run' && it.view===quizRunTarget) || (route.view==='exercices-run' && it.view==='exercices') || (route.view==='cas-run' && it.view==='cas');
     return '<button class="' + (active?'active':'') + '" data-action="go" data-hash="' + it.hash + '"><span class="ic">' + it.ic + '</span>' + it.label + '</button>';
   }).join("") + '</nav>';
@@ -2847,9 +2919,10 @@ function renderQuizResult(){
     '</div>';
   }
 
+  var backHash = quizSession.examType === "diplome" ? "#/diplome" : quizSession.examType === "exercice" ? "#/exercices" : "#/quiz";
   html += '<div class="row wrap" style="margin-top:4px;">';
   if (missed.length) html += '<button class="btn deep" style="flex:1;" data-action="quiz-retry-missed">🔁 Refaire les erreurs</button>';
-  html += '<button class="btn primary" style="flex:1;" data-action="go" data-hash="#/quiz">Nouveau quiz</button>';
+  html += '<button class="btn primary" style="flex:1;" data-action="go" data-hash="' + backHash + '">Terminer</button>';
   html += '</div>';
   return html;
 }
@@ -2904,7 +2977,27 @@ function renderExoSetup(){
     '</div>';
   }
 
+  var exoExamPool = collectQuestions("mix", "all", null, false);
+  var exoExamHistory = (state.history||[]).filter(function(h){ return h.examType === "exercice"; }).slice(0,5);
+  html += '<div class="card" style="text-align:center;">' +
+    '<div style="font-size:30px;">📝</div>' +
+    '<h3 style="margin:8px 0 4px;">Examen blanc — QCM/QCD</h3>' +
+    '<p class="faint" style="margin-bottom:12px;">Questions QCM et QCD mélangées, tirées de tout le programme (' + exoExamPool.length + ' disponibles), pour t\'entraîner quand tu veux.</p>' +
+    '<label class="field" style="max-width:220px; margin:0 auto 12px;"><span>Nombre de questions</span><input type="number" id="exo-exam-count" min="5" max="' + Math.max(5,exoExamPool.length) + '" value="' + Math.min(20, Math.max(1,exoExamPool.length)) + '"></label>' +
+    '<button class="btn primary block" data-action="exo-exam-start" ' + (!exoExamPool.length?'disabled':'') + '>🚀 Démarrer l\'entraînement</button>' +
+    (!exoExamPool.length ? '<div class="faint" style="margin-top:8px;">Ajoute des QCM/QCD dans le Programme pour pouvoir t\'entraîner.</div>' : '') +
+  '</div>';
+  if (exoExamHistory.length){
+    html += '<div class="card"><h3 style="font-size:15px; margin-bottom:8px;">Historique de tes entraînements</h3>' +
+      exoExamHistory.map(function(h){
+        return '<div class="row between small" style="padding:6px 0; border-bottom:1px solid var(--line);">' +
+          '<span>' + fmtDate(h.date) + '</span><span>' + h.correct + '/' + h.total + '</span>' +
+          '<span class="tag ' + (h.pct>=70?'good':h.pct>=50?'warn':'bad') + '">' + h.pct + '%</span></div>';
+      }).join("") + '</div>';
+  }
+
   html += '<div class="card stack">';
+  html += '<h3 style="font-size:15px;">✏️ Exercices pratiques</h3>';
   html += '<div><h3 style="font-size:15px;">Année</h3><div class="tabs" style="margin-top:8px;">' +
     [["all","Toutes"]].concat(visibleYears().map(function(y){return [y.id,y.label];})).map(function(o){
       return '<button class="' + (exoSetup.year===o[0]?'active':'') + '" data-action="exo-set-year" data-year="' + o[0] + '">' + o[1] + '</button>';
@@ -4199,7 +4292,8 @@ var DEFAULT_COURSE_DOCS = {
     { file: "course-docs/sante-publique.pdf", title: "Cours Santé publique — Chaîne du froid.pdf" },
     { file: "course-docs/sante-publique-formules-epidemiologie.pdf", title: "Cours Santé publique — Formules d'Épidémiologie.pdf" },
     { file: "course-docs/sante-publique-vaccins-consommables.pdf", title: "Cours Santé publique — Gestion des vaccins et consommables.pdf" },
-    { file: "course-docs/sante-publique-simr.pdf", title: "Cours Santé publique — Surveillance Intégrée de la Maladie et Riposte (SIMR).pdf" }
+    { file: "course-docs/sante-publique-simr.pdf", title: "Cours Santé publique — Surveillance Intégrée de la Maladie et Riposte (SIMR).pdf" },
+    { file: "course-docs/sante-publique-sujet2-versionA.pdf", title: "Sujet n°2 (Version A) — Santé Publique L2.pdf", section: "exercice" }
   ],
   "Pathologies urinaires": [{ file: "course-docs/pathologies-urinaires.pdf", title: "Cours Pathologies urinaires.pdf" }],
   /* replace:true => tout autre document déjà présent pour cette matière est supprimé */
@@ -4491,6 +4585,10 @@ function handleAction(action, el, ev){
       var dCount = parseInt((document.getElementById("diplome-count")||{}).value, 10);
       startDiplomeExam(dCount || 30);
       break;
+    case "exo-exam-start":
+      var eCount = parseInt((document.getElementById("exo-exam-count")||{}).value, 10);
+      startExoExam(eCount || 20);
+      break;
 
     /* Quiz run */
     case "quiz-select": quizSelectOption(+el.getAttribute("data-index")); break;
@@ -4589,6 +4687,14 @@ function startDiplomeExam(n){
   var count = Math.min(n || 30, pool.length);
   var items = shuffle(pool).slice(0, count);
   quizSession = { items: items, index: 0, answers: [], currentSelection: [], showFeedback:false, currentFlag:false, examType:"diplome", logged:false };
+  navigate("#/quiz-run");
+}
+function startExoExam(n){
+  var pool = collectQuestions("mix", "all", null, false);
+  if (!pool.length) return showToast("Aucune question disponible pour t'entraîner.");
+  var count = Math.min(n || 20, pool.length);
+  var items = shuffle(pool).slice(0, count);
+  quizSession = { items: items, index: 0, answers: [], currentSelection: [], showFeedback:false, currentFlag:false, examType:"exercice", logged:false };
   navigate("#/quiz-run");
 }
 function logQuizHistory(){
