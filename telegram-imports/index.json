@@ -241,5 +241,383 @@
     "size": 23780,
     "date": 1791482235000,
     "caption": ""
+  },
+  {
+    "id": "tg_650945091_AgADQCMAAnu0MFA",
+    "fileName": "QCM anatomie 1045 QCM.pdf",
+    "path": "telegram-imports/files/tg_650945091_AgADQCMAAnu0MFA-QCM_anatomie_1045_QCM.pdf",
+    "mimeType": "application/pdf",
+    "size": 1942666,
+    "date": 1791482533000,
+    "caption": ""
+  },
+  {
+    "id": "tg_650945092_AgADQSMAAnu0MFA",
+    "fileName": "CHAPITRE 1 INTRODUCTION AU TRAITEMENT ANTIRETROVIRAL (TARV).pptx",
+    "path": "telegram-imports/files/tg_650945092_AgADQSMAAnu0MFA-CHAPITRE_1_INTRODUCTION_AU_TRAITEMENT_ANTIRETROVIRAL_TARV_.pptx",
+    "mimeType": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    "size": 141908,
+    "date": 1791482533000,
+    "caption": ""
+  },
+  {
+    "id": "tg_650945093_AgADQiMAAnu0MFA",
+    "fileName": "GYNECO OBSTETRIQUE NO 1 LICENCE 2 IDE.docx",
+    "path": "telegram-imports/files/tg_650945093_AgADQiMAAnu0MFA-GYNECO_OBSTETRIQUE_NO_1_LICENCE_2_IDE.docx",
+    "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "size": 19937,
+    "date": 1791482533000,
+    "caption": ""
+  },
+  {
+    "id": "tg_650945094_AgADQyMAAnu0MFA",
+    "fileName": "GYNECO OBSTETRIQUE NO 4 L2 SF.docx",
+    "path": "telegram-imports/files/tg_650945094_AgADQyMAAnu0MFA-GYNECO_OBSTETRIQUE_NO_4_L2_SF.docx",
+    "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "size": 18928,
+    "date": 1791482534000,
+    "caption": ""
+  },
+  {
+    "id": "tg_650945095_AgADRCMAAnu0MFA",
+    "fileName": "GYNECO OBSTETRIQUE NO 1 SF L2.docx",
+    "path": "telegram-imports/files/tg_650945095_AgADRCMAAnu0MFA-GYNECO_OBSTETRIQUE_NO_1_SF_L2.docx",
+    "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "size": 24764,
+    "date": 1791482534000,
+    "caption": ""
+  },
+  {
+    "id": "tg_650945096_AgADRSMAAnu0MFA",
+    "fileName": "GYNECO OBSTETRIQUE NO 3 L2 SF.docx",
+    "path": "telegram-imports/files/tg_650945096_AgADRSMAAnu0MFA-GYNECO_OBSTETRIQUE_NO_3_L2_SF.docx",
+    "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "size": 19934,
+    "date": 1791482534000,
+    "caption": ""
+  },
+  {
+    "id": "tg_650945097_AgADRiMAAnu0MFA",
+    "fileName": "GYNECO OBSTETRIQUE NO 1 LICENCE 2 IDE-1.docx",
+    "path": "telegram-imports/files/tg_650945097_AgADRiMAAnu0MFA-GYNECO_OBSTETRIQUE_NO_1_LICENCE_2_IDE-1.docx",
+    "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "size": 29307,
+    "date": 1791482534000,
+    "caption": ""
+  },
+  {
+    "id": "tg_650945098_AgADRyMAAnu0MFA",
+    "fileName": "GYNECO OBSTETRIQUE NO 1 LICENCE 2 IDE-2.docx",
+    "path": "telegram-imports/files/tg_650945098_AgADRyMAAnu0MFA-GYNECO_OBSTETRIQUE_NO_1_LICENCE_2_IDE-2.docx",
+    "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "size": 19473,
+    "date": 1791482534000,
+    "caption": ""
+  },
+  {
+    "id": "tg_650945099_AgADSCMAAnu0MFA",
+    "fileName": "GYNECO OBSTETRIQUE NO 2 IDE L2.docx",
+    "path": "telegram-imports/files/tg_650945099_AgADSCMAAnu0MFA-GYNECO_OBSTETRIQUE_NO_2_IDE_L2.docx",
+    "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "size": 23008,
+    "date": 1791482534000,
+    "caption": ""
+  },
+  {
+    "id": "tg_650945100_AgADSSMAAnu0MFA",
+    "fileName": "GYNECO OBSTETRIQUE NO 2 SF L2.docx",
+    "path": "telegram-imports/files/tg_650945100_AgADSSMAAnu0MFA-GYNECO_OBSTETRIQUE_NO_2_SF_L2.docx",
+    "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "size": 23510,
+    "date": 1791482534000,
+    "caption": ""
+  },
+  {
+    "id": "tg_650945101_AgADSiMAAnu0MFA",
+    "fileName": "Dietetique PREPA DE DK1-1.pdf",
+    "path": "telegram-imports/files/tg_650945101_AgADSiMAAnu0MFA-Dietetique_PREPA_DE_DK1-1.pdf",
+    "mimeType": "application/pdf",
+    "size": 671456,
+    "date": 1791482534000,
+    "caption": ""
+  },
+  {
+    "id": "tg_650945102_AgADSyMAAnu0MFA",
+    "fileName": "TD DE CONTROLE DE CONNAISSANCE L3 SP 1-1.pdf",
+    "path": "telegram-imports/files/tg_650945102_AgADSyMAAnu0MFA-TD_DE_CONTROLE_DE_CONNAISSANCE_L3_SP_1-1.pdf",
+    "mimeType": "application/pdf",
+    "size": 386712,
+    "date": 1791482534000,
+    "caption": ""
+  },
+  {
+    "id": "tg_650945103_AgADTCMAAnu0MFA",
+    "fileName": "TD TRAUMATO 2.pdf",
+    "path": "telegram-imports/files/tg_650945103_AgADTCMAAnu0MFA-TD_TRAUMATO_2.pdf",
+    "mimeType": "application/pdf",
+    "size": 368173,
+    "date": 1791482534000,
+    "caption": ""
+  },
+  {
+    "id": "tg_650945104_AgADTSMAAnu0MFA",
+    "fileName": "Classification_des_Médicaments_by_Together,_we'll_be_Strong_1.pdf",
+    "path": "telegram-imports/files/tg_650945104_AgADTSMAAnu0MFA-Classification_des_Me_dicaments_by_Together__we_ll_be_Strong_1.pdf",
+    "mimeType": "application/pdf",
+    "size": 1513533,
+    "date": 1791482534000,
+    "caption": ""
+  },
+  {
+    "id": "tg_650945105_AgADTyMAAnu0MFA",
+    "fileName": "EXERCICES DE REVISION-1.pdf",
+    "path": "telegram-imports/files/tg_650945105_AgADTyMAAnu0MFA-EXERCICES_DE_REVISION-1.pdf",
+    "mimeType": "application/pdf",
+    "size": 327848,
+    "date": 1791482534000,
+    "caption": ""
+  },
+  {
+    "id": "tg_650945106_AgADUCMAAnu0MFA",
+    "fileName": "CALCUL DE DOSE EXACTE PRESCRITE-1.pdf",
+    "path": "telegram-imports/files/tg_650945106_AgADUCMAAnu0MFA-CALCUL_DE_DOSE_EXACTE_PRESCRITE-1.pdf",
+    "mimeType": "application/pdf",
+    "size": 712293,
+    "date": 1791482534000,
+    "caption": ""
+  },
+  {
+    "id": "tg_650945107_AgADUiMAAnu0MFA",
+    "fileName": "Livret de tableaux PCIMNE 0-5 ans .pdf",
+    "path": "telegram-imports/files/tg_650945107_AgADUiMAAnu0MFA-Livret_de_tableaux_PCIMNE_0-5_ans_.pdf",
+    "mimeType": "application/pdf",
+    "size": 9860787,
+    "date": 1791482534000,
+    "caption": ""
+  },
+  {
+    "id": "tg_650945108_AgADUyMAAnu0MFA",
+    "fileName": "Les 12 pratiques familiales   (PFE).pdf",
+    "path": "telegram-imports/files/tg_650945108_AgADUyMAAnu0MFA-Les_12_pratiques_familiales_PFE_.pdf",
+    "mimeType": "application/pdf",
+    "size": 2013109,
+    "date": 1791482534000,
+    "caption": ""
+  },
+  {
+    "id": "tg_650945109_AgADVSMAAnu0MFA",
+    "fileName": "SYNTHSE QCM-QCD GESTION DES VACCINS ET EPIDEMIOLOGIE -.pdf",
+    "path": "telegram-imports/files/tg_650945109_AgADVSMAAnu0MFA-SYNTHSE_QCM-QCD_GESTION_DES_VACCINS_ET_EPIDEMIOLOGIE_-.pdf",
+    "mimeType": "application/pdf",
+    "size": 87497,
+    "date": 1791482534000,
+    "caption": ""
+  },
+  {
+    "id": "tg_650945110_AgADViMAAnu0MFA",
+    "fileName": "MONITORAGE.docx",
+    "path": "telegram-imports/files/tg_650945110_AgADViMAAnu0MFA-MONITORAGE.docx",
+    "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "size": 84132,
+    "date": 1791482534000,
+    "caption": ""
+  },
+  {
+    "id": "tg_650945111_AgADVyMAAnu0MFA",
+    "fileName": "TECHNIQUES DE SOINS INFIRMIERS L1.pptx",
+    "path": "telegram-imports/files/tg_650945111_AgADVyMAAnu0MFA-TECHNIQUES_DE_SOINS_INFIRMIERS_L1.pptx",
+    "mimeType": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    "size": 4511553,
+    "date": 1791482534000,
+    "caption": ""
+  },
+  {
+    "id": "tg_650945112_AgADWCMAAnu0MFA",
+    "fileName": "SOINS INFIRMIERS DANS LES PATHOLOGIES-1.pptx",
+    "path": "telegram-imports/files/tg_650945112_AgADWCMAAnu0MFA-SOINS_INFIRMIERS_DANS_LES_PATHOLOGIES-1.pptx",
+    "mimeType": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    "size": 4184922,
+    "date": 1791482534000,
+    "caption": ""
+  },
+  {
+    "id": "tg_650945113_AgADXSMAAnu0MFA",
+    "fileName": "DEMARCHE SCIENTIFIQUE DE SOINS INFIRMIERS 2020-2021.pptx",
+    "path": "telegram-imports/files/tg_650945113_AgADXSMAAnu0MFA-DEMARCHE_SCIENTIFIQUE_DE_SOINS_INFIRMIERS_2020-2021.pptx",
+    "mimeType": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    "size": 109172,
+    "date": 1791482534000,
+    "caption": ""
+  },
+  {
+    "id": "tg_650945114_AgADeyMAAnu0MFA",
+    "fileName": "exercices_pathologies_medicales.pdf",
+    "path": "telegram-imports/files/tg_650945114_AgADeyMAAnu0MFA-exercices_pathologies_medicales.pdf",
+    "mimeType": "application/pdf",
+    "size": 24172,
+    "date": 1791482534000,
+    "caption": ""
+  },
+  {
+    "id": "tg_650945115_AgADgB0AAnu0OFA",
+    "fileName": "CORRIGÉ PARTIEL MÉDECINE.pdf",
+    "path": "telegram-imports/files/tg_650945115_AgADgB0AAnu0OFA-CORRIGE_PARTIEL_ME_DECINE.pdf",
+    "mimeType": "application/pdf",
+    "size": 1584657,
+    "date": 1791482534000,
+    "caption": ""
+  },
+  {
+    "id": "tg_650945116_AgADmx0AAnu0OFA",
+    "fileName": "+Arbres décisionnels_SONU.pdf",
+    "path": "telegram-imports/files/tg_650945116_AgADmx0AAnu0OFA-_Arbres_de_cisionnels_SONU.pdf",
+    "mimeType": "application/pdf",
+    "size": 731753,
+    "date": 1791482534000,
+    "caption": ""
+  },
+  {
+    "id": "tg_650945117_AgADqx0AAm87OFA",
+    "fileName": "EVALUATION CHIRURGIE L2 N°2 INFAS ABIDJAN 2025 FREUD.pdf",
+    "path": "telegram-imports/files/tg_650945117_AgADqx0AAm87OFA-EVALUATION_CHIRURGIE_L2_N_2_INFAS_ABIDJAN_2025_FREUD.pdf",
+    "mimeType": "application/pdf",
+    "size": 2641447,
+    "date": 1791482534000,
+    "caption": ""
+  },
+  {
+    "id": "tg_650945118_AgADrB0AAm87OFA",
+    "fileName": "EVALUATION_CHIRURGIE_PEDIATRIQUE_L2_INFAS_ABIDJAN_2025_FREUD.pdf",
+    "path": "telegram-imports/files/tg_650945118_AgADrB0AAm87OFA-EVALUATION_CHIRURGIE_PEDIATRIQUE_L2_INFAS_ABIDJAN_2025_FREUD.pdf",
+    "mimeType": "application/pdf",
+    "size": 3380910,
+    "date": 1791482534000,
+    "caption": ""
+  },
+  {
+    "id": "tg_650945119_AgADrR0AAm87OFA",
+    "fileName": "EVALUATION DE MEDECINE L2 N2 INFAS ABIDJAN 2025 FREUD.pdf",
+    "path": "telegram-imports/files/tg_650945119_AgADrR0AAm87OFA-EVALUATION_DE_MEDECINE_L2_N2_INFAS_ABIDJAN_2025_FREUD.pdf",
+    "mimeType": "application/pdf",
+    "size": 2161944,
+    "date": 1791482534000,
+    "caption": ""
+  },
+  {
+    "id": "tg_650945120_AgADFSAAAm87QFA",
+    "fileName": "Semiologie_Chirurgicale_2024-2025.docx",
+    "path": "telegram-imports/files/tg_650945120_AgADFSAAAm87QFA-Semiologie_Chirurgicale_2024-2025.docx",
+    "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "size": 12965,
+    "date": 1791482534000,
+    "caption": ""
+  },
+  {
+    "id": "tg_650945121_AgADFiAAAm87QFA",
+    "fileName": "Banque_Questions_Sante_Publique_Communautaire-1.docx",
+    "path": "telegram-imports/files/tg_650945121_AgADFiAAAm87QFA-Banque_Questions_Sante_Publique_Communautaire-1.docx",
+    "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "size": 41709,
+    "date": 1791482534000,
+    "caption": ""
+  },
+  {
+    "id": "tg_650945122_AgADFyAAAm87QFA",
+    "fileName": "Controles_Sante_Infantile.docx",
+    "path": "telegram-imports/files/tg_650945122_AgADFyAAAm87QFA-Controles_Sante_Infantile.docx",
+    "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "size": 19698,
+    "date": 1791482534000,
+    "caption": ""
+  },
+  {
+    "id": "tg_650945123_AgADGCAAAm87QFA",
+    "fileName": "Epreuve_Neonatologie_Pediatrie_L2_IDE_SFM.docx",
+    "path": "telegram-imports/files/tg_650945123_AgADGCAAAm87QFA-Epreuve_Neonatologie_Pediatrie_L2_IDE_SFM.docx",
+    "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "size": 15062,
+    "date": 1791482534000,
+    "caption": ""
+  },
+  {
+    "id": "tg_650945124_AgADGSAAAm87QFA",
+    "fileName": "Evaluation_L1_Deontologie.docx",
+    "path": "telegram-imports/files/tg_650945124_AgADGSAAAm87QFA-Evaluation_L1_Deontologie.docx",
+    "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "size": 15423,
+    "date": 1791482534000,
+    "caption": ""
+  },
+  {
+    "id": "tg_650945125_AgADGiAAAm87QFA",
+    "fileName": "Synthese_professionnelle_Pathologies_renales_urologiques.docx",
+    "path": "telegram-imports/files/tg_650945125_AgADGiAAAm87QFA-Synthese_professionnelle_Pathologies_renales_urologiques.docx",
+    "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "size": 37760,
+    "date": 1791482534000,
+    "caption": ""
+  },
+  {
+    "id": "tg_650945126_AgADUiAAAm87QFA",
+    "fileName": "PEV L2 2024-2025.ppt",
+    "path": "telegram-imports/files/tg_650945126_AgADUiAAAm87QFA-PEV_L2_2024-2025.ppt",
+    "mimeType": "application/vnd.ms-powerpoint",
+    "size": 17029632,
+    "date": 1791482534000,
+    "caption": ""
+  },
+  {
+    "id": "tg_650945127_AgADOCAAApPxYVA",
+    "fileName": "PEDIATRIE PAPA ASSE 8-2-1.pdf",
+    "path": "telegram-imports/files/tg_650945127_AgADOCAAApPxYVA-PEDIATRIE_PAPA_ASSE_8-2-1.pdf",
+    "mimeType": "application/pdf",
+    "size": 442491,
+    "date": 1791482534000,
+    "caption": ""
+  },
+  {
+    "id": "tg_650945128_AgADqSAAApPxYVA",
+    "fileName": "evaluation_soins_infirmiers.pdf",
+    "path": "telegram-imports/files/tg_650945128_AgADqSAAApPxYVA-evaluation_soins_infirmiers.pdf",
+    "mimeType": "application/pdf",
+    "size": 90600,
+    "date": 1791482534000,
+    "caption": ""
+  },
+  {
+    "id": "tg_650945129_AgADRBwAApPxaVA",
+    "fileName": "SOINS INFIRMIERS L2.pdf",
+    "path": "telegram-imports/files/tg_650945129_AgADRBwAApPxaVA-SOINS_INFIRMIERS_L2.pdf",
+    "mimeType": "application/pdf",
+    "size": 1729720,
+    "date": 1791482534000,
+    "caption": ""
+  },
+  {
+    "id": "tg_650945130_AgADRRwAApPxaVA",
+    "fileName": "TECHNIQUE SOINS INFIRMIERS LICENCE 2 ANNEE 2020-2021 BOUAKE.pdf",
+    "path": "telegram-imports/files/tg_650945130_AgADRRwAApPxaVA-TECHNIQUE_SOINS_INFIRMIERS_LICENCE_2_ANNEE_2020-2021_BOUAKE.pdf",
+    "mimeType": "application/pdf",
+    "size": 1011424,
+    "date": 1791482534000,
+    "caption": ""
+  },
+  {
+    "id": "tg_650945131_AgADRhwAApPxaVA",
+    "fileName": "RESUMÉ Techniques_Soins_Infirmiers_COMPLET.docx.pdf",
+    "path": "telegram-imports/files/tg_650945131_AgADRhwAApPxaVA-RESUME_Techniques_Soins_Infirmiers_COMPLET.docx.pdf",
+    "mimeType": "application/pdf",
+    "size": 530619,
+    "date": 1791482535000,
+    "caption": ""
+  },
+  {
+    "id": "tg_650945132_AgADSRwAApPxaVA",
+    "fileName": "Pédiatrie L2 IDE-SF 1.pdf",
+    "path": "telegram-imports/files/tg_650945132_AgADSRwAApPxaVA-Pe_diatrie_L2_IDE-SF_1.pdf",
+    "mimeType": "application/pdf",
+    "size": 4569860,
+    "date": 1791482535000,
+    "caption": ""
   }
 ]
