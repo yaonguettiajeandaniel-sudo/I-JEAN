@@ -2854,7 +2854,24 @@ function renderQuizResult(){
    ========================================================= */
 var exoSetup = { year:"all", modules:[], onlyReview:false };
 
+var exerciceDocsIndex; /* undefined = pas chargé, null = en cours, objet = {moduleId: [docs]} */
+function loadExerciceDocsIndex(){
+  if (exerciceDocsIndex !== undefined) return;
+  exerciceDocsIndex = null;
+  dbGetAllFiles().then(function(files){
+    var byModule = {};
+    files.forEach(function(f){
+      if (f.section !== "exercice") return;
+      if (!byModule[f.moduleId]) byModule[f.moduleId] = [];
+      byModule[f.moduleId].push(f);
+    });
+    exerciceDocsIndex = byModule;
+    render();
+  }).catch(function(){ exerciceDocsIndex = {}; render(); });
+}
+
 function renderExoSetup(){
+  if (exerciceDocsIndex === undefined) loadExerciceDocsIndex();
   var mods = allModulesFlat();
   var available = [];
   mods.forEach(function(x){
@@ -2866,7 +2883,23 @@ function renderExoSetup(){
     });
   });
 
-  var html = '<div class="card stack">';
+  var html = "";
+  var modsWithExoDocs = exerciceDocsIndex ? mods.filter(function(x){ return (exerciceDocsIndex[x.module.id]||[]).length; }) : [];
+  if (modsWithExoDocs.length){
+    html += '<div class="card stack">' +
+      '<h3 style="font-size:15px;">📝 Fiches d\'exercices (documents)</h3>' +
+      '<div class="faint">Documents à consulter librement, à ton rythme — pas des QCM.</div>' +
+      modsWithExoDocs.map(function(x){
+        var n = exerciceDocsIndex[x.module.id].length;
+        return '<div class="item" data-action="exo-doc-primary-click" data-module="' + x.module.id + '" style="cursor:pointer;">' +
+          '<div><strong class="small">' + esc(x.module.name) + '</strong>' +
+          '<div class="faint">' + esc(x.year.label) + ' · ' + n + ' document' + (n>1?'s':'') + '</div></div>' +
+        '</div>';
+      }).join("") +
+    '</div>';
+  }
+
+  html += '<div class="card stack">';
   html += '<div><h3 style="font-size:15px;">Année</h3><div class="tabs" style="margin-top:8px;">' +
     [["all","Toutes"]].concat(visibleYears().map(function(y){return [y.id,y.label];})).map(function(o){
       return '<button class="' + (exoSetup.year===o[0]?'active':'') + '" data-action="exo-set-year" data-year="' + o[0] + '">' + o[1] + '</button>';
@@ -3231,7 +3264,8 @@ function renderTelegram(){
           '<div class="faint">' + fmtSize(d.size) + ' · reçu le ' + fmtDate(d.uploadedAt) + (d.text ? ' · texte indexé pour la recherche' : '') + '</div></div>' +
           '<div class="iactions">' +
             '<button class="btn sm" data-action="doc-open" data-id="' + d.id + '">👁️</button>' +
-            '<button class="btn sm" data-action="telegram-move" data-id="' + d.id + '">📂 Classer</button>' +
+            '<button class="btn sm" data-action="telegram-move" data-id="' + d.id + '" data-section="cours">📘 Cours</button>' +
+            '<button class="btn sm" data-action="telegram-move" data-id="' + d.id + '" data-section="exercice">📝 Exercice</button>' +
             '<button class="btn sm danger" data-action="doc-delete" data-id="' + d.id + '" data-module="' + TELEGRAM_INBOX_MODULE + '">🗑️</button>' +
           '</div>' +
         '</div>' +
@@ -3295,13 +3329,15 @@ function syncTelegramImports(silent){
     if (!silent) showToast("Synchronisation Telegram impossible : " + err.message);
   });
 }
-function modalTelegramMove(id){
+function modalTelegramMove(id, section){
+  section = section === "exercice" ? "exercice" : "cours";
   var mods = allModulesFlat();
   if (!mods.length) return showToast("Crée d'abord une matière dans le Programme.");
+  var label = section === "exercice" ? "📝 Exercice" : "📘 Cours";
   var body = '<label class="field"><span>Matière de destination</span><select id="tg-move-target">' +
     mods.map(function(x){ return '<option value="' + x.year.id + '|' + x.module.id + '">' + esc(x.year.label) + ' — ' + esc(x.module.name) + '</option>'; }).join("") +
     '</select></label>';
-  openModal("Classer ce document", body, {
+  openModal("Classer ce document dans " + label, body, {
     submitLabel: "Déplacer",
     onSubmit: function(){
       var sel = document.getElementById("tg-move-target").value.split("|");
@@ -3309,12 +3345,13 @@ function modalTelegramMove(id){
       var mod = findModule(yearId, moduleId);
       dbGetFile(id).then(function(rec){
         if (!rec) return;
-        rec.yearId = yearId; rec.moduleId = moduleId; rec.moduleName = mod.name;
+        rec.yearId = yearId; rec.moduleId = moduleId; rec.moduleName = mod.name; rec.section = section;
         return dbPut(rec);
       }).then(function(){
         docsCache[TELEGRAM_INBOX_MODULE] = (docsCache[TELEGRAM_INBOX_MODULE] || []).filter(function(d){ return d.id !== id; });
         docsCache[moduleId] = undefined;
-        closeModal(); render(); showToast("Document déplacé vers « " + mod.name + " ».");
+        exerciceDocsIndex = undefined;
+        closeModal(); render(); showToast("Document déplacé vers « " + mod.name + " » (" + label + ").");
       });
     }
   });
@@ -4181,7 +4218,8 @@ function ensureDefaultCourseDocs(){
       if (state.defaultDocsSeeded[seedKey]) return;
       dbGetByModule(m.id).then(function(existing){
         var already = existing.some(function(d){ return d.fileName === cfg.title; });
-        var toRemove = cfg.replace ? existing.filter(function(d){ return d.fileName !== cfg.title; }) : [];
+        var cfgSection = cfg.section || "cours";
+        var toRemove = cfg.replace ? existing.filter(function(d){ return d.fileName !== cfg.title && (d.section||"cours") === cfgSection; }) : [];
         var cleanup = Promise.all(toRemove.map(function(d){ return dbDeleteFile(d.id); }));
         if (already){
           return cleanup.then(function(){
@@ -4202,6 +4240,7 @@ function ensureDefaultCourseDocs(){
               return dbPut({
                 id: uid(), yearId: y.id, moduleId: m.id, moduleName: m.name,
                 fileName: cfg.title, mimeType: "application/pdf", size: blob.size, kind: "pdf",
+                section: cfg.section || "cours",
                 text: text, uploadedAt: Date.now(), blob: blob
               });
             });
@@ -4370,7 +4409,7 @@ function handleAction(action, el, ev){
     case "unlock-submit": submitUnlock(); break;
     case "edit-niveau": modalEditNiveau(); break;
     case "telegram-sync": syncTelegramImports(false); break;
-    case "telegram-move": modalTelegramMove(el.getAttribute("data-id")); break;
+    case "telegram-move": modalTelegramMove(el.getAttribute("data-id"), el.getAttribute("data-section")); break;
     case "search-goto":
       closeSearch();
       navigate("#/programme/" + yearId);
@@ -4383,14 +4422,25 @@ function handleAction(action, el, ev){
       dbGetByModule(moduleId).then(function(docs){
         docs.sort(function(a,b){ return b.uploadedAt - a.uploadedAt; });
         docsCache[moduleId] = docs;
-        if (docs.length === 1){
-          openDocFile(docs[0].id);
-        } else if (docs.length > 1){
-          modalPickDoc(docs);
+        var coursDocs = docs.filter(function(d){ return (d.section||"cours") === "cours"; });
+        if (coursDocs.length === 1){
+          openDocFile(coursDocs[0].id);
+        } else if (coursDocs.length > 1){
+          modalPickDoc(coursDocs);
         } else {
           showToast("Aucun document de cours pour cette matière pour le moment.");
         }
       });
+      break;
+    case "exo-doc-primary-click":
+      var exoDocs = ((exerciceDocsIndex || {})[moduleId] || []).slice().sort(function(a,b){ return b.uploadedAt - a.uploadedAt; });
+      if (exoDocs.length === 1){
+        openDocFile(exoDocs[0].id);
+      } else if (exoDocs.length > 1){
+        modalPickDoc(exoDocs);
+      } else {
+        showToast("Aucune fiche d'exercice pour cette matière pour le moment.");
+      }
       break;
     case "add-module": modalAddModule(yearId); break;
     case "toc-import-start": modalTocImportStart(yearId); break;
