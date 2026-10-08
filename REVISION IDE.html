@@ -4304,6 +4304,16 @@ function searchInCourses(query){
     return { keywords: keywords, results: results.slice(0,15) };
   });
 }
+function modalPickDoc(docs){
+  var body = docs.map(function(d){
+    return '<div class="item" data-action="pick-doc" data-id="'+d.id+'" style="cursor:pointer;">' +
+      '<div style="min-width:0;"><strong class="small">' + docKindIcon(d.kind) + ' ' + esc(d.fileName) + '</strong>' +
+      '<div class="faint">' + fmtSize(d.size) + ' · ajouté le ' + fmtDate(d.uploadedAt) + '</div></div>' +
+    '</div>';
+  }).join("");
+  openModal("📎 Choisis un document", body, { submitLabel:"Fermer", onSubmit: function(){ closeModal(); } });
+  document.querySelector("#modal-root .foot .btn:not(.primary)").style.display = "none";
+}
 function openSearchCoursesModal(query){
   openModal("🔍 Recherche dans mes cours", '<div class="empty small">Recherche en cours…</div>', { submitLabel:"Fermer", onSubmit: function(){ closeModal(); } });
   document.querySelector("#modal-root .foot .btn:not(.primary)").style.display = "none";
@@ -4363,8 +4373,10 @@ function handleAction(action, el, ev){
       dbGetByModule(moduleId).then(function(docs){
         docs.sort(function(a,b){ return b.uploadedAt - a.uploadedAt; });
         docsCache[moduleId] = docs;
-        if (docs.length){
+        if (docs.length === 1){
           openDocFile(docs[0].id);
+        } else if (docs.length > 1){
+          modalPickDoc(docs);
         } else {
           showToast("Aucun document de cours pour cette matière pour le moment.");
         }
@@ -4391,6 +4403,10 @@ function handleAction(action, el, ev){
       break;
     case "search-courses": openSearchCoursesModal(el.getAttribute("data-query")); break;
     case "go-module-docs":
+      closeModal();
+      openDocFile(el.getAttribute("data-id"));
+      break;
+    case "pick-doc":
       closeModal();
       openDocFile(el.getAttribute("data-id"));
       break;
