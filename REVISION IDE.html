@@ -3066,7 +3066,6 @@ function renderCasRun(){
   html += '<div class="tag accent" style="margin-bottom:8px;">🩻 Consultation</div>';
   html += '<h3 style="font-size:16px; margin-bottom:10px;">' + esc(c.titre) + '</h3>';
   html += '<div class="cas-anamnese">' + nl2br(c.anamnese) + '</div>';
-  if (c.triade) html += '<div class="cas-triade">⚠️ ' + nl2br(c.triade) + '</div>';
 
   html += '<div class="small" style="font-weight:700; margin:14px 0 8px;">Quel diagnostic retenez-vous ?</div>';
   c.options.forEach(function(opt, i){
@@ -3085,6 +3084,7 @@ function renderCasRun(){
     html += '<div class="faint" style="margin-top:12px; padding-top:12px; border-top:1px solid var(--line);">' +
       '<strong>Diagnostic retenu : ' + esc(c.diagnostic || c.options[c.correct]) + '</strong>' +
       (c.explication ? '<br><br>' + nl2br(c.explication) : '') +
+      (c.triade ? '<div class="cas-triade">⚠️ ' + nl2br(c.triade) + '</div>' : '') +
     '</div>';
     if (c.cat) html += '<div class="cas-cat"><strong>🩺 CAT — Conduite à tenir</strong><br>' + nl2br(c.cat) + '</div>';
   }
