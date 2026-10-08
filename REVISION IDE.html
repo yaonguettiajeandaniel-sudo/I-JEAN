@@ -2665,8 +2665,6 @@ function renderAccueil(){
 /* =========================================================
    VUE : PROGRAMME
    ========================================================= */
-var openModules = {}; /* moduleId -> bool */
-var moduleSubTab = {}; /* moduleId -> 'exercices'|'docs' */
 var docsCache = {}; /* moduleId -> array of document records (loaded lazily from IndexedDB) */
 
 function groupModulesByUE(modules){
@@ -2713,77 +2711,18 @@ function renderProgramme(yearId){
 }
 
 function renderModule(y, m){
-  var isOpen = !!openModules[m.id];
-  var sub = moduleSubTab[m.id] || "exercices";
-  if (sub !== "exercices" && sub !== "docs") sub = "exercices";
   var docCount = (docsCache[m.id] || []).length;
   var counts = { cours:m.cours.length, qcm:m.qcm.length, qcd:m.qcd.length, exercices:m.exercices.length, cas:(m.casClinique||[]).length, docs:docCount };
-  var html = '<div class="module ' + (isOpen?'open':'') + '">';
+  var html = '<div class="module">';
   html += '<div class="mhead" data-action="module-primary-click" data-year="' + y.id + '" data-module="' + m.id + '" title="Ouvrir le cours PDF de cette matière">' +
     '<div><h3>' + esc(m.name) + '</h3>' +
     '<div class="faint" style="margin-top:3px;">' + counts.cours + ' cours · ' + counts.qcm + ' QCM · ' + counts.qcd + ' QCD · ' + counts.exercices + ' exercices · ' + counts.cas + ' cas cliniques · ' + counts.docs + ' documents</div></div>' +
     '<div class="row" style="gap:6px;">' +
       '<button class="icon-btn" style="width:30px;height:30px;" data-action="rename-module" data-year="' + y.id + '" data-module="' + m.id + '" title="Renommer">✏️</button>' +
       '<button class="icon-btn" style="width:30px;height:30px;" data-action="delete-module" data-year="' + y.id + '" data-module="' + m.id + '" title="Supprimer">🗑️</button>' +
-      '<button class="icon-btn" style="width:30px;height:30px;" data-action="toggle-module" data-module="' + m.id + '" title="Gérer le contenu (exercices, documents)"><span class="chevron">▶</span></button>' +
     '</div>' +
   '</div>';
-
-  if (isOpen){
-    html += '<div class="mbody">';
-    html += '<div class="subtabs">' +
-      ['exercices','docs'].map(function(k){
-        var lbl = { exercices:"✏️ Exercices", docs:"📎 Documents" }[k];
-        return '<button class="' + (sub===k?'active':'') + '" data-action="module-subtab" data-module="' + m.id + '" data-sub="' + k + '">' + lbl + ' (' + counts[k] + ')</button>';
-      }).join("") + '</div>';
-
-    if (sub === "exercices") html += renderExoList(y, m);
-    if (sub === "docs") html += renderDocsList(y, m);
-
-    html += '</div>';
-  }
   html += '</div>';
-  return html;
-}
-
-function renderExoList(y, m){
-  var html = "";
-  if (!m.exercices.length) html += '<div class="empty small">Aucun exercice pour l\'instant.</div>';
-  m.exercices.forEach(function(e){
-    html += '<div class="item">' +
-      '<div class="ihead">' +
-        '<div style="min-width:0;"><strong class="small">' + esc(e.statement) + '</strong> ' + (e.mastered ? '<span class="tag good">maîtrisé</span>' : '') + (e.reviewLater ? ' <span class="tag warn">à revoir</span>' : '') + '</div>' +
-        '<div class="iactions">' +
-          '<button class="btn sm" data-action="edit-exo" data-year="'+y.id+'" data-module="'+m.id+'" data-item="'+e.id+'">✏️</button>' +
-          '<button class="btn sm danger" data-action="delete-exo" data-year="'+y.id+'" data-module="'+m.id+'" data-item="'+e.id+'">🗑️</button>' +
-        '</div>' +
-      '</div>' +
-      '<p class="faint" style="margin-top:8px;">Correction : ' + nl2br(e.correction) + '</p>' +
-      '<button class="btn sm" style="margin-top:8px;" data-action="search-courses" data-query="' + escAttr(e.statement) + '">🔍 Chercher dans mes cours</button>' +
-    '</div>';
-  });
-  html += '<div class="row wrap"><button class="btn" style="flex:1;" data-action="add-exo" data-year="'+y.id+'" data-module="'+m.id+'">➕ Ajouter un exercice</button>' +
-    '<button class="btn" style="flex:1;" data-action="import-start" data-year="'+y.id+'" data-module="'+m.id+'" data-kind="exercices">📥 Importer (PDF/Word/PPT)</button></div>';
-  return html;
-}
-
-function renderCasList(y, m){
-  var list = m.casClinique || [];
-  var html = "";
-  if (!list.length) html += '<div class="empty small">Aucun cas clinique pour l\'instant. Ajoute une mise en situation avec anamnèse, symptômes et 5 diagnostics possibles.</div>';
-  list.forEach(function(c){
-    html += '<div class="item">' +
-      '<div class="ihead">' +
-        '<div style="min-width:0;"><strong class="small">' + esc(c.titre) + '</strong> ' + (c.lastResult===true ? '<span class="tag good">réussi</span>' : c.lastResult===false ? '<span class="tag bad">à revoir</span>' : '') + (c.reviewLater ? ' <span class="tag warn">à revoir</span>' : '') + '</div>' +
-        '<div class="iactions">' +
-          '<button class="btn sm" data-action="edit-cas" data-year="'+y.id+'" data-module="'+m.id+'" data-item="'+c.id+'">✏️</button>' +
-          '<button class="btn sm danger" data-action="delete-cas" data-year="'+y.id+'" data-module="'+m.id+'" data-item="'+c.id+'">🗑️</button>' +
-        '</div>' +
-      '</div>' +
-      '<p class="faint" style="margin-top:8px;">Diagnostic : ' + esc(c.diagnostic || c.options[c.correct]) + '</p>' +
-    '</div>';
-  });
-  html += '<button class="btn block" data-action="add-cas" data-year="'+y.id+'" data-module="'+m.id+'">➕ Ajouter un cas clinique</button>';
   return html;
 }
 
@@ -2795,35 +2734,6 @@ function fmtSize(bytes){
 function docKindIcon(kind){
   return { pdf:"📕", docx:"📄", pptx:"📊", image:"🖼️" }[kind] || "📎";
 }
-function renderDocsList(y, m){
-  var docs = docsCache[m.id];
-  var html = "";
-  if (docs === undefined){
-    loadModuleDocs(m.id);
-    return '<div class="empty small">Chargement de tes documents…</div>' +
-      '<div class="faint" style="margin-top:8px;">Les cours que tu ajoutes ici (PDF, Word, PowerPoint, image) restent enregistrés en permanence sur cet appareil, même après fermeture du navigateur — jusqu\'à ce que tu les supprimes toi-même.</div>' +
-      '<label class="field" style="margin-top:12px;"><span>Ajouter un document</span><input type="file" multiple accept=".pdf,.docx,.pptx,.png,.jpg,.jpeg,.gif,.webp" data-action="doc-upload-input" data-year="'+y.id+'" data-module="'+m.id+'" data-module-name="'+escAttr(m.name)+'"></label>';
-  }
-  if (!docs.length){
-    html += '<div class="empty small">Aucun document pour l\'instant. Ajoute la version numérique de ton cours (PDF, Word, PowerPoint ou photo) : elle restera disponible en permanence sur cet appareil.</div>';
-  }
-  docs.forEach(function(d){
-    html += '<div class="item">' +
-      '<div class="ihead">' +
-        '<div style="min-width:0;"><strong class="small">' + docKindIcon(d.kind) + ' ' + esc(d.fileName) + '</strong>' +
-        '<div class="faint">' + fmtSize(d.size) + ' · ajouté le ' + fmtDate(d.uploadedAt) + (d.text ? ' · texte indexé pour la recherche' : '') + '</div></div>' +
-        '<div class="iactions">' +
-          '<button class="btn sm" data-action="doc-open" data-id="'+d.id+'">👁️ Ouvrir</button>' +
-          '<button class="btn sm danger" data-action="doc-delete" data-id="'+d.id+'" data-module="'+m.id+'">🗑️</button>' +
-        '</div>' +
-      '</div>' +
-    '</div>';
-  });
-  html += '<label class="field" style="margin-top:6px;"><span>Ajouter un document (PDF, Word .docx, PowerPoint .pptx, image)</span>' +
-    '<input type="file" multiple accept=".pdf,.docx,.pptx,.png,.jpg,.jpeg,.gif,.webp" data-action="doc-upload-input" data-year="'+y.id+'" data-module="'+m.id+'" data-module-name="'+escAttr(m.name)+'"></label>';
-  return html;
-}
-
 /* =========================================================
    VUE : QUIZ (setup + run)
    ========================================================= */
@@ -3664,25 +3574,6 @@ function modalTocImportReview(defaultYearId, items){
   });
 }
 
-/* --- Cours --- */
-/* --- Exercice --- */
-function modalExo(yearId, moduleId, itemId){
-  var m = findModule(yearId, moduleId);
-  var item = itemId ? m.exercices.find(function(e){return e.id===itemId;}) : null;
-  var body = fieldTextarea("Énoncé de l'exercice", "e-statement", item?item.statement:"", "Ex : Décrivez la conduite à tenir face à…") +
-    fieldTextarea("Correction / éléments de réponse", "e-correction", item?item.correction:"", "Corrigé attendu…");
-  openModal(item?"Modifier l'exercice":"Ajouter un exercice", body, {
-    onSubmit: function(){
-      var statement = document.getElementById("e-statement").value.trim();
-      var correction = document.getElementById("e-correction").value.trim();
-      if (!statement) return showToast("L'énoncé est requis.");
-      if (item){ item.statement = statement; item.correction = correction; }
-      else { m.exercices.push({ id: uid(), statement: statement, correction: correction, reviewLater:false, mastered:false }); }
-      saveState(); closeModal(); render(); showToast("Exercice enregistré.");
-    }
-  });
-}
-
 /* =========================================================
    IMPORT DEPUIS FICHIER (PDF / DOCX / TXT)
    ========================================================= */
@@ -4252,77 +4143,6 @@ function extractTextForDoc(kind, arrayBuffer){
   return Promise.resolve("");
 }
 
-function handleDocUpload(files, yearId, moduleId, moduleName){
-  var list = Array.prototype.slice.call(files);
-  if (!list.length) return;
-  showToast("Ajout de " + list.length + " document(s)…");
-  var chain = Promise.resolve();
-  list.forEach(function(file){
-    chain = chain.then(function(){
-      var kind = detectDocKind(file.name);
-      if (kind === "other"){
-        showToast(file.name + " : format non pris en charge (utilise .pdf, .docx, .pptx ou une image).");
-        return;
-      }
-      return file.arrayBuffer().then(function(buf){
-        var extractPromise = (kind === "image") ? Promise.resolve("") : extractTextForDoc(kind, buf).catch(function(err){
-          showToast("Extraction du texte impossible pour " + file.name + " (" + err.message + ") — le fichier est quand même enregistré.");
-          return "";
-        });
-        return extractPromise.then(function(text){
-          var rejectReason = text ? contentRejectionReason(text) : null;
-          if (rejectReason){
-            showToast("⛔ " + file.name + " : " + rejectReason.replace(/^⛔ /,""));
-            return;
-          }
-          /* Le cours doit être disponible uniquement en PDF pour l'étudiant,
-             même s'il a été importé en .docx/.pptx/photo : on convertit
-             systématiquement vers un vrai fichier PDF avant de l'enregistrer. */
-          if (kind === "pdf"){
-            return dbPut({
-              id: uid(), yearId: yearId, moduleId: moduleId, moduleName: moduleName,
-              fileName: file.name, mimeType: file.type || "application/pdf", size: file.size, kind: "pdf",
-              text: text, uploadedAt: Date.now(), blob: file
-            });
-          }
-          if (kind === "docx" || kind === "pptx"){
-            var titleBase = file.name.replace(/\.(docx|pptx)$/i, "");
-            return textToPdfBlob(titleBase, text).then(function(pdfBlob){
-              return dbPut({
-                id: uid(), yearId: yearId, moduleId: moduleId, moduleName: moduleName,
-                fileName: titleBase + ".pdf", mimeType: "application/pdf", size: pdfBlob.size, kind: "pdf",
-                text: text, uploadedAt: Date.now(), blob: pdfBlob
-              });
-            }).catch(function(err){
-              showToast("Conversion en PDF impossible pour " + file.name + " (" + err.message + ").");
-            });
-          }
-          return fileToDataUrl(file).then(function(dataUrl){
-            var imgFormat = /\.png$/i.test(file.name) ? "PNG" : "JPEG";
-            return imageToPdfBlob(dataUrl, imgFormat).then(function(pdfBlob){
-              var pdfName = file.name.replace(/\.(png|jpe?g|gif|webp)$/i, ".pdf");
-              return dbPut({
-                id: uid(), yearId: yearId, moduleId: moduleId, moduleName: moduleName,
-                fileName: pdfName, mimeType: "application/pdf", size: pdfBlob.size, kind: "pdf",
-                text: "", uploadedAt: Date.now(), blob: pdfBlob
-              });
-            });
-          }).catch(function(err){
-            showToast("Conversion en PDF impossible pour " + file.name + " (" + err.message + ").");
-          });
-        });
-      });
-    });
-  });
-  chain.then(function(){
-    docsCache[moduleId] = undefined;
-    loadModuleDocs(moduleId);
-    showToast("Document(s) ajouté(s) — conservés en permanence sur cet appareil.");
-  }).catch(function(err){
-    showToast("Erreur lors de l'ajout : " + err.message);
-  });
-}
-
 /* =========================================================
    Cours par défaut fournis avec l'appli (fichiers du dépôt,
    servis par GitHub Pages) : au premier lancement, on les copie
@@ -4461,7 +4281,7 @@ function searchInCourses(query){
         var start = Math.max(0, idx-90);
         var end = Math.min(f.text.length, idx+kw.length+90);
         var snippet = (start>0?"…":"") + f.text.slice(start,end).replace(/\s+/g," ").trim() + (end<f.text.length?"…":"");
-        results.push({ fileName:f.fileName, moduleName:f.moduleName, moduleId:f.moduleId, yearId:f.yearId, keyword:kw, snippet:snippet });
+        results.push({ id:f.id, fileName:f.fileName, moduleName:f.moduleName, moduleId:f.moduleId, yearId:f.yearId, keyword:kw, snippet:snippet });
       });
     });
     return { keywords: keywords, results: results.slice(0,15) };
@@ -4484,7 +4304,7 @@ function openSearchCoursesModal(query){
     }
     body.innerHTML = '<p class="faint" style="margin-bottom:10px;">Mots-clés recherchés : ' + esc(res.keywords.join(", ")) + '</p>' +
       res.results.map(function(r){
-        return '<div class="item" data-action="go-module-docs" data-year="'+r.yearId+'" data-module="'+r.moduleId+'" style="cursor:pointer;">' +
+        return '<div class="item" data-action="go-module-docs" data-id="'+r.id+'" style="cursor:pointer;">' +
           '<div class="row between"><span class="tag deep">' + esc(r.fileName) + '</span><span class="faint">' + esc(r.moduleName) + '</span></div>' +
           '<p>…' + esc(r.snippet) + '…</p>' +
         '</div>';
@@ -4516,17 +4336,12 @@ function handleAction(action, el, ev){
     case "telegram-move": modalTelegramMove(el.getAttribute("data-id")); break;
     case "search-goto":
       closeSearch();
-      openModules[moduleId] = true;
       navigate("#/programme/" + yearId);
       break;
     case "dismiss-onboarding":
       state.onboardingSeen = true; saveState(); render();
       break;
 
-    case "toggle-module":
-      openModules[moduleId] = !openModules[moduleId];
-      render();
-      break;
     case "module-primary-click":
       dbGetByModule(moduleId).then(function(docs){
         docs.sort(function(a,b){ return b.uploadedAt - a.uploadedAt; });
@@ -4534,14 +4349,9 @@ function handleAction(action, el, ev){
         if (docs.length){
           openDocFile(docs[0].id);
         } else {
-          openModules[moduleId] = !openModules[moduleId];
+          showToast("Aucun document de cours pour cette matière pour le moment.");
         }
-        render();
       });
-      break;
-    case "module-subtab":
-      moduleSubTab[moduleId] = el.getAttribute("data-sub");
-      render();
       break;
     case "add-module": modalAddModule(yearId); break;
     case "toc-import-start": modalTocImportStart(yearId); break;
@@ -4565,19 +4375,7 @@ function handleAction(action, el, ev){
     case "search-courses": openSearchCoursesModal(el.getAttribute("data-query")); break;
     case "go-module-docs":
       closeModal();
-      openModules[moduleId] = true;
-      moduleSubTab[moduleId] = "docs";
-      navigate("#/programme/" + yearId);
-      break;
-
-    case "add-exo": modalExo(yearId, moduleId); break;
-    case "edit-exo": modalExo(yearId, moduleId, itemId); break;
-    case "delete-exo":
-      if (confirm("Supprimer cet exercice ?")){
-        var m6 = findModule(yearId, moduleId);
-        m6.exercices = m6.exercices.filter(function(e){return e.id!==itemId;});
-        saveState(); render();
-      }
+      openDocFile(el.getAttribute("data-id"));
       break;
 
     /* Quiz setup */
@@ -4818,10 +4616,6 @@ document.addEventListener("keydown", function(e){
 document.addEventListener("change", function(e){
   if (e.target.id === "import-file" && e.target.files[0]) importDataFile(e.target.files[0]);
   if (e.target.id === "settings-name") { state.settings.name = e.target.value; saveState(); }
-  if (e.target.getAttribute && e.target.getAttribute("data-action") === "doc-upload-input" && e.target.files.length){
-    handleDocUpload(e.target.files, e.target.getAttribute("data-year"), e.target.getAttribute("data-module"), e.target.getAttribute("data-module-name"));
-    e.target.value = "";
-  }
 });
 document.addEventListener("input", function(e){
   if (e.target.getAttribute && e.target.getAttribute("data-action") === "quiz-set-count"){
