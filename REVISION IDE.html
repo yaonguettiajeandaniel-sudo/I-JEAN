@@ -212,9 +212,9 @@
   .item{
     background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:11px 12px; margin-bottom:8px;
   }
-  .item .ihead{ display:flex; align-items:flex-start; justify-content:space-between; gap:8px; }
+  .item .ihead{ display:flex; align-items:flex-start; justify-content:space-between; gap:8px; flex-wrap:wrap; }
   .item p{ margin:6px 0 0; white-space:pre-wrap; font-size:13.5px; line-height:1.5; }
-  .item .iactions{ display:flex; gap:6px; flex:none; }
+  .item .iactions{ display:flex; gap:6px; flex:none; flex-wrap:wrap; justify-content:flex-end; }
   .opt{
     display:flex; align-items:center; gap:8px; padding:7px 9px; border:1px solid var(--line); border-radius:8px; margin-top:6px; font-size:13.5px;
   }
@@ -267,6 +267,7 @@
   .search-overlay .app{ padding-top: calc(env(safe-area-inset-top,0px) + 14px); }
 
   ::selection{ background:var(--accent-soft); }
+  code{ word-break:break-all; overflow-wrap:anywhere; }
 
   /* ---- Mascotte : le Professeur Serpent (compagnon permanent) ---- */
   #mascot-root{ position:fixed; left:0; right:0; bottom:0; z-index:95; pointer-events:none; }
@@ -288,8 +289,12 @@
     padding:10px 26px 10px 12px; font-size:13px; font-weight:600; color:var(--ink); box-shadow:var(--shadow);
     position:relative; line-height:1.35; max-width:250px;
     opacity:0; transform:translateY(6px) scale(.96); transform-origin:bottom left;
-    transition:opacity .2s ease, transform .2s ease; pointer-events:none;
+    transition:opacity .2s ease, transform .2s ease, max-width .2s ease .15s, padding .2s ease .15s, border-width .2s ease .15s;
+    pointer-events:none;
   }
+  /* Repliée (pas de message actif) : largeur nulle pour que la mascotte reprenne
+     sa place dans le coin au lieu de rester décalée par une bulle invisible. */
+  .mascot-bubble:not(.show){ max-width:0; padding:0; border-width:0; overflow:hidden; white-space:nowrap; }
   .mascot-bubble.show{ opacity:1; transform:translateY(0) scale(1); pointer-events:auto; }
   .mascot-bubble .mascot-close{
     position:absolute; top:6px; right:6px; width:18px; height:18px; border-radius:99px; border:none;
