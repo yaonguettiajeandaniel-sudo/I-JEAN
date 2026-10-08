@@ -2977,15 +2977,30 @@ function renderExoSetup(){
     '</div>';
   }
 
-  var exoExamPool = collectQuestions("mix", "all", null, false);
+  html += '<div class="card stack">' +
+    '<div><h3 style="font-size:15px;">Niveau à réviser</h3>' +
+    '<div class="faint" style="margin-bottom:6px;">Contrairement à l\'examen blanc du Diplôme (qui mélange tous les niveaux), les Exercices te permettent de réviser un niveau précis — ou tous, si tu choisis « Toutes ».</div>' +
+    '<div class="tabs" style="margin-top:8px;">' +
+    [["all","Toutes"]].concat(visibleYears().map(function(y){return [y.id,y.label];})).map(function(o){
+      return '<button class="' + (exoSetup.year===o[0]?'active':'') + '" data-action="exo-set-year" data-year="' + o[0] + '">' + o[1] + '</button>';
+    }).join("") + '</div></div>' +
+    '<div><h3 style="font-size:15px;">Matières (optionnel)</h3>' +
+    '<div class="stack" style="max-height:180px; overflow:auto; border:1px solid var(--line); border-radius:10px; padding:8px;">' +
+    mods.filter(function(x){ return exoSetup.year==="all" || x.year.id===exoSetup.year; }).map(function(x){
+      var checked = exoSetup.modules.indexOf(x.module.id) !== -1;
+      return '<label class="checkbox-row small"><input type="checkbox" data-action="exo-toggle-module" data-module="' + x.module.id + '" ' + (checked?'checked':'') + '> ' + esc(x.module.name) + ' <span class="faint">(' + x.year.label + ')</span></label>';
+    }).join("") + '</div></div>' +
+  '</div>';
+
+  var exoExamPool = collectQuestions("mix", exoSetup.year, exoSetup.modules.length?exoSetup.modules:null, false);
   var exoExamHistory = (state.history||[]).filter(function(h){ return h.examType === "exercice"; }).slice(0,5);
   html += '<div class="card" style="text-align:center;">' +
     '<div style="font-size:30px;">📝</div>' +
     '<h3 style="margin:8px 0 4px;">Examen blanc — QCM/QCD</h3>' +
-    '<p class="faint" style="margin-bottom:12px;">Questions QCM et QCD mélangées, tirées de tout le programme (' + exoExamPool.length + ' disponibles), pour t\'entraîner quand tu veux.</p>' +
+    '<p class="faint" style="margin-bottom:12px;">Questions QCM et QCD mélangées — venant des questions déjà dans le système et de celles tirées des sujets classés en « Exercice », pour le niveau choisi ci-dessus (' + exoExamPool.length + ' disponibles).</p>' +
     '<label class="field" style="max-width:220px; margin:0 auto 12px;"><span>Nombre de questions</span><input type="number" id="exo-exam-count" min="5" max="' + Math.max(5,exoExamPool.length) + '" value="' + Math.min(20, Math.max(1,exoExamPool.length)) + '"></label>' +
     '<button class="btn primary block" data-action="exo-exam-start" ' + (!exoExamPool.length?'disabled':'') + '>🚀 Démarrer l\'entraînement</button>' +
-    (!exoExamPool.length ? '<div class="faint" style="margin-top:8px;">Ajoute des QCM/QCD dans le Programme pour pouvoir t\'entraîner.</div>' : '') +
+    (!exoExamPool.length ? '<div class="faint" style="margin-top:8px;">Aucune question QCM/QCD pour ce niveau/ces matières.</div>' : '') +
   '</div>';
   if (exoExamHistory.length){
     html += '<div class="card"><h3 style="font-size:15px; margin-bottom:8px;">Historique de tes entraînements</h3>' +
@@ -2998,18 +3013,6 @@ function renderExoSetup(){
 
   html += '<div class="card stack">';
   html += '<h3 style="font-size:15px;">✏️ Exercices pratiques</h3>';
-  html += '<div><h3 style="font-size:15px;">Année</h3><div class="tabs" style="margin-top:8px;">' +
-    [["all","Toutes"]].concat(visibleYears().map(function(y){return [y.id,y.label];})).map(function(o){
-      return '<button class="' + (exoSetup.year===o[0]?'active':'') + '" data-action="exo-set-year" data-year="' + o[0] + '">' + o[1] + '</button>';
-    }).join("") + '</div></div>';
-
-  html += '<div><h3 style="font-size:15px;">Matières (optionnel)</h3>' +
-    '<div class="stack" style="max-height:180px; overflow:auto; border:1px solid var(--line); border-radius:10px; padding:8px;">' +
-    mods.filter(function(x){ return exoSetup.year==="all" || x.year.id===exoSetup.year; }).map(function(x){
-      var checked = exoSetup.modules.indexOf(x.module.id) !== -1;
-      return '<label class="checkbox-row small"><input type="checkbox" data-action="exo-toggle-module" data-module="' + x.module.id + '" ' + (checked?'checked':'') + '> ' + esc(x.module.name) + ' <span class="faint">(' + x.year.label + ')</span></label>';
-    }).join("") + '</div></div>';
-
   html += '<label class="checkbox-row"><input type="checkbox" data-action="exo-toggle-review" ' + (exoSetup.onlyReview?'checked':'') + '> <span class="small">Uniquement les exercices marqués « à revoir »</span></label>';
 
   html += '<button class="btn primary block" data-action="exo-start" ' + (!available.length?'disabled':'') + '>🚀 Commencer (' + available.length + ' exercices)</button>';
@@ -4690,8 +4693,8 @@ function startDiplomeExam(n){
   navigate("#/quiz-run");
 }
 function startExoExam(n){
-  var pool = collectQuestions("mix", "all", null, false);
-  if (!pool.length) return showToast("Aucune question disponible pour t'entraîner.");
+  var pool = collectQuestions("mix", exoSetup.year, exoSetup.modules.length?exoSetup.modules:null, false);
+  if (!pool.length) return showToast("Aucune question disponible pour t'entraîner avec ces critères.");
   var count = Math.min(n || 20, pool.length);
   var items = shuffle(pool).slice(0, count);
   quizSession = { items: items, index: 0, answers: [], currentSelection: [], showFeedback:false, currentFlag:false, examType:"exercice", logged:false };
