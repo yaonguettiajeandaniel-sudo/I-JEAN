@@ -4149,20 +4149,25 @@ function extractTextForDoc(kind, arrayBuffer){
    matière n'est traitée qu'une seule fois (state.defaultDocsSeeded).
    ========================================================= */
 var DEFAULT_COURSE_DOCS = {
-  "Anatomie et Physiologie": { file: "course-docs/anatomie-et-physiologie.pdf", title: "Cours Anatomie et Physiologie.pdf" },
-  "Pathologie chirurgicale": { file: "course-docs/pathologie-chirurgicale.pdf", title: "Cours Pathologie chirurgicale.pdf" },
-  "VIH-SIDA": { file: "course-docs/vih-sida.pdf", title: "Cours VIH-SIDA.pdf" },
-  "Santé publique et Épidémiologie": { file: "course-docs/sante-publique.pdf", title: "Cours Santé publique — Chaîne du froid.pdf" }
+  "Anatomie et Physiologie": [{ file: "course-docs/anatomie-et-physiologie.pdf", title: "Cours Anatomie et Physiologie.pdf" }],
+  "Pathologie chirurgicale": [{ file: "course-docs/pathologie-chirurgicale.pdf", title: "Cours Pathologie chirurgicale.pdf" }],
+  "VIH-SIDA": [{ file: "course-docs/vih-sida.pdf", title: "Cours VIH-SIDA.pdf" }],
+  "Santé publique et Épidémiologie": [{ file: "course-docs/sante-publique.pdf", title: "Cours Santé publique — Chaîne du froid.pdf" }],
+  "Pathologies urinaires": [{ file: "course-docs/pathologies-urinaires.pdf", title: "Cours Pathologies urinaires.pdf" }]
 };
 function ensureDefaultCourseDocs(){
   if (!state.defaultDocsSeeded) state.defaultDocsSeeded = {};
   state.years.forEach(function(y){
     y.modules.forEach(function(m){
-      var cfg = DEFAULT_COURSE_DOCS[m.name];
-      if (!cfg || state.defaultDocsSeeded[m.id]) return;
+      var list = DEFAULT_COURSE_DOCS[m.name];
+      if (!list) return;
+      list.forEach(function(cfg){
+      var seedKey = m.id + "::" + cfg.file;
+      if (state.defaultDocsSeeded[seedKey]) return;
       dbGetByModule(m.id).then(function(existing){
-        if (existing.length){
-          state.defaultDocsSeeded[m.id] = true; saveState();
+        var already = existing.some(function(d){ return d.fileName === cfg.title; });
+        if (already){
+          state.defaultDocsSeeded[seedKey] = true; saveState();
           return;
         }
         return fetch(cfg.file).then(function(res){
@@ -4181,12 +4186,13 @@ function ensureDefaultCourseDocs(){
             });
           });
         }).then(function(){
-          state.defaultDocsSeeded[m.id] = true; saveState();
+          state.defaultDocsSeeded[seedKey] = true; saveState();
           docsCache[m.id] = undefined;
           render();
         });
       }).catch(function(err){
-        console.warn("Cours par défaut indisponible pour " + m.name, err);
+        console.warn("Cours par défaut indisponible pour " + m.name + " (" + cfg.file + ")", err);
+      });
       });
     });
   });
