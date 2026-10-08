@@ -269,7 +269,7 @@
   ::selection{ background:var(--accent-soft); }
 
   /* ---- Mascotte : le Professeur Serpent (compagnon permanent) ---- */
-  #mascot-root{ position:fixed; left:0; right:0; bottom:0; z-index:150; pointer-events:none; }
+  #mascot-root{ position:fixed; left:0; right:0; bottom:0; z-index:95; pointer-events:none; }
   .mascot-wrap{
     position:absolute; right:14px; bottom:calc(env(safe-area-inset-bottom,0px) + 88px);
     display:flex; align-items:flex-end; gap:8px; max-width:min(320px, calc(100vw - 28px));
@@ -2395,6 +2395,7 @@ window.addEventListener("hashchange", function(){
   var quizWasActive = route.view === "quiz-run" && quizSession && quizSession.index < quizSession.items.length;
   route = parseHash();
   closeSearch();
+  closeModal();
   render();
   if (quizWasActive && route.view !== "quiz-run") showMascot("alert");
 });
