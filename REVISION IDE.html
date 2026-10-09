@@ -2392,7 +2392,13 @@ function mascotPick(mood){
   var list = MASCOT_MSGS[mood] || MASCOT_MSGS.greet;
   return list[Math.floor(Math.random() * list.length)];
 }
-var MASCOT_IMG = '<img src="mascot-chers-maitre.png" alt="Chers Maître" draggable="false">';
+/* Une image différente selon l'humeur : contente (bonne réponse),
+   déçue (mauvaise réponse), par défaut sinon (accueil, alerte...). */
+function mascotImgSrc(mood){
+  if (mood === "happy") return "mascot-chers-maitre-gagne.png";
+  if (mood === "encourage") return "mascot-chers-maitre-perdu.png";
+  return "mascot-chers-maitre.png";
+}
 var mascotHideTimer = null;
 var mascotRemoveTimer = null;
 var mascotShown = false;
@@ -2410,7 +2416,7 @@ function showMascot(mood, text, opts){
           '<span class="mascot-spark s1" aria-hidden="true">✨</span>' +
           '<span class="mascot-spark s2" aria-hidden="true">✨</span>' +
           '<span class="mascot-spark s3" aria-hidden="true">✨</span>' +
-          '<span class="mascot-avatar-art">' + MASCOT_IMG + '</span>' +
+          '<span class="mascot-avatar-art"><img id="mascot-avatar-img" alt="Chers Maître" draggable="false"></span>' +
         '</button>' +
         '<div class="mascot-bubble" id="mascot-bubble">' +
           '<span id="mascot-bubble-text"></span>' +
@@ -2420,9 +2426,11 @@ function showMascot(mood, text, opts){
     mascotShown = true;
   }
   var wrap = document.getElementById("mascot-wrap");
+  var avatarImg = document.getElementById("mascot-avatar-img");
   var bubble = document.getElementById("mascot-bubble");
   var bubbleText = document.getElementById("mascot-bubble-text");
-  if (!wrap || !bubble || !bubbleText) return;
+  if (!wrap || !avatarImg || !bubble || !bubbleText) return;
+  avatarImg.src = mascotImgSrc(mood);
   /* Si la mascotte est déjà visible (ou en train de disparaître), on garde
      "present" tout de suite pour éviter un flash ; sinon on part de l'état
      masqué pour que l'apparition s'anime. */
