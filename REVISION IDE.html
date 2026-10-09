@@ -4300,29 +4300,185 @@ function extractTextForDoc(kind, arrayBuffer){
    matière n'est traitée qu'une seule fois (state.defaultDocsSeeded).
    ========================================================= */
 var DEFAULT_COURSE_DOCS = {
-  "Anatomie et Physiologie": [{ file: "course-docs/anatomie-et-physiologie.pdf", title: "Cours Anatomie et Physiologie.pdf" }],
-  "Pathologie chirurgicale": [{ file: "course-docs/pathologie-chirurgicale.pdf", title: "Cours Pathologie chirurgicale.pdf" }],
-  "VIH-SIDA": [{ file: "course-docs/vih-sida.pdf", title: "Cours VIH-SIDA.pdf" }],
+  "Anatomie et Physiologie": [
+    { file: "course-docs/anatomie-et-physiologie.pdf", title: "Cours Anatomie et Physiologie.pdf" },
+    { file: "course-docs/qcm-anatomie-1045.pdf", title: "QCM Anatomie — Banque de 1045 questions.pdf", section: "exercice", tgId: "tg_650945091_AgADQCMAAnu0MFA" },
+    { file: "course-docs/qcm-generalites-anatomie.pdf", title: "QCM — Généralités en Anatomie.pdf", section: "exercice", tgId: "tg_650945147_AgADPiMAAnu0MFA" },
+    { file: "course-docs/qcm-abdomen-tube-digestif.pdf", title: "QCM — Abdomen, péritoine, tube digestif et glandes annexes.pdf", section: "exercice", tgId: "tg_650945148_AgADPyMAAnu0MFA" }
+  ],
+  "Pathologie chirurgicale": [
+    { file: "course-docs/pathologie-chirurgicale.pdf", title: "Cours Pathologie chirurgicale.pdf", tgId: "tg_650945064_AgADMiMAAnu0MFA" },
+    { file: "course-docs/evaluation-chirurgie-l2-n2-freud.pdf", title: "Évaluation Chirurgie L2 n°2 (Abidjan, Freud).pdf", section: "exercice", tgId: "tg_650945117_AgADqx0AAm87OFA" },
+    { file: "course-docs/chirurgie-exo-abengourou.pdf", title: "Chirurgie — Exercices (Abengourou).pdf", section: "exercice", tgId: "tg_650945133_AgADLiMAAnu0MFA" },
+    { file: "course-docs/serie-exercices-pathologies-chirurgicales.pdf", title: "Série d'exercices — Pathologies chirurgicales.pdf", section: "exercice", tgId: "tg_650945176_AgADlBsAAgkWQFI" }
+  ],
+  "VIH-SIDA": [
+    { file: "course-docs/vih-sida.pdf", title: "Cours VIH-SIDA.pdf", tgId: ["tg_650945065_AgADMyMAAnu0MFA", "tg_650945137_AgADMyMAAnu0MFA"] },
+    { file: "course-docs/chapitre1-traitement-antiretroviral.pdf", title: "Chapitre 1 — Introduction au traitement antirétroviral (TARV).pdf", tgId: "tg_650945092_AgADQSMAAnu0MFA" },
+    { file: "course-docs/td-vih-sida-par-chapitre.pdf", title: "TD VIH-SIDA par chapitre — L2.pdf", section: "exercice", tgId: "tg_650945163_AgADHyMAAnu0MFA" }
+  ],
   "Santé publique et Épidémiologie": [
     { file: "course-docs/sante-publique.pdf", title: "Cours Santé publique — Chaîne du froid.pdf" },
     { file: "course-docs/sante-publique-formules-epidemiologie.pdf", title: "Cours Santé publique — Formules d'Épidémiologie.pdf" },
     { file: "course-docs/sante-publique-vaccins-consommables.pdf", title: "Cours Santé publique — Gestion des vaccins et consommables.pdf" },
-    { file: "course-docs/sante-publique-simr.pdf", title: "Cours Santé publique — Surveillance Intégrée de la Maladie et Riposte (SIMR).pdf" },
-    { file: "course-docs/sante-publique-sujet2-versionA.pdf", title: "Sujet n°2 (Version A) — Santé Publique L2.pdf", section: "exercice" }
+    { file: "course-docs/sante-publique-simr.pdf", title: "Cours Santé publique — Surveillance Intégrée de la Maladie et Riposte (SIMR).pdf", tgId: ["tg_650945063_AgADGSMAAnu0MFA", "tg_650945157_AgADGSMAAnu0MFA"] },
+    { file: "course-docs/sante-publique-sujet2-versionA.pdf", title: "Sujet n°2 (Version A) — Santé Publique L2.pdf", section: "exercice", tgId: ["tg_650945070_AgADZCQAAtLzCVI", "tg_650945075_AgADdSEAAhCMmFA"] },
+    { file: "course-docs/synthese-qcm-vaccins-epidemiologie.pdf", title: "Synthèse QCM/QCD — Gestion des vaccins et épidémiologie.pdf", section: "exercice", tgId: "tg_650945109_AgADVSMAAnu0MFA" },
+    { file: "course-docs/monitorage-qcd.pdf", title: "Monitorage — QCD.pdf", section: "exercice", tgId: "tg_650945110_AgADViMAAnu0MFA" },
+    { file: "course-docs/td-sante-publique-communautaire-l2.pdf", title: "TD Santé Publique communautaire — L2.pdf", section: "exercice", tgId: "tg_650945160_AgADHCMAAnu0MFA" }
   ],
-  "Pathologies urinaires": [{ file: "course-docs/pathologies-urinaires.pdf", title: "Cours Pathologies urinaires.pdf" }],
+  "Pathologies urinaires": [
+    { file: "course-docs/pathologies-urinaires.pdf", title: "Cours Pathologies urinaires.pdf" },
+    { file: "course-docs/synthese-pathologies-renales-urologiques.pdf", title: "Synthèse professionnelle — Pathologies rénales et urologiques.pdf", tgId: "tg_650945125_AgADGiAAAm87QFA" },
+    { file: "course-docs/sujet-nephro-urologie-l2-2020.pdf", title: "Sujet de Médecine L2 — Néphro-urologie (2020).pdf", section: "exercice", tgId: "tg_650945144_AgADOyMAAnu0MFA" }
+  ],
   /* replace:true => tout autre document déjà présent pour cette matière est supprimé */
-  "Pathologie médicale": [{ file: "course-docs/pathologie-medicale.pdf", title: "Cours Pathologie médicale.pdf", replace: true }],
-  "Pathologies Respiratoires": [{ file: "course-docs/pathologies-respiratoires.pdf", title: "Cours Pathologies Respiratoires.pdf" }],
-  "Pharmacologie": [{ file: "course-docs/pharmacologie.pdf", title: "Cours Pharmacologie INFAS.pdf" }],
-  "Planification familiale / Technologie contraceptive": [{ file: "course-docs/sr-pf-l2.pdf", title: "Cours Santé de la Reproduction / Planification Familiale.pdf" }],
-  "Santé sexuelle / Santé de la reproduction des adolescents et des jeunes / Approche genre": [{ file: "course-docs/sr-pf-l2.pdf", title: "Cours Santé de la Reproduction / Planification Familiale.pdf" }],
-  "Soins infirmiers obstétricaux / néonataux (SONU, SONUC, SONUB, PCIMNE et PTMNE)": [{ file: "course-docs/pcimne.pdf", title: "Cours PCIMNE.pdf" }],
-  "Démarche de soin": [{ file: "course-docs/demarche-scientifique-soins.pdf", title: "Cours Démarche scientifique de soins infirmiers.pdf" }],
-  "Soins Infirmiers de Base": [{ file: "course-docs/soins-infirmiers-cardio-vasculaire-l1.pdf", title: "Cours Soins infirmiers — Appareil cardio-vasculaire.pdf" }]
+  "Pathologie médicale": [
+    { file: "course-docs/pathologie-medicale.pdf", title: "Cours Pathologie médicale.pdf", replace: true, tgId: "tg_650945069_AgADXyMAAnu0MFA" },
+    { file: "course-docs/evaluation-pec-pathologies-l2.pdf", title: "Évaluation PEC Pathologies médicales / IST-VIH-SIDA L2.pdf", section: "exercice", tgId: "tg_650945080_AgADWhwAApPxaVA" },
+    { file: "course-docs/evaluation-medecine-vf.pdf", title: "Évaluation de Médecine — Vrai/Faux.pdf", section: "exercice", tgId: "tg_650945087_AgAD8h8AApR6gVA" },
+    { file: "course-docs/exercices-pathologies-medicales.pdf", title: "Exercices — Pathologies médicales (TVP, EP, Angor).pdf", section: "exercice", tgId: "tg_650945114_AgADeyMAAnu0MFA" },
+    { file: "course-docs/corrige-partiel-medecine.pdf", title: "Corrigé — Partiel de Médecine.pdf", section: "exercice", tgId: "tg_650945115_AgADgB0AAnu0OFA" },
+    { file: "course-docs/evaluation-medecine-l2-n2-freud.pdf", title: "Évaluation de Médecine L2 n°2 (Abidjan, Freud).pdf", section: "exercice", tgId: "tg_650945119_AgADrR0AAm87OFA" },
+    { file: "course-docs/td-pec-ist-vih-sida-oev.pdf", title: "TD PEC Pathologies médicales (IST-VIH-SIDA-OEV) — L2.pdf", section: "exercice", tgId: "tg_650945159_AgADGyMAAnu0MFA" },
+    { file: "course-docs/medecine-l2-n2-scan.pdf", title: "Médecine L2 n°2.pdf", section: "exercice", tgId: "tg_650945170_AgADJiMAAnu0MFA" }
+  ],
+  "Pathologies Respiratoires": [{ file: "course-docs/pathologies-respiratoires.pdf", title: "Cours Pathologies Respiratoires.pdf", tgId: "tg_650945060_AgADTCQAAtLzCVI" }],
+  "Pharmacologie": [
+    { file: "course-docs/pharmacologie.pdf", title: "Cours Pharmacologie INFAS.pdf", tgId: ["tg_650945061_AgADEyMAAnu0MFA", "tg_650945151_AgADEyMAAnu0MFA"] },
+    { file: "course-docs/pharmaco-70-medicaments.pdf", title: "Tableau des 70 médicaments essentiels (Pharmacologie INFAS).pdf", tgId: "tg_650945071_AgADBSIAAhcmKFE" },
+    { file: "course-docs/classification-medicaments.pdf", title: "Classification des médicaments (référence).pdf", tgId: "tg_650945104_AgADTSMAAnu0MFA" }
+  ],
+  "Planification familiale / Technologie contraceptive": [{ file: "course-docs/sr-pf-l2.pdf", title: "Cours Santé de la Reproduction / Planification Familiale.pdf", tgId: ["tg_650945062_AgADGCMAAnu0MFA", "tg_650945156_AgADGCMAAnu0MFA"] }],
+  "Santé sexuelle / Santé de la reproduction des adolescents et des jeunes / Approche genre": [{ file: "course-docs/sr-pf-l2.pdf", title: "Cours Santé de la Reproduction / Planification Familiale.pdf", tgId: ["tg_650945062_AgADGCMAAnu0MFA", "tg_650945156_AgADGCMAAnu0MFA"] }],
+  "Soins infirmiers obstétricaux / néonataux (SONU, SONUC, SONUB, PCIMNE et PTMNE)": [
+    { file: "course-docs/pcimne.pdf", title: "Cours PCIMNE.pdf", tgId: "tg_650945066_AgADVCMAAnu0MFA" },
+    { file: "course-docs/livret-tableaux-pcimne.pdf", title: "Livret de tableaux PCIMNE 0-5 ans.pdf", tgId: "tg_650945107_AgADUiMAAnu0MFA" }
+  ],
+  "Démarche de soin": [{ file: "course-docs/demarche-scientifique-soins.pdf", title: "Cours Démarche scientifique de soins infirmiers.pdf", tgId: "tg_650945067_AgADWiMAAnu0MFA" }],
+  "Soins Infirmiers de Base": [
+    { file: "course-docs/soins-infirmiers-cardio-vasculaire-l1.pdf", title: "Cours Soins infirmiers — Appareil cardio-vasculaire.pdf", tgId: "tg_650945068_AgADWyMAAnu0MFA" },
+    { file: "course-docs/calcul-dose-exacte-prescrite.pdf", title: "Calcul de dose exacte prescrite — Généralités.pdf", tgId: "tg_650945106_AgADUCMAAnu0MFA" }
+  ],
+  "Révision générale - Synthèse examen d'État": [
+    { file: "course-docs/de-blanc-2025-chirurgie-sujet.pdf", title: "Diplôme d'État blanc 2025 — Chirurgie (sujet).pdf", section: "exercice", tgId: "tg_650945072_AgADECIAAhcmKFE" },
+    { file: "course-docs/de-blanc-2025-correction-8-antennes.pdf", title: "Diplôme d'État blanc 2025 — Correction (8 antennes).pdf", section: "exercice", tgId: "tg_650945074_AgADKh8AAlBAkFA" },
+    { file: "course-docs/pediatrie-complet-exercices-corriges-l3.pdf", title: "Pédiatrie complet — Exercices et corrigés (L3).pdf", section: "exercice", tgId: "tg_650945077_AgAD3CEAAhcmGFE" },
+    { file: "course-docs/evaluation-pediatrie-n8-l3.pdf", title: "Évaluation de Pédiatrie n°8 — L3.pdf", section: "exercice", tgId: "tg_650945127_AgADOCAAApPxYVA" },
+    { file: "course-docs/medecine-partie1-diplome-etat.pdf", title: "Médecine partie 1 — Préparation Diplôme d'État.pdf", section: "exercice", tgId: "tg_650945142_AgADOSMAAnu0MFA" }
+  ],
+  "Soins Infirmiers en Chirurgie": [
+    { file: "course-docs/partiel-chirurgie-l2-p32-abj.pdf", title: "Partiel Soins Infirmiers en Chirurgie — Abidjan P32.pdf", section: "exercice", tgId: "tg_650945076_AgAD9iIAAmsYuFA" },
+    { file: "course-docs/evaluation-chirurgie-pediatrique-l2-freud.pdf", title: "Évaluation Chirurgie pédiatrique L2 (Abidjan, Freud).pdf", section: "exercice", tgId: "tg_650945118_AgADrB0AAm87OFA" },
+    { file: "course-docs/evaluation-chirurgie-pediatrique-l2-fev2024.pdf", title: "Évaluation Soins Infirmiers en Chirurgie pédiatrique — L2.pdf", section: "exercice", tgId: "tg_650945167_AgADIyMAAnu0MFA" }
+  ],
+  "Techniques de soins infirmiers": [
+    { file: "course-docs/evaluation-techniques-soins-infirmiers-l2.pdf", title: "Évaluation — Techniques de soins infirmiers L2.pdf", section: "exercice", tgId: ["tg_650945078_AgADRBwAApPxaVA", "tg_650945129_AgADRBwAApPxaVA"] },
+    { file: "course-docs/technique-soins-infirmiers-l2-bouake.pdf", title: "Technique de soins infirmiers — L2 (Bouaké).pdf", tgId: "tg_650945130_AgADRRwAApPxaVA" },
+    { file: "course-docs/resume-techniques-soins-infirmiers-complet.pdf", title: "Résumé — Techniques de soins infirmiers (complet).pdf", tgId: "tg_650945131_AgADRhwAApPxaVA" },
+    { file: "course-docs/demarche-soins-pensee-critique-l2.pdf", title: "Démarche de soins et pensée critique — L2.pdf", tgId: "tg_650945152_AgADFCMAAnu0MFA" }
+  ],
+  "Pédiatrie et Soins de l'enfant": [
+    { file: "course-docs/pediatrie-medicale-l2-qcd.pdf", title: "Pédiatrie médicale L2 — QCD (prématurité, nouveau-nés).pdf", section: "exercice", tgId: "tg_650945079_AgADShwAApPxaVA" },
+    { file: "course-docs/epreuve-sante-infantile-partiel-2024.pdf", title: "Épreuve Santé Infantile — Partiel 2024.pdf", section: "exercice", tgId: "tg_650945083_AgADiykAAsZXcFA" },
+    { file: "course-docs/resume-pediatrie-diplome-etat.pdf", title: "Résumé Pédiatrie pour le Diplôme d'État.pdf", tgId: "tg_650945084_AgADdioAAsZXcFA" },
+    { file: "course-docs/controle-sante-infantile-l2.pdf", title: "Contrôle — Santé Infantile L2.pdf", section: "exercice", tgId: "tg_650945122_AgADFyAAAm87QFA" },
+    { file: "course-docs/epreuve-neonatologie-pediatrie-l2.pdf", title: "Épreuve — Néonatologie/Pédiatrie L2.pdf", section: "exercice", tgId: "tg_650945123_AgADGCAAAm87QFA" },
+    { file: "course-docs/evaluation-soins-infirmiers-pediatrie.pdf", title: "Évaluation — Sciences infirmières et Pédiatrie.pdf", section: "exercice", tgId: "tg_650945128_AgADqSAAApPxYVA" },
+    { file: "course-docs/cours-pediatrie-l2.pdf", title: "Cours de Pédiatrie — L2.pdf", tgId: "tg_650945132_AgADSRwAApPxaVA" },
+    { file: "course-docs/evaluation-sante-infantile-l2.pdf", title: "Évaluation Santé Infantile — L2.pdf", section: "exercice", tgId: "tg_650945149_AgADLh0AAlP8CFA" },
+    { file: "course-docs/correction-test-formatif-anatomie-pediatrie.pdf", title: "Correction — Test formatif Anatomie/Pédiatrie L2.pdf", section: "exercice", tgId: "tg_650945165_AgADISMAAnu0MFA" }
+  ],
+  "Santé Publique": [
+    { file: "course-docs/evaluation-sante-publique-n2.pdf", title: "Évaluation Santé Publique n°2.pdf", section: "exercice", tgId: "tg_650945082_AgADgCkAAsZXcFA" },
+    { file: "course-docs/formules-sante-publique-1.pdf", title: "Formules de Santé Publique (démographie, taux).pdf", tgId: "tg_650945085_AgADByEAApR6eVA" },
+    { file: "course-docs/formules-sante-publique-2.pdf", title: "Formules en Santé Publique.pdf", tgId: "tg_650945088_AgAEIAAClHqBUA" },
+    { file: "course-docs/exercices-revision-sante-publique.pdf", title: "Exercices de révision — Santé Publique (D.E.).pdf", section: "exercice", tgId: "tg_650945105_AgADTyMAAnu0MFA" },
+    { file: "course-docs/banque-questions-sante-publique-communautaire.pdf", title: "Banque de questions — Santé Publique communautaire (L1).pdf", section: "exercice", tgId: "tg_650945121_AgADFiAAAm87QFA" },
+    { file: "course-docs/generalites-sante-publique-2020.pdf", title: "Généralités sur la Santé Publique (2020).pdf", tgId: "tg_650945150_AgADDiMAAnu0MFA" }
+  ],
+  "Gynécologie et Obstétrique": [
+    { file: "course-docs/formulaire-gyneco-obstetrique-vierge.pdf", title: "Formulaire Gynécologie-Obstétrique (vierge).pdf", tgId: "tg_650945086_AgAD1R8AApR6gVA" },
+    { file: "course-docs/gyneco-obst-sujet1-ide-l2.pdf", title: "Gynéco-Obstétrique — Sujet n°1 (IDE L2).pdf", section: "exercice", tgId: "tg_650945093_AgADQiMAAnu0MFA" },
+    { file: "course-docs/gyneco-obst-sujet4-sf-l2.pdf", title: "Gynéco-Obstétrique — Sujet n°4 (SF L2).pdf", section: "exercice", tgId: "tg_650945094_AgADQyMAAnu0MFA" },
+    { file: "course-docs/gyneco-obst-sujet1-sf-l2.pdf", title: "Gynéco-Obstétrique — Sujet n°1 (SF L2).pdf", section: "exercice", tgId: "tg_650945095_AgADRCMAAnu0MFA" },
+    { file: "course-docs/gyneco-obst-sujet3-sf-l2.pdf", title: "Gynéco-Obstétrique — Sujet n°3 (SF L2).pdf", section: "exercice", tgId: "tg_650945096_AgADRSMAAnu0MFA" },
+    { file: "course-docs/gyneco-obst-sujet2-ide-l2.pdf", title: "Gynéco-Obstétrique — Sujet n°2 (IDE L2).pdf", section: "exercice", tgId: "tg_650945099_AgADSCMAAnu0MFA" },
+    { file: "course-docs/gyneco-obst-sujet2-sf-l2.pdf", title: "Gynéco-Obstétrique — Sujet n°2 (SF L2).pdf", section: "exercice", tgId: "tg_650945100_AgADSSMAAnu0MFA" },
+    { file: "course-docs/definitions-terminologies-gyneco-obst.pdf", title: "Définitions et terminologies en Gynéco-Obstétrique.pdf", tgId: "tg_650945138_AgADNSMAAnu0MFA" }
+  ],
+  "Diététique": [{ file: "course-docs/prepa-de-dietetique-pediatrie.pdf", title: "Préparation D.E. — Diététique / Pédiatrie (Vrai-Faux).pdf", section: "exercice", tgId: "tg_650945101_AgADSiMAAnu0MFA" }],
+  "Santé communautaire et Soins de santé primaires": [{ file: "course-docs/td-sante-publique-l3-n1.pdf", title: "TD de Santé Publique n°1 — L3.pdf", section: "exercice", tgId: "tg_650945102_AgADSyMAAnu0MFA" }],
+  "Traumatologie": [
+    { file: "course-docs/td-traumato-2.pdf", title: "TD de Traumatologie n°2 — QCD.pdf", section: "exercice", tgId: "tg_650945103_AgADTCMAAnu0MFA" },
+    { file: "course-docs/td-traumatologie-qcd-qcm.pdf", title: "TD Traumatologie — QCD/QCM (L2).pdf", section: "exercice", tgId: "tg_650945158_AgADGiMAAnu0MFA" },
+    { file: "course-docs/chirurgie-l2-traumato-rhumato.pdf", title: "Chirurgie L2 — Traumatologie/Rhumatologie (définitions).pdf", tgId: "tg_650945166_AgADIiMAAnu0MFA" },
+    { file: "course-docs/chirurgie-traumato-l2-scan.pdf", title: "Chirurgie Traumatologie — L2.pdf", section: "exercice", tgId: "tg_650945169_AgADJSMAAnu0MFA" },
+    { file: "course-docs/chirurgie-traumato-bold.pdf", title: "Chirurgie Traumatologie (bis).pdf", section: "exercice", tgId: "tg_650945174_AgADKiMAAnu0MFA" }
+  ],
+  "Mobilisation sociale et communautaire": [
+    { file: "course-docs/12-pratiques-familiales-essentielles.pdf", title: "Les 12 pratiques familiales essentielles (PFE).pdf", tgId: "tg_650945108_AgADUyMAAnu0MFA" },
+    { file: "course-docs/mobilisation-sociale-communautaire.pdf", title: "La mobilisation sociale et communautaire (MOBSOC).pdf", tgId: "tg_650945154_AgADFiMAAnu0MFA" }
+  ],
+  "Techniques de soins de base en médecine et en chirurgie": [{ file: "course-docs/techniques-soins-infirmiers-l1.pdf", title: "Techniques de soins infirmiers — L1.pdf", tgId: "tg_650945111_AgADVyMAAnu0MFA" }],
+  "Maladies parasitaires et infectieuses": [{ file: "course-docs/soins-infirmiers-pathologies-tropicales.pdf", title: "Soins infirmiers dans les pathologies tropicales.pdf", tgId: "tg_650945112_AgADWCMAAnu0MFA" }],
+  "Soins Infirmiers obstétricaux / néonataux (SONU)": [{ file: "course-docs/arbres-decisionnels-sonu.pdf", title: "Arbres décisionnels SONU (hémorragies grossesse).pdf", tgId: "tg_650945116_AgADmx0AAnu0OFA" }],
+  "Pathologies chirurgicales / Sémiologie": [{ file: "course-docs/semiologie-chirurgicale-qcd.pdf", title: "Sémiologie chirurgicale — QCD.pdf", section: "exercice", tgId: "tg_650945120_AgADFSAAAm87QFA" }],
+  "Législation et Déontologie professionnelle": [{ file: "course-docs/evaluation-deontologie-l1.pdf", title: "Évaluation Déontologie — L1.pdf", section: "exercice", tgId: "tg_650945124_AgADGSAAAm87QFA" }],
+  "Réanimation et Urgences": [{ file: "course-docs/examen-blanc-chirurgie-l3-bouake.pdf", title: "Examen blanc Chirurgie n°1 — L3 (Bouaké/Korhogo).pdf", section: "exercice", tgId: "tg_650945134_AgADLyMAAnu0MFA" }],
+  "IST/VIH": [{ file: "course-docs/ue-vih-l1-2017.pdf", title: "UE VIH — L1 (unité d'enseignement officielle).pdf", tgId: "tg_650945135_AgADMCMAAnu0MFA" }],
+  "Anatomie Physiologie : appareil respiratoire, appareil cardiovasculaire, appareil urinaire, appareil reproducteur": [
+    { file: "course-docs/anatomie-appareil-uro-genital.pdf", title: "Anatomie de l'appareil uro-génital.pdf", tgId: "tg_650945136_AgADMSMAAnu0MFA" },
+    { file: "course-docs/qcm-appareil-genital-masculin.pdf", title: "QCM — Appareil génital masculin.pdf", section: "exercice", tgId: "tg_650945139_AgADNiMAAnu0MFA" },
+    { file: "course-docs/qcm-appareil-urinaire.pdf", title: "QCM — Appareil urinaire.pdf", section: "exercice", tgId: ["tg_650945140_AgADNyMAAnu0MFA", "tg_650945146_AgADPSMAAnu0MFA"] },
+    { file: "course-docs/qcm-appareil-genital-feminin.pdf", title: "QCM — Appareil génital féminin.pdf", section: "exercice", tgId: "tg_650945141_AgADOCMAAnu0MFA" }
+  ],
+  "Anatomie Physiologie : Cellules et tissus, ostéologie, myologie, système nerveux": [{ file: "course-docs/qcm-paroi-thorax.pdf", title: "QCM — Paroi du thorax.pdf", section: "exercice", tgId: "tg_650945143_AgADOiMAAnu0MFA" }],
+  "Gestion des services de soins et Administration": [{ file: "course-docs/documents-sante-publique-l3.pdf", title: "Documents de Santé Publique — L3 (monitorage, ESPC, COGES).pdf", tgId: "tg_650945145_AgADPCMAAnu0MFA" }],
+  "Chirurgie digestive": [
+    { file: "course-docs/correction-epreuve-chirurgie-digestive.pdf", title: "Correction — Épreuve Chirurgie digestive (L2).pdf", section: "exercice", tgId: "tg_650945155_AgADFyMAAnu0MFA" },
+    { file: "course-docs/td-qcd-qcm-appendicite-occlusions.pdf", title: "TD QCD/QCM — Appendicite, occlusions, péritonites.pdf", section: "exercice", tgId: "tg_650945162_AgADHiMAAnu0MFA" },
+    { file: "course-docs/chirurgie-digestive-l2-scan.pdf", title: "Chirurgie digestive — L2.pdf", section: "exercice", tgId: "tg_650945168_AgADJCMAAnu0MFA" },
+    { file: "course-docs/sujet-chirurgie-digestive-1-abengourou.pdf", title: "Sujet de Chirurgie digestive n°1 (Abengourou).pdf", section: "exercice", tgId: "tg_650945175_AgADkxsAAgkWQFI" }
+  ],
+  "Pathologies digestives": [
+    { file: "course-docs/td-pathologies-digestives.pdf", title: "TD Pathologies digestives — L2.pdf", section: "exercice", tgId: "tg_650945161_AgADHSMAAnu0MFA" },
+    { file: "course-docs/sujet-entrainement-medecine-l2-digestif-urinaire.pdf", title: "Sujet d'entraînement — Médecine L2 (digestif/urinaire).pdf", section: "exercice", tgId: "tg_650945171_AgADJyMAAnu0MFA" }
+  ],
+  "Théorie et concepts des Soins Infirmiers / Obstétricaux / Relation d'aide": [{ file: "course-docs/test-formatif-theorie-soins-infirmiers.pdf", title: "Test formatif — Théorie et concepts des Soins Infirmiers.pdf", section: "exercice", tgId: "tg_650945164_AgADICMAAnu0MFA" }],
+  "Affections transmissibles": [{ file: "course-docs/medecine-trop-l2-s4.pdf", title: "Médecine tropicale L2 S4 — QCM.pdf", section: "exercice", tgId: "tg_650945172_AgADKCMAAnu0MFA" }],
+  "Soins Infirmiers en Médecine": [{ file: "course-docs/examen-s4-soins-infirmiers-medecine-l2.pdf", title: "Examen S4 — Soins Infirmiers en Médecine L2 (version C).pdf", section: "exercice", tgId: "tg_650945173_AgADKSMAAnu0MFA" }]
 };
+function markTelegramSeenIfAny(cfg){
+  /* Un document déjà classé automatiquement (DEFAULT_COURSE_DOCS) ne doit
+     pas réapparaître comme "non classé" dans la boîte de réception
+     Telegram de l'étudiant. cfg.tgId peut être un id unique ou un tableau
+     d'ids (cas d'un même fichier renvoyé plusieurs fois sur Telegram). */
+  if (!cfg.tgId) return;
+  if (!state.telegramSeen) state.telegramSeen = [];
+  var ids = Array.isArray(cfg.tgId) ? cfg.tgId : [cfg.tgId];
+  ids.forEach(function(id){
+    if (state.telegramSeen.indexOf(id) === -1) state.telegramSeen.push(id);
+  });
+}
+var TELEGRAM_DUPLICATE_IDS = [
+  /* Fichiers renvoyés sur Telegram en double (contenu strictement identique
+     à un document déjà classé sous un autre id) : on les marque "vus" sans
+     créer de document séparé pour éviter les doublons dans la boîte de
+     réception. */
+  "tg_650945097_AgADRiMAAnu0MFA", /* = GYNECO OBSTETRIQUE NO 1 LICENCE 2 IDE (doublon de tg_650945093) */
+  "tg_650945098_AgADRyMAAnu0MFA", /* = GYNECO OBSTETRIQUE NO 1 LICENCE 2 IDE (doublon de tg_650945093) */
+  "tg_650945113_AgADXSMAAnu0MFA"  /* = DEMARCHE SCIENTIFIQUE DE SOINS INFIRMIERS (doublon du cours déjà classé) */
+];
+function markTelegramDuplicatesSeen(){
+  if (!state.telegramSeen) state.telegramSeen = [];
+  TELEGRAM_DUPLICATE_IDS.forEach(function(id){
+    if (state.telegramSeen.indexOf(id) === -1) state.telegramSeen.push(id);
+  });
+}
 function ensureDefaultCourseDocs(){
   if (!state.defaultDocsSeeded) state.defaultDocsSeeded = {};
+  markTelegramDuplicatesSeen();
   state.years.forEach(function(y){
     y.modules.forEach(function(m){
       var list = DEFAULT_COURSE_DOCS[m.name];
@@ -4330,6 +4486,7 @@ function ensureDefaultCourseDocs(){
       list.forEach(function(cfg){
       var seedKey = m.id + "::" + cfg.file;
       if (state.defaultDocsSeeded[seedKey]) return;
+      markTelegramSeenIfAny(cfg);
       dbGetByModule(m.id).then(function(existing){
         var already = existing.some(function(d){ return d.fileName === cfg.title; });
         var cfgSection = cfg.section || "cours";
