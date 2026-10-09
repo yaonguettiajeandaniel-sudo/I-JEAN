@@ -213,6 +213,9 @@
     background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:11px 12px; margin-bottom:8px;
   }
   .item .ihead{ display:flex; align-items:flex-start; justify-content:space-between; gap:8px; flex-wrap:wrap; }
+  /* Les noms de fichiers (ex. venant de Telegram) peuvent être un seul long
+     mot sans espaces : sans ça, ils forcent un débordement horizontal. */
+  .item strong{ overflow-wrap:anywhere; word-break:break-word; }
   .item p{ margin:6px 0 0; white-space:pre-wrap; font-size:13.5px; line-height:1.5; }
   .item .iactions{ display:flex; gap:6px; flex:none; flex-wrap:wrap; justify-content:flex-end; }
   .opt{
