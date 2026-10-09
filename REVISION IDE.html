@@ -269,7 +269,7 @@
   ::selection{ background:var(--accent-soft); }
   code{ word-break:break-all; overflow-wrap:anywhere; }
 
-  /* ---- Mascotte : le Professeur Serpent (compagnon permanent) ---- */
+  /* ---- Mascotte : Chers Maître (compagnon qui apparaît/disparaît) ---- */
   #mascot-root{ position:fixed; left:0; right:0; bottom:0; z-index:95; pointer-events:none; }
   .mascot-wrap{
     position:absolute; right:14px; bottom:calc(env(safe-area-inset-bottom,0px) + 88px);
@@ -278,12 +278,35 @@
     pointer-events:none;
   }
   .mascot-wrap.present{ opacity:1; transform:translateY(0) scale(1); }
+  /* Disparition « magique » : fondu + léger flou, avant retrait complet du DOM. */
+  .mascot-wrap.leaving{
+    opacity:0; transform:translateY(8px) scale(.82); filter:blur(3px);
+    transition:opacity .5s ease, transform .5s ease, filter .5s ease;
+  }
   .mascot-avatar{
-    width:52px; height:52px; flex:none; cursor:pointer; border:none; background:none; padding:0;
+    position:relative; width:52px; height:52px; flex:none; cursor:pointer; border:none; background:none; padding:0;
     filter:drop-shadow(0 4px 10px rgba(0,0,0,.18)); transition:transform .2s ease; pointer-events:auto;
   }
   .mascot-avatar:active{ transform:scale(.93); }
-  .mascot-avatar svg{ width:100%; height:100%; display:block; }
+  .mascot-avatar-art{ display:block; width:100%; height:100%; }
+  .mascot-avatar-art svg{ width:100%; height:100%; display:block; }
+  /* Halo + étincelles d'apparition/disparition */
+  .mascot-avatar::before{
+    content:""; position:absolute; inset:-14px; border-radius:50%; z-index:-1; opacity:0;
+    background:radial-gradient(circle, rgba(255,214,120,.65) 0%, rgba(255,214,120,0) 70%);
+  }
+  .mascot-wrap.entering .mascot-avatar::before{ animation:mascot-halo .7s ease-out; }
+  .mascot-wrap.leaving .mascot-avatar::before{ animation:mascot-halo .5s ease-in reverse; }
+  .mascot-spark{ position:absolute; font-size:13px; opacity:0; pointer-events:none; line-height:1; }
+  .mascot-spark.s1{ top:-8px; left:-10px; }
+  .mascot-spark.s2{ bottom:-2px; right:-12px; font-size:10px; }
+  .mascot-spark.s3{ top:4px; right:-14px; font-size:9px; }
+  .mascot-wrap.entering .mascot-spark{ animation:mascot-twinkle .75s ease-out; }
+  .mascot-wrap.entering .mascot-spark.s2{ animation-delay:.08s; }
+  .mascot-wrap.entering .mascot-spark.s3{ animation-delay:.16s; }
+  .mascot-wrap.leaving .mascot-spark{ animation:mascot-twinkle .5s ease-in reverse; }
+  @keyframes mascot-halo{ 0%{opacity:0; transform:scale(.4);} 45%{opacity:1; transform:scale(1.15);} 100%{opacity:0; transform:scale(1.4);} }
+  @keyframes mascot-twinkle{ 0%{opacity:0; transform:scale(.2) rotate(0deg);} 50%{opacity:1; transform:scale(1.15) rotate(20deg);} 100%{opacity:0; transform:scale(.6) rotate(40deg);} }
   .mascot-bubble{
     background:var(--surface); border:1px solid var(--line); border-radius:14px 14px 14px 4px;
     padding:10px 26px 10px 12px; font-size:13px; font-weight:600; color:var(--ink); box-shadow:var(--shadow);
@@ -2335,14 +2358,15 @@ function fmtDate(ts){
 }
 
 /* =========================================================
-   MASCOTTE : LE PROFESSEUR SERPENT (compagnon permanent)
+   MASCOTTE : CHERS MAÎTRE
    Serpent humanoïde à l'allure de vieux professeur bienveillant,
-   lunettes rondes, sourcils et moustache grisonnants — il reste
-   affiché en permanence pendant que l'étudiant utilise l'appli.
+   lunettes rondes, sourcils et moustache grisonnants, tablette en
+   main — il apparaît (avec un effet d'étincelles) pour l'accueil,
+   les encouragements et les célébrations, puis disparaît.
    ========================================================= */
 var MASCOT_MSGS = {
   greet: [
-    "Bonjour, cher étudiant. Je suis le Professeur Ausculte, je t'accompagne dans tes révisions. Par où commençons-nous ? 🐍🎓",
+    "Bonjour, cher étudiant. Je suis Chers Maître, je t'accompagne dans tes révisions. Par où commençons-nous ? 🐍🎓",
     "Te revoilà ! Choisis un module ou lance un quiz, je reste avec toi tout au long de la séance. 🐍"
   ],
   happy: [
@@ -2413,41 +2437,57 @@ function mascotSvg(mood){
     /* moustache grise */
     '<path d="M45 65 Q56 70 67 65 Q56 68.5 45 65 Z" fill="#E7ECE9"/>' +
     f.mouth +
+    /* petite tablette tenue près du corps */
+    '<g transform="rotate(-8 86 80)">' +
+      '<rect x="74" y="68" width="24" height="26" rx="4" fill="#17302A"/>' +
+      '<rect x="76.5" y="70.5" width="19" height="17" rx="1.4" fill="#DCF3EA"/>' +
+      '<path d="M79 75 H92" stroke="#7FC9AE" stroke-width="1.6" stroke-linecap="round"/>' +
+      '<path d="M79 79.5 H88" stroke="#7FC9AE" stroke-width="1.6" stroke-linecap="round"/>' +
+      '<path d="M79 84 H92" stroke="#B9E3D2" stroke-width="1.6" stroke-linecap="round"/>' +
+    '</g>' +
     '</svg>';
 }
 var mascotHideTimer = null;
+var mascotRemoveTimer = null;
 var mascotShown = false;
 function showMascot(mood, text, opts){
   opts = opts || {};
   var root = document.getElementById("mascot-root");
   if (!root) return;
   text = text || mascotPick(mood);
+  clearTimeout(mascotHideTimer);
+  clearTimeout(mascotRemoveTimer);
   if (!mascotShown){
     root.innerHTML =
       '<div class="mascot-wrap" id="mascot-wrap">' +
-        '<button type="button" class="mascot-avatar" id="mascot-avatar" data-action="mascot-replay" aria-label="Professeur Ausculte"></button>' +
+        '<button type="button" class="mascot-avatar" id="mascot-avatar" data-action="mascot-replay" aria-label="Chers Maître">' +
+          '<span class="mascot-spark s1" aria-hidden="true">✨</span>' +
+          '<span class="mascot-spark s2" aria-hidden="true">✨</span>' +
+          '<span class="mascot-spark s3" aria-hidden="true">✨</span>' +
+          '<span class="mascot-avatar-art" id="mascot-avatar-art"></span>' +
+        '</button>' +
         '<div class="mascot-bubble" id="mascot-bubble">' +
           '<span id="mascot-bubble-text"></span>' +
           '<button type="button" class="mascot-close" data-action="mascot-dismiss" aria-label="Fermer">✕</button>' +
         '</div>' +
       '</div>';
     mascotShown = true;
-    requestAnimationFrame(function(){
-      var w = document.getElementById("mascot-wrap");
-      if (w) w.classList.add("present");
-    });
   }
   var wrap = document.getElementById("mascot-wrap");
-  var avatar = document.getElementById("mascot-avatar");
+  var avatarArt = document.getElementById("mascot-avatar-art");
   var bubble = document.getElementById("mascot-bubble");
   var bubbleText = document.getElementById("mascot-bubble-text");
-  if (!wrap || !avatar || !bubble || !bubbleText) return;
-  wrap.className = "mascot-wrap present mood-" + mood;
-  avatar.innerHTML = mascotSvg(mood);
+  if (!wrap || !avatarArt || !bubble || !bubbleText) return;
+  /* Si la mascotte est déjà visible (ou en train de disparaître), on garde
+     "present" tout de suite pour éviter un flash ; sinon on part de l'état
+     masqué pour que l'apparition s'anime. */
+  wrap.className = "mascot-wrap mood-" + mood + (wrap.classList.contains("present") ? " present" : "");
+  requestAnimationFrame(function(){ wrap.classList.add("present", "entering"); });
+  setTimeout(function(){ wrap.classList.remove("entering"); }, 750);
+  avatarArt.innerHTML = mascotSvg(mood);
   bubbleText.textContent = text;
   mascotLastMood = mood; mascotLastText = text;
   requestAnimationFrame(function(){ bubble.classList.add("show"); });
-  clearTimeout(mascotHideTimer);
   var duration = opts.duration || (mood === "alert" ? 6500 : 4200);
   if (duration) mascotHideTimer = setTimeout(hideMascotBubble, duration);
 }
@@ -2457,9 +2497,15 @@ function hideMascotBubble(){
   var bubble = document.getElementById("mascot-bubble");
   if (bubble) bubble.classList.remove("show");
   var wrap = document.getElementById("mascot-wrap");
-  if (wrap) wrap.className = "mascot-wrap present";
-  var avatar = document.getElementById("mascot-avatar");
-  if (avatar) avatar.innerHTML = mascotSvg("default");
+  if (!wrap) return;
+  wrap.classList.remove("entering");
+  wrap.classList.add("leaving");
+  clearTimeout(mascotRemoveTimer);
+  mascotRemoveTimer = setTimeout(function(){
+    var root = document.getElementById("mascot-root");
+    if (root) root.innerHTML = "";
+    mascotShown = false;
+  }, 550); /* laisse le temps à l'animation de disparition de se jouer */
 }
 function replayMascot(){
   showMascot(mascotLastMood, mascotLastText);
