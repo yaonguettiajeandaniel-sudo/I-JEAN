@@ -376,6 +376,7 @@
       <div class="field"><label for="authPassword">Mot de passe</label><input type="password" id="authPassword" autocomplete="current-password" required></div>
       <button class="btn primary" type="submit" id="submitAuth">Se connecter</button>
     </form>
+    <button type="button" class="btn ghost" id="btnForgotPassword" style="margin-top:10px; width:100%;">Mot de passe oublié ?</button>
     <div class="auth-foot" id="authFoot">Connexion à la base de données&hellip;</div>
   </div>
 </div>
@@ -508,6 +509,10 @@
       <button class="subtab" data-mfilter="investissement">Investissement initial</button>
     </div>
     <div class="stat-strip" id="entretienStrip"></div>
+    <div class="filter-row">
+      <label for="mMonthFilter" style="margin:0;">Mois</label>
+      <select id="mMonthFilter"></select>
+    </div>
     <div class="table-wrap">
       <table>
         <thead><tr><th>Date</th><th>Libellé</th><th>Mode</th><th class="num">Montant</th><th></th></tr></thead>
@@ -554,6 +559,7 @@
         <div class="reste"><b id="vehResteTxt"></b><div>reste dû</div></div>
       </div>
     </div>
+    <div class="edit-banner" id="editBannerEmprunt" hidden>Modification du versement <button type="button" class="btn" data-cancel-edit="emprunt">Annuler</button></div>
     <form class="entry" id="formEmprunt">
       <div class="field"><label for="veDate">Date du versement</label><input type="date" id="veDate" required></div>
       <div class="field"><label for="veMontant">Montant versé (F)</label><input type="number" id="veMontant" class="mono" min="0" step="500" required></div>
@@ -591,6 +597,11 @@
       <div class="field"><label for="ddMontant">Montant (F)</label><input type="number" id="ddMontant" class="mono" min="0" step="500" required></div>
       <button class="btn primary" type="submit" id="submitDette">Ajouter</button>
     </form>
+    <div class="subtabs">
+      <button class="subtab active" data-dfilter="open">En cours</button>
+      <button class="subtab" data-dfilter="paid">Payées</button>
+      <button class="subtab" data-dfilter="all">Toutes</button>
+    </div>
     <div class="table-wrap">
       <table>
         <thead><tr><th>Date</th><th>Libellé</th><th>Mode</th><th class="num">Montant</th><th></th></tr></thead>
@@ -640,6 +651,10 @@
 (function(){
   "use strict";
 
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('bord-de-route-sw.js', { scope: './BORD%20DE%20ROUTE.html' }).catch(function(){});
+  }
+
   var fmt = new Intl.NumberFormat('fr-FR', {maximumFractionDigits:0});
   function money(n){ if(n===undefined||n===null||isNaN(n)) return "—"; var s = fmt.format(Math.round(n)); return (n<0?"-":"")+fmt.format(Math.abs(Math.round(n)))+" F"; }
   function moneySigned(n){ return (n>0?"+":"") + money(n); }
@@ -673,8 +688,10 @@
   // ---------------- state ----------------
   var state = { journal:[], maintenance:[], documents:[], dettes:[], creanciers:[], emprunt:[], objectifs:{ default:310000, byMonth:{} }, vehicule:{ montantInitial:3720000 }, ready:{} };
   var db = null;
-  var editing = { journal:null, maintenance:null, doc:null, creditor:null, dette:null };
+  var editing = { journal:null, maintenance:null, doc:null, creditor:null, dette:null, emprunt:null };
   var journalMonthFilter = '__all__';
+  var entretienMonthFilter = '__all__';
+  var dFilter = 'open';
 
   function sortByDate(arr, field){ arr.sort(function(a,b){ return (a[field]||"").localeCompare(b[field]||""); }); }
   function findById(arr, id){ for(var i=0;i<arr.length;i++){ if(arr[i].id===id) return arr[i]; } return null; }
@@ -764,7 +781,33 @@
   var sb = (window.supabase && window.supabase.createClient) ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 
   function createSupabaseDB(uid){
+    var LOCAL_CACHE_KEY = 'bordDeRoute.cache.'+uid;
+    var PENDING_KEY = 'bordDeRoute.pending.'+uid;
     var cache = {};
+    try{ var rawCache = localStorage.getItem(LOCAL_CACHE_KEY); if(rawCache) cache = JSON.parse(rawCache); }catch(e){}
+    function persistCache(){ try{ localStorage.setItem(LOCAL_CACHE_KEY, JSON.stringify(cache)); }catch(e){} }
+
+    function loadPending(){ try{ var raw = localStorage.getItem(PENDING_KEY); return raw ? JSON.parse(raw) : []; }catch(e){ return []; } }
+    function savePending(q){ try{ localStorage.setItem(PENDING_KEY, JSON.stringify(q)); }catch(e){} }
+    function queueWrite(kind, payload){ var q = loadPending(); q.push({ kind:kind, payload:payload }); savePending(q); }
+    function isNetworkError(err){ return !navigator.onLine || (err && /fetch|network|failed/i.test(err.message||String(err))); }
+    function flushPending(){
+      var q = loadPending();
+      if(q.length===0) return;
+      if(!navigator.onLine) return;
+      var op = q[0];
+      var req = op.kind==='upsert'
+        ? sb.from(TABLE).upsert(op.payload, { onConflict:'user_id,collection,doc_id' })
+        : sb.from(TABLE).delete().eq('user_id',op.payload.user_id).eq('collection',op.payload.collection).eq('doc_id',op.payload.doc_id);
+      req.then(function(res){
+        if(res.error) throw res.error;
+        q.shift(); savePending(q);
+        setSyncStatus(q.length===0 ? 'ok' : 'off');
+        flushPending();
+      }).catch(function(){ /* toujours en attente, on réessaiera au prochain retour réseau */ });
+    }
+    window.addEventListener('online', flushPending);
+
     var listeners = {};
     function notify(key){ (listeners[key]||[]).slice().forEach(function(cb){ cb(); }); }
     function onChange(key, cb){ listeners[key] = listeners[key]||[]; listeners[key].push(cb); return function(){ var a=listeners[key]; var i=a.indexOf(cb); if(i>=0) a.splice(i,1); }; }
@@ -776,8 +819,8 @@
       var obj = cache[col]||{};
       return { docs: Object.keys(obj).map(function(id){ return docSnap(col,id); }) };
     }
-    function upsertLocal(col,id,data){ cache[col]=cache[col]||{}; cache[col][id]=data; notify(col); notify(col+'/'+id); }
-    function removeLocal(col,id){ if(cache[col]) delete cache[col][id]; notify(col); notify(col+'/'+id); }
+    function upsertLocal(col,id,data){ cache[col]=cache[col]||{}; cache[col][id]=data; persistCache(); notify(col); notify(col+'/'+id); }
+    function removeLocal(col,id){ if(cache[col]) delete cache[col][id]; persistCache(); notify(col); notify(col+'/'+id); }
 
     function docRef(col, id){
       if(id==null) id = 'auto'+Date.now()+'_'+Math.random().toString(36).slice(2);
@@ -785,18 +828,34 @@
         id:id,
         get: function(){ return Promise.resolve(docSnap(col,id)); },
         set: function(data){
-          return sb.from(TABLE).upsert(
-            { user_id:uid, collection:col, doc_id:id, data:data, updated_at:new Date().toISOString() },
-            { onConflict:'user_id,collection,doc_id' }
-          ).then(function(res){ if(res.error) throw res.error; upsertLocal(col,id,data); });
+          var row = { user_id:uid, collection:col, doc_id:id, data:data, updated_at:new Date().toISOString() };
+          if(!navigator.onLine){
+            queueWrite('upsert', row); upsertLocal(col,id,data); setSyncStatus('off');
+            return Promise.resolve();
+          }
+          return sb.from(TABLE).upsert(row, { onConflict:'user_id,collection,doc_id' })
+            .then(function(res){ if(res.error) throw res.error; upsertLocal(col,id,data); })
+            .catch(function(err){
+              if(isNetworkError(err)){ queueWrite('upsert', row); upsertLocal(col,id,data); setSyncStatus('off'); return; }
+              throw err;
+            });
         },
         update: function(patch){
           var merged = Object.assign({}, (cache[col]||{})[id]||{}, patch);
           return this.set(merged);
         },
         delete: function(){
+          var key = { user_id:uid, collection:col, doc_id:id };
+          if(!navigator.onLine){
+            queueWrite('delete', key); removeLocal(col,id); setSyncStatus('off');
+            return Promise.resolve();
+          }
           return sb.from(TABLE).delete().eq('user_id',uid).eq('collection',col).eq('doc_id',id)
-            .then(function(res){ if(res.error) throw res.error; removeLocal(col,id); });
+            .then(function(res){ if(res.error) throw res.error; removeLocal(col,id); })
+            .catch(function(err){
+              if(isNetworkError(err)){ queueWrite('delete', key); removeLocal(col,id); setSyncStatus('off'); return; }
+              throw err;
+            });
         },
         onSnapshot: function(cb){
           var off = onChange(col+'/'+id, function(){ cb(docSnap(col,id)); });
@@ -826,7 +885,8 @@
         if(!row) return;
         if(evt.eventType === 'DELETE') removeLocal(row.collection, row.doc_id);
         else upsertLocal(row.collection, row.doc_id, row.data);
-      }
+      },
+      _flushPending: flushPending
     };
   }
 
@@ -857,26 +917,33 @@
     document.getElementById('app').hidden = false;
     document.getElementById('tabs').hidden = false;
 
-    sb.from(TABLE).select('*').eq('user_id', uid).then(function(res){
-      if(res.error){ setSyncStatus('err'); toast('Erreur de synchronisation : '+res.error.message); return; }
-      var proceed = res.data.length===0 ? migrateLocalToSupabase(uid) : Promise.resolve();
-      proceed.then(function(){
-        return sb.from(TABLE).select('*').eq('user_id', uid);
-      }).then(function(res2){
-        if(res2.error){ setSyncStatus('err'); return; }
-        db._bootstrapFromRows(res2.data);
-        wireRenderWatchers();
-        setSyncStatus('ok');
+    // Affiche tout de suite les dernières données connues sur cet appareil (hors ligne ou en attendant le réseau),
+    // puis se mettra à jour automatiquement dès que les données fraîches arrivent.
+    wireRenderWatchers();
 
-        sb.channel('bord_de_route_'+uid)
-          .on('postgres_changes', { event:'*', schema:'public', table:TABLE, filter:'user_id=eq.'+uid }, function(payload){
-            db._applyRealtimeChange(payload);
-          })
-          .subscribe(function(status){
-            if(status==='SUBSCRIBED') setSyncStatus('ok');
-            else if(status==='CHANNEL_ERROR' || status==='TIMED_OUT') setSyncStatus('err');
-          });
-      }).catch(function(err){ setSyncStatus('err'); toast('Erreur : '+err.message); });
+    sb.from(TABLE).select('*').eq('user_id', uid).then(function(res){
+      if(res.error) throw res.error;
+      var proceed = res.data.length===0 ? migrateLocalToSupabase(uid) : Promise.resolve();
+      return proceed.then(function(){
+        return sb.from(TABLE).select('*').eq('user_id', uid);
+      });
+    }).then(function(res2){
+      if(res2.error) throw res2.error;
+      db._bootstrapFromRows(res2.data);
+      setSyncStatus('ok');
+      db._flushPending();
+
+      sb.channel('bord_de_route_'+uid)
+        .on('postgres_changes', { event:'*', schema:'public', table:TABLE, filter:'user_id=eq.'+uid }, function(payload){
+          db._applyRealtimeChange(payload);
+        })
+        .subscribe(function(status){
+          if(status==='SUBSCRIBED') setSyncStatus('ok');
+          else if(status==='CHANNEL_ERROR' || status==='TIMED_OUT') setSyncStatus('err');
+        });
+    }).catch(function(err){
+      setSyncStatus('err');
+      toast('Connexion au serveur impossible — tu vois les dernières données enregistrées sur cet appareil.');
     });
   }
 
@@ -924,6 +991,32 @@
     sb.auth.signOut().then(function(){ location.reload(); });
   });
 
+  document.getElementById('btnForgotPassword').addEventListener('click', function(){
+    var email = document.getElementById('authEmail').value.trim();
+    var errEl = document.getElementById('authError');
+    errEl.classList.remove('show');
+    if(!email){ errEl.textContent = 'Indique ton email ci-dessus, puis clique à nouveau sur ce bouton.'; errEl.classList.add('show'); return; }
+    if(!sb){ errEl.textContent = 'Connexion au service indisponible.'; errEl.classList.add('show'); return; }
+    sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.href.split('#')[0] }).then(function(res){
+      if(res.error){ errEl.textContent = 'Erreur : '+res.error.message; errEl.classList.add('show'); return; }
+      toast('Email envoyé à '+email+' — suis le lien pour choisir un nouveau mot de passe.');
+    });
+  });
+
+  if(sb){
+    sb.auth.onAuthStateChange(function(event){
+      if(event === 'PASSWORD_RECOVERY'){
+        var newPass = prompt('Entre ton nouveau mot de passe (au moins 6 caractères) :');
+        if(newPass && newPass.length>=6){
+          sb.auth.updateUser({ password:newPass }).then(function(res){
+            if(res.error) toast('Erreur : '+res.error.message);
+            else toast('Mot de passe mis à jour. Tu peux te reconnecter.');
+          });
+        }
+      }
+    });
+  }
+
   function bootAuth(){
     if(!sb){
       document.getElementById('authFoot').textContent = 'Service de connexion indisponible — vérifie ta connexion internet.';
@@ -936,7 +1029,7 @@
     });
   }
 
-  var CREATE_LABELS = { journal:'Enregistrer', maintenance:'Ajouter', doc:'Enregistrer', creditor:'Ajouter', dette:'Ajouter' };
+  var CREATE_LABELS = { journal:'Enregistrer', maintenance:'Ajouter', doc:'Enregistrer', creditor:'Ajouter', dette:'Ajouter', emprunt:'Enregistrer' };
   function setEditBanner(key, on, labelEl, labelText){
     var banner = document.getElementById('editBanner'+key.charAt(0).toUpperCase()+key.slice(1));
     var submitBtn = document.getElementById('submit'+key.charAt(0).toUpperCase()+key.slice(1));
@@ -1006,19 +1099,21 @@
     });
     var totalRembCreanciers = 0, totalSommeCreanciers = 0;
     state.creanciers.forEach(function(c){ totalRembCreanciers += (c.rembourse||0); totalSommeCreanciers += (c.sommeInitiale||0); });
-    var totalDettes = 0;
-    state.dettes.forEach(function(d){ totalDettes += (d.montant||0); });
+    var totalDettes = 0, totalDettesPayees = 0;
+    state.dettes.forEach(function(d){ if(d.paye) totalDettesPayees += (d.montant||0); else totalDettes += (d.montant||0); });
     var montantVehicule = (state.vehicule && state.vehicule.montantInitial) || 3720000;
     var resteVehicule = montantVehicule - totalRembEmprunt;
 
-    var soldeBrut = totalRecette - totalDepenses - totalRembEmprunt;
+    // Une dette payée est une sortie d'argent réelle : elle rejoint les dépenses dans le solde net
+    // plutôt que de simplement disparaître (sinon le solde net ferait un bond artificiel au paiement).
+    var soldeBrut = totalRecette - totalDepenses - totalDettesPayees - totalRembEmprunt;
     var soldeNet = soldeBrut - totalRembCreanciers;
     var soldeApresDettes = soldeNet - totalDettes;
     var resteCreanciers = totalSommeCreanciers - totalRembCreanciers;
 
     return { totalRecette:totalRecette, totalDepenses:totalDepenses, totalRembEmprunt:totalRembEmprunt,
       totalInvestissement:totalInvestissement, totalRembCreanciers:totalRembCreanciers, totalSommeCreanciers:totalSommeCreanciers,
-      totalDettes:totalDettes, soldeBrut:soldeBrut, soldeNet:soldeNet, soldeApresDettes:soldeApresDettes, resteCreanciers:resteCreanciers,
+      totalDettes:totalDettes, totalDettesPayees:totalDettesPayees, soldeBrut:soldeBrut, soldeNet:soldeNet, soldeApresDettes:soldeApresDettes, resteCreanciers:resteCreanciers,
       montantVehicule:montantVehicule, resteVehicule:resteVehicule };
   }
 
@@ -1270,10 +1365,31 @@
   var mFilter = 'all';
   function renderEntretien(){
     document.getElementById('cEntretien').textContent = state.maintenance.length;
-    var list = state.maintenance.filter(function(m){ return mFilter==='all' || m.type===mFilter; });
+
+    var monthsPresent = {};
+    state.maintenance.forEach(function(m){ var mk = monthKey(m.date); if(mk) monthsPresent[mk]=true; });
+    var monthKeys = Object.keys(monthsPresent).sort().reverse();
+    if(entretienMonthFilter!=='__all__' && monthKeys.indexOf(entretienMonthFilter)===-1){
+      entretienMonthFilter = '__all__';
+    }
+    var msel = document.getElementById('mMonthFilter');
+    if(msel){
+      msel.innerHTML = '<option value="__all__">Tous les mois</option>' + monthKeys.map(function(mk){
+        var parts = mk.split('-');
+        return '<option value="'+mk+'">'+MONTH_NAMES[+parts[1]-1]+' '+parts[0]+'</option>';
+      }).join('');
+      msel.value = entretienMonthFilter;
+    }
+
+    var list = state.maintenance.filter(function(m){
+      if(mFilter!=='all' && m.type!==mFilter) return false;
+      if(entretienMonthFilter!=='__all__' && monthKey(m.date)!==entretienMonthFilter) return false;
+      return true;
+    });
     sortByDate(list, 'date'); list.reverse();
+    var totalsSource = entretienMonthFilter==='__all__' ? state.maintenance : state.maintenance.filter(function(m){ return monthKey(m.date)===entretienMonthFilter; });
     var totalDep=0, totalInv=0;
-    state.maintenance.forEach(function(m){ if(m.type==='investissement') totalInv += (m.montant||0); else totalDep += (m.montant||0); });
+    totalsSource.forEach(function(m){ if(m.type==='investissement') totalInv += (m.montant||0); else totalDep += (m.montant||0); });
     document.getElementById('entretienStrip').innerHTML =
       '<div class="s">Dépenses courantes <b>'+money(totalDep)+'</b></div>' +
       '<div class="s">Investissement initial <b>'+money(totalInv)+'</b></div>' +
@@ -1300,14 +1416,24 @@
     if(list.length===0){ body.innerHTML = '<tr class="empty-row"><td colspan="6">Aucun document enregistré.</td></tr>'; return; }
     body.innerHTML = list.map(function(d){
       var s = docStatus(d);
+      var histRow = '';
+      if(d.historique && d.historique.length){
+        histRow = '<tr class="hist-row" id="hist-'+d.id+'" hidden><td colspan="6"><div class="row-note">Périodes précédentes : ' +
+          d.historique.slice().reverse().map(function(h){
+            return escapeHtml((h.dateEmission||'—')+' → '+(h.dateExpiration||'—')+(h.montant?' ('+money(h.montant)+')':''));
+          }).join(' · ') + '</div></td></tr>';
+      }
       return '<tr>' +
         '<td>'+escapeHtml(d.type)+'</td>' +
         '<td class="mono">'+(d.dateEmission||'—')+'</td>' +
         '<td class="mono">'+(d.dateExpiration||'—')+'</td>' +
         '<td><span class="pill '+s.cls+'">'+s.label+'</span></td>' +
         '<td class="num">'+(d.montant?money(d.montant):'—')+'</td>' +
-        '<td class="row-actions"><button class="btn ghost" data-edit-doc="'+d.id+'">Modifier</button><button class="btn ghost" data-del-doc="'+d.id+'">Suppr.</button></td>' +
-        '</tr>';
+        '<td class="row-actions">' +
+          (d.historique && d.historique.length ? '<button class="btn ghost" data-hist-doc="'+d.id+'">Historique ('+d.historique.length+')</button>' : '') +
+          '<button class="btn ghost" data-edit-doc="'+d.id+'">Modifier</button><button class="btn ghost" data-del-doc="'+d.id+'">Suppr.</button>' +
+        '</td>' +
+        '</tr>' + histRow;
     }).join('');
   }
 
@@ -1335,7 +1461,7 @@
       return '<tr>' +
         '<td class="mono">'+(r.date||'—')+'</td>' +
         '<td class="num">'+money(r.montant)+'</td>' +
-        '<td>'+(r.manual ? '<button class="btn ghost" data-del-emprunt="'+r.id+'">Suppr.</button>' : '<span class="row-note">saisi via Recettes</span>')+'</td>' +
+        '<td>'+(r.manual ? '<button class="btn ghost" data-edit-emprunt="'+r.id+'">Modifier</button><button class="btn ghost" data-del-emprunt="'+r.id+'">Suppr.</button>' : '<span class="row-note">saisi via Recettes</span>')+'</td>' +
         '</tr>';
     }).join('');
   }
@@ -1368,16 +1494,27 @@
     }
 
     var dbody = document.getElementById('dettesBody');
-    var dlist = state.dettes.slice().sort(function(a,b){ return (b.date||'').localeCompare(a.date||''); });
-    if(dlist.length===0){ dbody.innerHTML = '<tr class="empty-row"><td colspan="5">Aucune dette d\'exploitation en cours.</td></tr>'; }
-    else {
+    var dlist = state.dettes.filter(function(d){
+      if(dFilter==='open') return !d.paye;
+      if(dFilter==='paid') return !!d.paye;
+      return true;
+    }).sort(function(a,b){ return (b.date||'').localeCompare(a.date||''); });
+    if(dlist.length===0){
+      dbody.innerHTML = '<tr class="empty-row"><td colspan="5">'+(dFilter==='paid' ? 'Aucune dette payée.' : 'Aucune dette d\'exploitation en cours.')+'</td></tr>';
+    } else {
       dbody.innerHTML = dlist.map(function(d){
-        return '<tr>' +
+        return '<tr'+(d.paye?' style="opacity:.55;"':'')+'>' +
           '<td class="mono">'+(d.date||'—')+'</td>' +
-          '<td>'+escapeHtml(d.libelle)+'</td>' +
+          '<td>'+escapeHtml(d.libelle)+(d.paye?' <span class="pill good">payée'+(d.datePaiement?' le '+d.datePaiement:'')+'</span>':'')+'</td>' +
           '<td>'+escapeHtml(d.mode||'')+'</td>' +
           '<td class="num">'+money(d.montant)+'</td>' +
-          '<td class="row-actions"><button class="btn ghost" data-edit-dette="'+d.id+'">Modifier</button><button class="btn small" data-pay-dette="'+d.id+'">Marquer payée</button></td>' +
+          '<td class="row-actions">' +
+            '<button class="btn ghost" data-edit-dette="'+d.id+'">Modifier</button>' +
+            (d.paye
+              ? '<button class="btn ghost" data-unpay-dette="'+d.id+'">Annuler paiement</button>'
+              : '<button class="btn small" data-pay-dette="'+d.id+'">Marquer payée</button>') +
+            '<button class="btn ghost" data-del-dette="'+d.id+'" title="Supprimer">✕</button>' +
+          '</td>' +
           '</tr>';
       }).join('');
     }
@@ -1393,14 +1530,23 @@
     btn.classList.add('active');
     document.getElementById('view-'+btn.dataset.tab).classList.add('active');
   });
-  document.querySelectorAll('.subtab').forEach(function(b){
+  document.querySelectorAll('.subtab[data-mfilter]').forEach(function(b){
     b.addEventListener('click', function(){
-      document.querySelectorAll('.subtab').forEach(function(s){ s.classList.remove('active'); });
+      document.querySelectorAll('.subtab[data-mfilter]').forEach(function(s){ s.classList.remove('active'); });
       b.classList.add('active'); mFilter = b.dataset.mfilter; renderEntretien();
+    });
+  });
+  document.querySelectorAll('.subtab[data-dfilter]').forEach(function(b){
+    b.addEventListener('click', function(){
+      document.querySelectorAll('.subtab[data-dfilter]').forEach(function(s){ s.classList.remove('active'); });
+      b.classList.add('active'); dFilter = b.dataset.dfilter; renderFinancement();
     });
   });
   document.getElementById('jMonthFilter').addEventListener('change', function(){
     journalMonthFilter = this.value; renderJournal();
+  });
+  document.getElementById('mMonthFilter').addEventListener('change', function(){
+    entretienMonthFilter = this.value; renderEntretien();
   });
 
   // ---------------- forms ----------------
@@ -1462,10 +1608,19 @@
       dateExpiration: document.getElementById('dExpiration').value || null,
       montant: document.getElementById('dMontant').value ? Number(document.getElementById('dMontant').value) : null
     };
+    var existing = findById(state.documents, id);
+    var isRenewal = !oldId && existing; // nouvelle saisie sur un type déjà suivi : on archive l'ancienne période
+    if(isRenewal){
+      data.historique = (existing.historique || []).concat([{
+        dateEmission: existing.dateEmission, dateExpiration: existing.dateExpiration, montant: existing.montant
+      }]);
+    } else if(existing && existing.historique){
+      data.historique = existing.historique;
+    }
     withDb(function(){
       var p = (oldId && oldId!==id) ? db.collection('documents').doc(oldId).delete() : Promise.resolve();
       p.then(function(){ return db.collection('documents').doc(id).set(data); }).then(function(){
-        toast(oldId ? 'Document mis à jour' : 'Document enregistré');
+        toast(oldId ? 'Document mis à jour' : (isRenewal ? 'Document renouvelé — ancienne période archivée' : 'Document enregistré'));
         e.target.reset(); editing.doc = null; setEditBanner('doc', false);
       }).catch(function(err){ toast('Erreur : '+err.message); });
     });
@@ -1515,9 +1670,13 @@
       montant: Number(document.getElementById('veMontant').value)
     };
     if(!data.date || !data.montant) return;
+    var id = editing.emprunt;
     withDb(function(){
-      db.collection('emprunt').add(data).then(function(){
-        toast('Versement enregistré'); e.target.reset(); document.getElementById('veDate').value = todayStr();
+      var ref = id ? db.collection('emprunt').doc(id) : db.collection('emprunt').doc();
+      ref.set(data).then(function(){
+        toast(id ? 'Versement mis à jour' : 'Versement enregistré');
+        e.target.reset(); document.getElementById('veDate').value = todayStr();
+        editing.emprunt = null; setEditBanner('emprunt', false);
       }).catch(function(err){ toast('Erreur : '+err.message); });
     });
   });
@@ -1526,23 +1685,27 @@
     btn.addEventListener('click', function(){
       var key = btn.dataset.cancelEdit;
       editing[key] = null; setEditBanner(key, false);
-      var forms = { journal:'formJournal', maintenance:'formEntretien', doc:'formDoc', creditor:'formCreditor', dette:'formDette' };
+      var forms = { journal:'formJournal', maintenance:'formEntretien', doc:'formDoc', creditor:'formCreditor', dette:'formDette', emprunt:'formEmprunt' };
       var f = document.getElementById(forms[key]); if(f) f.reset();
       if(key==='journal') document.getElementById('jDate').value = todayStr();
       if(key==='maintenance') document.getElementById('mDate').value = todayStr();
       if(key==='dette') document.getElementById('ddDate').value = todayStr();
+      if(key==='emprunt') document.getElementById('veDate').value = todayStr();
     });
   });
 
   // ---------------- edit / delete / action handlers (delegated) ----------------
   document.addEventListener('click', function(e){
     var t = e.target;
-    if(t.dataset.delJournal){ withDb(function(){ db.collection('journal').doc(t.dataset.delJournal).delete().then(function(){ toast('Ligne supprimée'); }); }); }
-    else if(t.dataset.delMaintenance){ withDb(function(){ db.collection('maintenance').doc(t.dataset.delMaintenance).delete().then(function(){ toast('Ligne supprimée'); }); }); }
-    else if(t.dataset.delDoc){ withDb(function(){ db.collection('documents').doc(t.dataset.delDoc).delete().then(function(){ toast('Document supprimé'); }); }); }
+    if(t.dataset.delJournal){ if(confirm('Supprimer cette ligne de recette ?')) withDb(function(){ db.collection('journal').doc(t.dataset.delJournal).delete().then(function(){ toast('Ligne supprimée'); }); }); }
+    else if(t.dataset.delMaintenance){ if(confirm('Supprimer cette dépense ?')) withDb(function(){ db.collection('maintenance').doc(t.dataset.delMaintenance).delete().then(function(){ toast('Ligne supprimée'); }); }); }
+    else if(t.dataset.delDoc){ if(confirm('Supprimer ce document ?')) withDb(function(){ db.collection('documents').doc(t.dataset.delDoc).delete().then(function(){ toast('Document supprimé'); }); }); }
     else if(t.dataset.delCreditor){ if(confirm('Supprimer ce créancier ?')) withDb(function(){ db.collection('creanciers').doc(t.dataset.delCreditor).delete().then(function(){ toast('Créancier supprimé'); }); }); }
-    else if(t.dataset.payDette){ withDb(function(){ db.collection('dettes').doc(t.dataset.payDette).delete().then(function(){ toast('Dette marquée payée'); }); }); }
-    else if(t.dataset.delEmprunt){ withDb(function(){ db.collection('emprunt').doc(t.dataset.delEmprunt).delete().then(function(){ toast('Versement supprimé'); }); }); }
+    else if(t.dataset.payDette){ withDb(function(){ db.collection('dettes').doc(t.dataset.payDette).update({ paye:true, datePaiement:todayStr() }).then(function(){ toast('Dette marquée payée'); }); }); }
+    else if(t.dataset.unpayDette){ withDb(function(){ db.collection('dettes').doc(t.dataset.unpayDette).update({ paye:false, datePaiement:null }).then(function(){ toast('Paiement annulé'); }); }); }
+    else if(t.dataset.delDette){ if(confirm('Supprimer cette dette ?')) withDb(function(){ db.collection('dettes').doc(t.dataset.delDette).delete().then(function(){ toast('Dette supprimée'); }); }); }
+    else if(t.dataset.delEmprunt){ if(confirm('Supprimer ce versement ?')) withDb(function(){ db.collection('emprunt').doc(t.dataset.delEmprunt).delete().then(function(){ toast('Versement supprimé'); }); }); }
+    else if(t.dataset.histDoc){ var hrow = document.getElementById('hist-'+t.dataset.histDoc); if(hrow) hrow.hidden = !hrow.hidden; }
 
     else if(t.dataset.editJournal){
       var j = findById(state.journal, t.dataset.editJournal) || state.journal.filter(function(x){return x.date===t.dataset.editJournal;})[0];
@@ -1604,11 +1767,21 @@
       if(!amt || amt<=0) return;
       var cred = findById(state.creanciers, cid);
       if(!cred) return;
+      var resteCred = (cred.sommeInitiale||0) - (cred.rembourse||0);
+      if(amt > resteCred){ toast('Le montant dépasse le reste dû ('+money(resteCred)+').'); return; }
       withDb(function(){
         db.collection('creanciers').doc(cid).update({ rembourse: (cred.rembourse||0) + amt }).then(function(){
           toast('Remboursement enregistré');
         }).catch(function(err){ toast('Erreur : '+err.message); });
       });
+    }
+    else if(t.dataset.editEmprunt){
+      var em = findById(state.emprunt, t.dataset.editEmprunt);
+      if(!em) return;
+      document.getElementById('veDate').value = em.date||'';
+      document.getElementById('veMontant').value = em.montant||'';
+      editing.emprunt = em.id; setEditBanner('emprunt', true);
+      document.getElementById('formEmprunt').scrollIntoView({block:'center', behavior:'smooth'});
     }
   });
 
@@ -1621,9 +1794,22 @@
 
   bootAuth();
 
-  // ---------------- sauvegarde / restauration (fichier) ----------------
+  // ---------------- sauvegarde / restauration (données actuelles, pas l'ancienne copie locale) ----------------
+  var BACKUP_COLLECTIONS = ['journal','maintenance','documents','dettes','creanciers','emprunt'];
+  function buildSnapshot(){
+    var snap = { config: { objectifs: state.objectifs, vehicule: state.vehicule } };
+    BACKUP_COLLECTIONS.forEach(function(col){
+      snap[col] = {};
+      (state[col]||[]).forEach(function(item){
+        var copy = Object.assign({}, item);
+        var id = copy.id; delete copy.id;
+        snap[col][id] = copy;
+      });
+    });
+    return snap;
+  }
   document.getElementById('btnExport').addEventListener('click', function(){
-    var blob = new Blob([JSON.stringify(STORE, null, 2)], {type:'application/json'});
+    var blob = new Blob([JSON.stringify(buildSnapshot(), null, 2)], {type:'application/json'});
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a');
     a.href = url; a.download = 'bord-de-route-sauvegarde-'+todayStr()+'.json';
@@ -1641,12 +1827,21 @@
       try{
         var data = JSON.parse(reader.result);
         if(!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('format inattendu');
-        if(!confirm('Remplacer toutes les données actuelles de cet appareil par celles de ce fichier ? Cette action est irréversible.')) return;
-        STORE = data;
-        saveStore();
-        ['journal','maintenance','documents','dettes','creanciers'].forEach(notify);
-        notify('config/objectifs');
-        toast('Sauvegarde restaurée');
+        if(!db){ toast('Connexion indisponible — réessaie une fois connecté.'); return; }
+        if(!confirm('Remplacer toutes les données actuelles par celles de ce fichier ? Cette action est irréversible.')) return;
+        var writes = [];
+        BACKUP_COLLECTIONS.forEach(function(col){
+          var incoming = data[col] || {};
+          (state[col]||[]).forEach(function(item){
+            if(!(item.id in incoming)) writes.push(db.collection(col).doc(item.id).delete());
+          });
+          Object.keys(incoming).forEach(function(id){
+            writes.push(db.collection(col).doc(id).set(incoming[id]));
+          });
+        });
+        if(data.config && data.config.objectifs) writes.push(db.doc('config/objectifs').set(data.config.objectifs));
+        if(data.config && data.config.vehicule) writes.push(db.doc('config/vehicule').set(data.config.vehicule));
+        Promise.all(writes).then(function(){ toast('Sauvegarde restaurée'); }).catch(function(err){ toast('Erreur : '+err.message); });
       }catch(err){ toast('Fichier invalide : '+err.message); }
     };
     reader.readAsText(file);
