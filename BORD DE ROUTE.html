@@ -595,6 +595,7 @@
       <div class="field grow"><label for="ddLibelle">Libellé</label><input type="text" id="ddLibelle" required></div>
       <div class="field"><label for="ddMode">Mode</label><input type="text" id="ddMode" placeholder="Ex. À crédit" value="À crédit"></div>
       <div class="field"><label for="ddMontant">Montant (F)</label><input type="number" id="ddMontant" class="mono" min="0" step="1" required></div>
+      <div class="field"><label for="ddRembourse">Déjà remboursé (F)</label><input type="number" id="ddRembourse" class="mono" min="0" step="1" value="0"></div>
       <button class="btn primary" type="submit" id="submitDette">Ajouter</button>
     </form>
     <div class="subtabs">
@@ -604,7 +605,7 @@
     </div>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Date</th><th>Libellé</th><th>Mode</th><th class="num">Montant</th><th></th></tr></thead>
+        <thead><tr><th>Date</th><th>Libellé</th><th>Mode</th><th class="num">Montant</th><th class="num">Remboursé</th><th class="num">Reste</th><th></th></tr></thead>
         <tbody id="dettesBody"></tbody>
       </table>
     </div>
@@ -1099,21 +1100,26 @@
     });
     var totalRembCreanciers = 0, totalSommeCreanciers = 0;
     state.creanciers.forEach(function(c){ totalRembCreanciers += (c.rembourse||0); totalSommeCreanciers += (c.sommeInitiale||0); });
-    var totalDettes = 0, totalDettesPayees = 0;
-    state.dettes.forEach(function(d){ if(d.paye) totalDettesPayees += (d.montant||0); else totalDettes += (d.montant||0); });
+    var totalDettes = 0, totalDettesRembourse = 0, totalSommeDettes = 0;
+    state.dettes.forEach(function(d){
+      var reste = Math.max(0, (d.montant||0) - (d.rembourse||0));
+      totalDettes += reste;
+      totalDettesRembourse += (d.rembourse||0);
+      totalSommeDettes += (d.montant||0);
+    });
     var montantVehicule = (state.vehicule && state.vehicule.montantInitial) || 3720000;
     var resteVehicule = montantVehicule - totalRembEmprunt;
 
-    // Une dette payée est une sortie d'argent réelle : elle rejoint les dépenses dans le solde net
-    // plutôt que de simplement disparaître (sinon le solde net ferait un bond artificiel au paiement).
-    var soldeBrut = totalRecette - totalDepenses - totalDettesPayees - totalRembEmprunt;
+    // Un remboursement de dette (total ou partiel) est une sortie d'argent réelle : il rejoint les
+    // dépenses dans le solde net. Seul ce qui reste encore dû continue de peser sur le solde "après dettes".
+    var soldeBrut = totalRecette - totalDepenses - totalDettesRembourse - totalRembEmprunt;
     var soldeNet = soldeBrut - totalRembCreanciers;
     var soldeApresDettes = soldeNet - totalDettes;
     var resteCreanciers = totalSommeCreanciers - totalRembCreanciers;
 
     return { totalRecette:totalRecette, totalDepenses:totalDepenses, totalRembEmprunt:totalRembEmprunt,
       totalInvestissement:totalInvestissement, totalRembCreanciers:totalRembCreanciers, totalSommeCreanciers:totalSommeCreanciers,
-      totalDettes:totalDettes, totalDettesPayees:totalDettesPayees, soldeBrut:soldeBrut, soldeNet:soldeNet, soldeApresDettes:soldeApresDettes, resteCreanciers:resteCreanciers,
+      totalDettes:totalDettes, totalDettesRembourse:totalDettesRembourse, totalSommeDettes:totalSommeDettes, soldeBrut:soldeBrut, soldeNet:soldeNet, soldeApresDettes:soldeApresDettes, resteCreanciers:resteCreanciers,
       montantVehicule:montantVehicule, resteVehicule:resteVehicule };
   }
 
@@ -1495,27 +1501,35 @@
 
     var dbody = document.getElementById('dettesBody');
     var dlist = state.dettes.filter(function(d){
-      if(dFilter==='open') return !d.paye;
-      if(dFilter==='paid') return !!d.paye;
+      var reste = Math.max(0, (d.montant||0) - (d.rembourse||0));
+      if(dFilter==='open') return reste>0;
+      if(dFilter==='paid') return reste<=0;
       return true;
     }).sort(function(a,b){ return (b.date||'').localeCompare(a.date||''); });
     if(dlist.length===0){
-      dbody.innerHTML = '<tr class="empty-row"><td colspan="5">'+(dFilter==='paid' ? 'Aucune dette payée.' : 'Aucune dette d\'exploitation en cours.')+'</td></tr>';
+      dbody.innerHTML = '<tr class="empty-row"><td colspan="7">'+(dFilter==='paid' ? 'Aucune dette payée.' : 'Aucune dette d\'exploitation en cours.')+'</td></tr>';
     } else {
       dbody.innerHTML = dlist.map(function(d){
-        return '<tr'+(d.paye?' style="opacity:.55;"':'')+'>' +
+        var reste = Math.max(0, (d.montant||0) - (d.rembourse||0));
+        var paye = reste<=0;
+        return '<tr'+(paye?' style="opacity:.55;"':'')+'>' +
           '<td class="mono">'+(d.date||'—')+'</td>' +
-          '<td>'+escapeHtml(d.libelle)+(d.paye?' <span class="pill good">payée'+(d.datePaiement?' le '+d.datePaiement:'')+'</span>':'')+'</td>' +
+          '<td>'+escapeHtml(d.libelle)+(paye?' <span class="pill good">payée</span>':'')+'</td>' +
           '<td>'+escapeHtml(d.mode||'')+'</td>' +
           '<td class="num">'+money(d.montant)+'</td>' +
+          '<td class="num">'+money(d.rembourse||0)+'</td>' +
+          '<td class="num" style="color:'+(reste>0?'var(--warn)':'var(--good)')+'">'+money(reste)+'</td>' +
           '<td class="row-actions">' +
+            (reste>0 ? '<button class="btn small" data-open-rembourser-dette="'+d.id+'">+ Rembourser</button>' : '') +
             '<button class="btn ghost" data-edit-dette="'+d.id+'">Modifier</button>' +
-            (d.paye
-              ? '<button class="btn ghost" data-unpay-dette="'+d.id+'">Annuler paiement</button>'
-              : '<button class="btn small" data-pay-dette="'+d.id+'">Marquer payée</button>') +
             '<button class="btn ghost" data-del-dette="'+d.id+'" title="Supprimer">✕</button>' +
           '</td>' +
-          '</tr>';
+          '</tr>' +
+          '<tr class="rembourser-row" id="remb-dette-row-'+d.id+'" hidden><td colspan="7">' +
+          '<div class="rembourser-form" id="remb-dette-'+d.id+'">' +
+          '<input type="number" min="1" step="1" class="mono" placeholder="Montant" id="rembInput-dette-'+d.id+'">' +
+          '<button class="btn primary small" data-do-rembourser-dette="'+d.id+'">OK</button>' +
+          '</div></td></tr>';
       }).join('');
     }
   }
@@ -1649,7 +1663,8 @@
       date: document.getElementById('ddDate').value,
       libelle: document.getElementById('ddLibelle').value.trim(),
       mode: document.getElementById('ddMode').value.trim(),
-      montant: Number(document.getElementById('ddMontant').value)
+      montant: Number(document.getElementById('ddMontant').value),
+      rembourse: Number(document.getElementById('ddRembourse').value)||0
     };
     if(!data.libelle || !data.montant) return;
     var id = editing.dette;
@@ -1657,7 +1672,7 @@
       var ref = id ? db.collection('dettes').doc(id) : db.collection('dettes').doc();
       ref.set(data).then(function(){
         toast(id ? 'Dette mise à jour' : 'Dette ajoutée');
-        e.target.reset(); document.getElementById('ddMode').value='À crédit'; document.getElementById('ddDate').value = todayStr();
+        e.target.reset(); document.getElementById('ddMode').value='À crédit'; document.getElementById('ddRembourse').value='0'; document.getElementById('ddDate').value = todayStr();
         editing.dette = null; setEditBanner('dette', false);
       }).catch(function(err){ toast('Erreur : '+err.message); });
     });
@@ -1689,7 +1704,7 @@
       var f = document.getElementById(forms[key]); if(f) f.reset();
       if(key==='journal') document.getElementById('jDate').value = todayStr();
       if(key==='maintenance') document.getElementById('mDate').value = todayStr();
-      if(key==='dette') document.getElementById('ddDate').value = todayStr();
+      if(key==='dette'){ document.getElementById('ddDate').value = todayStr(); document.getElementById('ddRembourse').value = '0'; }
       if(key==='emprunt') document.getElementById('veDate').value = todayStr();
     });
   });
@@ -1701,9 +1716,26 @@
     else if(t.dataset.delMaintenance){ if(confirm('Supprimer cette dépense ?')) withDb(function(){ db.collection('maintenance').doc(t.dataset.delMaintenance).delete().then(function(){ toast('Ligne supprimée'); }); }); }
     else if(t.dataset.delDoc){ if(confirm('Supprimer ce document ?')) withDb(function(){ db.collection('documents').doc(t.dataset.delDoc).delete().then(function(){ toast('Document supprimé'); }); }); }
     else if(t.dataset.delCreditor){ if(confirm('Supprimer ce créancier ?')) withDb(function(){ db.collection('creanciers').doc(t.dataset.delCreditor).delete().then(function(){ toast('Créancier supprimé'); }); }); }
-    else if(t.dataset.payDette){ withDb(function(){ db.collection('dettes').doc(t.dataset.payDette).update({ paye:true, datePaiement:todayStr() }).then(function(){ toast('Dette marquée payée'); }); }); }
-    else if(t.dataset.unpayDette){ withDb(function(){ db.collection('dettes').doc(t.dataset.unpayDette).update({ paye:false, datePaiement:null }).then(function(){ toast('Paiement annulé'); }); }); }
     else if(t.dataset.delDette){ if(confirm('Supprimer cette dette ?')) withDb(function(){ db.collection('dettes').doc(t.dataset.delDette).delete().then(function(){ toast('Dette supprimée'); }); }); }
+    else if(t.dataset.openRembourserDette){
+      var drow = document.getElementById('remb-dette-row-'+t.dataset.openRembourserDette);
+      if(drow){ drow.hidden = !drow.hidden; if(!drow.hidden) drow.querySelector('input').focus(); }
+    }
+    else if(t.dataset.doRembourserDette){
+      var did = t.dataset.doRembourserDette;
+      var dinput = document.getElementById('rembInput-dette-'+did);
+      var damt = Number(dinput.value);
+      if(!damt || damt<=0) return;
+      var dette = findById(state.dettes, did);
+      if(!dette) return;
+      var resteDette = Math.max(0, (dette.montant||0) - (dette.rembourse||0));
+      if(damt > resteDette){ toast('Le montant dépasse le reste dû ('+money(resteDette)+').'); return; }
+      withDb(function(){
+        db.collection('dettes').doc(did).update({ rembourse: (dette.rembourse||0) + damt }).then(function(){
+          toast('Remboursement enregistré');
+        }).catch(function(err){ toast('Erreur : '+err.message); });
+      });
+    }
     else if(t.dataset.delEmprunt){ if(confirm('Supprimer ce versement ?')) withDb(function(){ db.collection('emprunt').doc(t.dataset.delEmprunt).delete().then(function(){ toast('Versement supprimé'); }); }); }
     else if(t.dataset.histDoc){ var hrow = document.getElementById('hist-'+t.dataset.histDoc); if(hrow) hrow.hidden = !hrow.hidden; }
 
@@ -1753,6 +1785,7 @@
       document.getElementById('ddLibelle').value = dd.libelle||'';
       document.getElementById('ddMode').value = dd.mode||'';
       document.getElementById('ddMontant').value = dd.montant||'';
+      document.getElementById('ddRembourse').value = dd.rembourse||0;
       editing.dette = dd.id; setEditBanner('dette', true);
       document.getElementById('formDette').scrollIntoView({block:'center', behavior:'smooth'});
     }
