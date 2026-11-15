@@ -810,6 +810,12 @@
           <p class="fine">Chaque mois est financé par le revenu du mois précédent (janvier par celui de décembre).</p>
         </section>
 
+        <section class="panel">
+          <h2>Devise</h2>
+          <div class="form-row"><label>Devise d'affichage</label><select id="currencySelect"></select></div>
+          <p class="fine">Changer la devise modifie seulement l'affichage : les montants ne sont pas convertis (100 reste 100).</p>
+        </section>
+
         <section class="panel" id="syncPanel">
           <div class="panel-title">
             <h2>Synchronisation</h2>
@@ -939,7 +945,19 @@
       return escapeHtml(value).replace(/`/g, "&#96;");
     }
 
-    const money = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
+    const CURRENCIES = [
+      ["XOF", "Franc CFA (UEMOA)"], ["XAF", "Franc CFA (CEMAC)"], ["EUR", "Euro"], ["USD", "Dollar US"],
+      ["GBP", "Livre sterling"], ["CAD", "Dollar canadien"], ["MAD", "Dirham marocain"], ["CHF", "Franc suisse"]
+    ];
+
+    function makeMoneyFormat(code) {
+      try { return new Intl.NumberFormat("fr-FR", { style: "currency", currency: code, maximumFractionDigits: 0 }); }
+      catch { return new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }); }
+    }
+
+    // L'affichage suit state.settings.currency ; les montants eux-mêmes ne sont jamais convertis.
+    let moneyFormat = makeMoneyFormat("EUR");
+    const money = { format: value => moneyFormat.format(value) };
     const pct = new Intl.NumberFormat("fr-FR", { style: "percent", maximumFractionDigits: 0 });
 
     function monthName(index) {
@@ -1000,6 +1018,7 @@
         expenses: [],
         savings: defaultSavings(),
         deleted: {},
+        settings: { currency: "EUR", u: 0 },
         lastBackup: null
       };
     }
@@ -1026,7 +1045,12 @@
       const deleted = {};
       Object.entries(d.deleted && typeof d.deleted === "object" ? d.deleted : {}).forEach(([id, ts]) => { deleted[id] = Number(ts) || 0; });
       const years = [...new Set((Array.isArray(d.years) ? d.years : []).filter(Number.isInteger))].sort((a, b) => a - b);
-      return { years, incomes, budgets: fixList(d.budgets), expenses: fixList(d.expenses), savings: fixList(d.savings), deleted };
+      const rawSettings = d.settings && typeof d.settings === "object" ? d.settings : {};
+      const settings = {
+        currency: CURRENCIES.some(([code]) => code === rawSettings.currency) ? rawSettings.currency : "EUR",
+        u: Number(rawSettings.u) || 0
+      };
+      return { years, incomes, budgets: fixList(d.budgets), expenses: fixList(d.expenses), savings: fixList(d.savings), deleted, settings };
     }
 
     function newer(a, b) {
@@ -1056,12 +1080,13 @@
         budgets: mergeList(a.budgets, b.budgets),
         expenses: mergeList(a.expenses, b.expenses),
         savings: mergeList(a.savings, b.savings),
-        deleted
+        deleted,
+        settings: newer(a.settings, b.settings)
       });
     }
 
     function syncData(s) {
-      return { years: s.years, incomes: s.incomes, budgets: s.budgets, expenses: s.expenses, savings: s.savings, deleted: s.deleted };
+      return { years: s.years, incomes: s.incomes, budgets: s.budgets, expenses: s.expenses, savings: s.savings, deleted: s.deleted, settings: s.settings };
     }
 
     function deriveYears(s) {
@@ -1203,6 +1228,7 @@
     function render(opts = {}) {
       const skipForms = opts.fromSync && isEditingForm();
       state.years = deriveYears(state);
+      moneyFormat = makeMoneyFormat(state.settings.currency);
       renderYearSelect();
       renderHeader();
       renderDashboard();
@@ -1213,6 +1239,7 @@
         renderSavings();
       }
       renderHistory();
+      renderCurrency();
       renderSync();
       saveState();
     }
@@ -1479,6 +1506,14 @@
       }).join("");
 
       renderBackupInfo();
+    }
+
+    function renderCurrency() {
+      const select = document.getElementById("currencySelect");
+      if (!select.options.length) {
+        select.innerHTML = CURRENCIES.map(([code, label]) => `<option value="${code}">${code} — ${label}</option>`).join("");
+      }
+      select.value = state.settings.currency;
     }
 
     function renderBackupInfo() {
@@ -2010,6 +2045,11 @@
         commitSavingEdits();
         commit();
         setView("dashboard");
+      });
+
+      document.getElementById("currencySelect").addEventListener("change", event => {
+        state.settings = { currency: event.target.value, u: stamp() };
+        commit();
       });
 
       document.getElementById("exportData").addEventListener("click", exportBackup);
