@@ -500,9 +500,6 @@
       <div class="field"><label for="mType">Type</label>
         <select id="mType"><option value="depense">Dépense courante</option><option value="investissement">Investissement initial</option></select>
       </div>
-      <div class="field"><label for="mCredit">Règlement</label>
-        <select id="mCredit"><option value="0">Payé (cash)</option><option value="1">À crédit</option></select>
-      </div>
       <div class="field grow"><label for="mMode">Mode de paiement</label><input type="text" id="mMode" placeholder="Ex. Wave business, espèces…"></div>
       <button class="btn primary" type="submit" id="submitMaintenance">Ajouter</button>
     </form>
@@ -515,12 +512,6 @@
     <div class="filter-row">
       <label for="mMonthFilter" style="margin:0;">Mois</label>
       <select id="mMonthFilter"></select>
-      <label for="mCreditFilter" style="margin:0;">Règlement</label>
-      <select id="mCreditFilter">
-        <option value="all">Tous</option>
-        <option value="cash">Payé (cash)</option>
-        <option value="credit">À crédit</option>
-      </select>
     </div>
     <div class="table-wrap">
       <table>
@@ -700,7 +691,6 @@
   var editing = { journal:null, maintenance:null, doc:null, creditor:null, dette:null, emprunt:null };
   var journalMonthFilter = '__all__';
   var entretienMonthFilter = '__all__';
-  var entretienCreditFilter = 'all';
   var dFilter = 'open';
 
   function sortByDate(arr, field){ arr.sort(function(a,b){ return (a[field]||"").localeCompare(b[field]||""); }); }
@@ -1394,30 +1384,23 @@
     var list = state.maintenance.filter(function(m){
       if(mFilter!=='all' && m.type!==mFilter) return false;
       if(entretienMonthFilter!=='__all__' && monthKey(m.date)!==entretienMonthFilter) return false;
-      if(entretienCreditFilter==='cash' && m.credit) return false;
-      if(entretienCreditFilter==='credit' && !m.credit) return false;
       return true;
     });
     sortByDate(list, 'date'); list.reverse();
     var totalsSource = entretienMonthFilter==='__all__' ? state.maintenance : state.maintenance.filter(function(m){ return monthKey(m.date)===entretienMonthFilter; });
-    var totalDep=0, totalInv=0, totalCash=0, totalCredit=0;
-    totalsSource.forEach(function(m){
-      if(m.type==='investissement') totalInv += (m.montant||0); else totalDep += (m.montant||0);
-      if(m.credit) totalCredit += (m.montant||0); else totalCash += (m.montant||0);
-    });
+    var totalDep=0, totalInv=0;
+    totalsSource.forEach(function(m){ if(m.type==='investissement') totalInv += (m.montant||0); else totalDep += (m.montant||0); });
     document.getElementById('entretienStrip').innerHTML =
       '<div class="s">Dépenses courantes <b>'+money(totalDep)+'</b></div>' +
       '<div class="s">Investissement initial <b>'+money(totalInv)+'</b></div>' +
-      '<div class="s">Total <b>'+money(totalDep+totalInv)+'</b></div>' +
-      '<div class="s">Payé cash <b>'+money(totalCash)+'</b></div>' +
-      '<div class="s">À crédit <b>'+money(totalCredit)+'</b></div>';
+      '<div class="s">Total <b>'+money(totalDep+totalInv)+'</b></div>';
 
     var body = document.getElementById('entretienBody');
     if(list.length===0){ body.innerHTML = '<tr class="empty-row"><td colspan="5">Aucune dépense dans cette catégorie.</td></tr>'; return; }
     body.innerHTML = list.map(function(m){
       return '<tr>' +
         '<td class="mono">'+(m.date||'—')+'</td>' +
-        '<td>'+escapeHtml(m.libelle)+(m.type==='investissement'?' <span class="pill neutral">investissement</span>':'')+(m.credit?' <span class="pill warn">à crédit</span>':'')+(m.garage?'<div class="row-note">'+escapeHtml(m.garage)+'</div>':'')+'</td>' +
+        '<td>'+escapeHtml(m.libelle)+(m.type==='investissement'?' <span class="pill neutral">investissement</span>':'')+(m.garage?'<div class="row-note">'+escapeHtml(m.garage)+'</div>':'')+'</td>' +
         '<td>'+escapeHtml(m.mode||'')+'</td>' +
         '<td class="num">'+money(m.montant)+'</td>' +
         '<td class="row-actions"><button class="btn ghost" data-edit-maintenance="'+m.id+'">Modifier</button><button class="btn ghost" data-del-maintenance="'+m.id+'">Suppr.</button></td>' +
@@ -1565,9 +1548,6 @@
   document.getElementById('mMonthFilter').addEventListener('change', function(){
     entretienMonthFilter = this.value; renderEntretien();
   });
-  document.getElementById('mCreditFilter').addEventListener('change', function(){
-    entretienCreditFilter = this.value; renderEntretien();
-  });
 
   // ---------------- forms ----------------
   function withDb(fn){
@@ -1602,7 +1582,6 @@
       libelle: document.getElementById('mLibelle').value.trim(),
       montant: Number(document.getElementById('mMontant').value),
       type: document.getElementById('mType').value,
-      credit: document.getElementById('mCredit').value === '1',
       mode: document.getElementById('mMode').value.trim()
     };
     if(!data.libelle || !data.montant) return;
@@ -1611,7 +1590,7 @@
       var ref = id ? db.collection('maintenance').doc(id) : db.collection('maintenance').doc();
       ref.set(data).then(function(){
         toast(id ? 'Dépense mise à jour' : 'Dépense ajoutée');
-        e.target.reset(); document.getElementById('mType').value='depense'; document.getElementById('mCredit').value='0'; document.getElementById('mDate').value = todayStr();
+        e.target.reset(); document.getElementById('mType').value='depense'; document.getElementById('mDate').value = todayStr();
         editing.maintenance = null; setEditBanner('maintenance', false);
       }).catch(function(err){ toast('Erreur : '+err.message); });
     });
@@ -1709,7 +1688,7 @@
       var forms = { journal:'formJournal', maintenance:'formEntretien', doc:'formDoc', creditor:'formCreditor', dette:'formDette', emprunt:'formEmprunt' };
       var f = document.getElementById(forms[key]); if(f) f.reset();
       if(key==='journal') document.getElementById('jDate').value = todayStr();
-      if(key==='maintenance'){ document.getElementById('mDate').value = todayStr(); document.getElementById('mCredit').value = '0'; }
+      if(key==='maintenance') document.getElementById('mDate').value = todayStr();
       if(key==='dette') document.getElementById('ddDate').value = todayStr();
       if(key==='emprunt') document.getElementById('veDate').value = todayStr();
     });
@@ -1744,7 +1723,6 @@
       document.getElementById('mLibelle').value = m.libelle||'';
       document.getElementById('mMontant').value = m.montant||'';
       document.getElementById('mType').value = m.type||'depense';
-      document.getElementById('mCredit').value = m.credit ? '1' : '0';
       document.getElementById('mMode').value = m.mode||'';
       editing.maintenance = m.id; setEditBanner('maintenance', true);
       document.getElementById('view-entretien').scrollIntoView({block:'start', behavior:'smooth'});
