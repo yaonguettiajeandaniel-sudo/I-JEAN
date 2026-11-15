@@ -650,6 +650,57 @@
       outline: 2px solid var(--brand);
       outline-offset: 2px;
     }
+
+    .reserve-balance {
+      font-size: 1.7rem;
+      font-weight: 780;
+      line-height: 1.1;
+    }
+
+    .reserve-balance.neg { color: var(--danger); }
+
+    .check-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--ink);
+      font-size: 0.88rem;
+    }
+
+    .check-row input {
+      flex: 0 0 auto;
+      width: 20px;
+      height: 20px;
+      min-height: 0;
+      accent-color: var(--brand);
+    }
+
+    .status.res { background: #e0f2fe; color: #075985; }
+
+    .row-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .mini-btn {
+      min-height: 38px;
+      padding: 0 14px;
+      border-radius: 8px;
+      background: #edf2ef;
+      color: var(--ink);
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    .expense-row.editing {
+      border-color: var(--brand);
+      background: var(--surface-soft);
+    }
   </style>
 </head>
 <body>
@@ -692,6 +743,15 @@
           </div>
           <p class="fine" id="receivedHint"></p>
         </div>
+        <section class="panel" id="reservePanel">
+          <div class="panel-title">
+            <h2>Réserve</h2>
+            <span class="hint" id="reserveHint"></span>
+          </div>
+          <div class="reserve-balance" id="reserveBalance">0</div>
+          <p class="fine" id="reserveMonth"></p>
+          <p class="fine">Revenus exceptionnels reçus, moins les dépenses payées par la réserve. Elle n'entre pas dans le budget.</p>
+        </section>
         <section class="panel">
           <div class="panel-title">
             <h2>Répartition du mois</h2>
@@ -745,6 +805,21 @@
           <button class="btn" id="saveRecv" type="button">Enregistrer</button>
         </section>
         <section class="panel">
+          <div class="panel-title">
+            <h2>Revenu exceptionnel</h2>
+            <span class="hint" id="reserveSolde"></span>
+          </div>
+          <p class="fine">Hors rémunération habituelle (vente, cadeau, prime ponctuelle…) : il n'entre pas dans le budget et va directement dans la réserve.</p>
+          <div class="form-grid">
+            <div class="form-row"><label>Date</label><input id="reserveDate" type="date"></div>
+            <div class="form-row"><label>Montant</label><input id="reserveAmount" inputmode="decimal" type="number" min="0" step="0.01"></div>
+            <div class="form-row"><label>Origine (optionnel)</label><input id="reserveLabel" placeholder="Ex. vente, prime, cadeau…"></div>
+          </div>
+          <button class="btn" id="addReserve" type="button">Ajouter à la réserve</button>
+          <button class="btn secondary" id="cancelReserveEdit" type="button" hidden>Annuler la modification</button>
+          <div id="reserveList" class="stack"></div>
+        </section>
+        <section class="panel">
           <h2>Revenus perçus en <span id="incomeYearLabel"></span></h2>
           <div id="incomeHistory" class="stack"></div>
         </section>
@@ -752,14 +827,17 @@
 
       <section id="expenses" class="view" aria-label="Dépenses">
         <section class="panel">
-          <h2>Nouvelle dépense</h2>
+          <h2 id="expenseFormTitle">Nouvelle dépense</h2>
           <div class="form-grid">
             <div class="form-row"><label>Date</label><input id="expenseDate" type="date"></div>
             <div class="form-row"><label>Catégorie</label><select id="expenseCategory"></select></div>
             <div class="form-row"><label>Montant</label><input id="expenseAmount" inputmode="decimal" type="number" min="0" step="0.01"></div>
             <div class="form-row"><label>Note</label><textarea id="expenseNote" placeholder="Optionnel"></textarea></div>
+            <label class="check-row"><input type="checkbox" id="expenseFromReserve"><span>Payée par la réserve (hors budget du mois)</span></label>
+            <p class="fine" id="expenseReserveHint"></p>
           </div>
           <button class="btn" id="addExpense" type="button">Ajouter</button>
+          <button class="btn secondary" id="cancelExpenseEdit" type="button" hidden>Annuler la modification</button>
         </section>
         <section class="panel">
           <div class="panel-title">
@@ -806,6 +884,7 @@
             <div class="metric"><span>Taux d'épargne</span><strong id="yearSavingsRate">0%</strong></div>
           </div>
           <p class="hint">Mois le plus dépensier : <span id="yearWorstMonth">—</span></p>
+          <p class="fine" id="reserveYearHint"></p>
           <div class="ybars" id="yearChart"></div>
           <p class="fine">Chaque mois est financé par le revenu du mois précédent (janvier par celui de décembre).</p>
         </section>
@@ -1016,6 +1095,7 @@
         incomes: {},
         budgets: defaultBudgets(),
         expenses: [],
+        reserve: [],
         savings: defaultSavings(),
         deleted: {},
         settings: { currency: "EUR", u: 0 },
@@ -1050,7 +1130,7 @@
         currency: CURRENCIES.some(([code]) => code === rawSettings.currency) ? rawSettings.currency : "EUR",
         u: Number(rawSettings.u) || 0
       };
-      return { years, incomes, budgets: fixList(d.budgets), expenses: fixList(d.expenses), savings: fixList(d.savings), deleted, settings };
+      return { years, incomes, budgets: fixList(d.budgets), expenses: fixList(d.expenses), reserve: fixList(d.reserve), savings: fixList(d.savings), deleted, settings };
     }
 
     function newer(a, b) {
@@ -1079,6 +1159,7 @@
         incomes,
         budgets: mergeList(a.budgets, b.budgets),
         expenses: mergeList(a.expenses, b.expenses),
+        reserve: mergeList(a.reserve, b.reserve),
         savings: mergeList(a.savings, b.savings),
         deleted,
         settings: newer(a.settings, b.settings)
@@ -1086,7 +1167,7 @@
     }
 
     function syncData(s) {
-      return { years: s.years, incomes: s.incomes, budgets: s.budgets, expenses: s.expenses, savings: s.savings, deleted: s.deleted, settings: s.settings };
+      return { years: s.years, incomes: s.incomes, budgets: s.budgets, expenses: s.expenses, reserve: s.reserve, savings: s.savings, deleted: s.deleted, settings: s.settings };
     }
 
     function deriveYears(s) {
@@ -1097,6 +1178,10 @@
       });
       (s.expenses || []).forEach(e => {
         const y = parseInt(String(e.date || "").slice(0, 4), 10);
+        if (Number.isInteger(y)) years.add(y);
+      });
+      (s.reserve || []).forEach(r => {
+        const y = parseInt(String(r.date || "").slice(0, 4), 10);
         if (Number.isInteger(y)) years.add(y);
       });
       if (!years.size) years.add(startPeriod().year);
@@ -1163,6 +1248,41 @@
         .sort((a, b) => String(b.date).localeCompare(String(a.date)));
     }
 
+    // Dépenses comptées dans le budget du mois (hors celles payées par la réserve).
+    function budgetExpenses(year, index) {
+      return monthExpenses(year, index).filter(e => !e.fromReserve);
+    }
+
+    function sumAmounts(list) {
+      return list.reduce((sum, item) => sum + numberValue(item.amount), 0);
+    }
+
+    function reserveEntries(year, index) {
+      const prefix = monthDatePrefix(year, index);
+      return state.reserve
+        .filter(r => String(r.date || "").startsWith(prefix))
+        .sort((a, b) => String(b.date).localeCompare(String(a.date)));
+    }
+
+    // Réserve = revenus exceptionnels reçus − dépenses payées par la réserve (cumul, tous mois confondus).
+    function reserveSummary(year, index) {
+      const totalIn = sumAmounts(state.reserve);
+      const totalOut = sumAmounts(state.expenses.filter(e => e.fromReserve));
+      return {
+        balance: totalIn - totalOut,
+        monthIn: sumAmounts(reserveEntries(year, index)),
+        monthOut: sumAmounts(monthExpenses(year, index).filter(e => e.fromReserve))
+      };
+    }
+
+    function reserveYear(year) {
+      const prefix = `${year}-`;
+      return {
+        inn: sumAmounts(state.reserve.filter(r => String(r.date || "").startsWith(prefix))),
+        out: sumAmounts(state.expenses.filter(e => e.fromReserve && String(e.date || "").startsWith(prefix)))
+      };
+    }
+
     function categoryMatches(expense, budget) {
       if (expense.categoryId) return expense.categoryId === budget.id;
       return expense.category === budget.name;
@@ -1183,7 +1303,7 @@
 
     function monthSummary(year, index) {
       const budget = fundingIncome(year, index);
-      const expenses = monthExpenses(year, index);
+      const expenses = budgetExpenses(year, index);
       const rows = state.budgets.map(cat => {
         const limit = budget * numberValue(cat.percent);
         const spent = expenses.filter(e => categoryMatches(e, cat)).reduce((sum, e) => sum + numberValue(e.amount), 0);
@@ -1240,6 +1360,7 @@
       }
       renderHistory();
       renderCurrency();
+      renderEditModes();
       renderSync();
       saveState();
     }
@@ -1288,6 +1409,8 @@
       document.getElementById("receivedHint").textContent =
         `Perçu en ${monthName(m).toLowerCase()} : ${money.format(summary.received)} → finance ${periodLabel(next, y)}.`;
 
+      renderReservePanel();
+
       document.getElementById("budgetPercentTotal").textContent = `Total ${pct.format(budgetTotalPercent())}`;
       document.getElementById("budgetList").innerHTML = summary.rows.length
         ? summary.rows.map(budgetRow).join("")
@@ -1305,6 +1428,19 @@
       document.getElementById("savingsCompact").innerHTML = state.savings.length
         ? state.savings.map(savingRow).join("")
         : `<div class="empty">Aucun objectif d'épargne.</div>`;
+    }
+
+    function renderReservePanel() {
+      const y = state.selectedYear;
+      const m = state.selectedMonth;
+      const r = reserveSummary(y, m);
+      const balance = document.getElementById("reserveBalance");
+      balance.textContent = money.format(r.balance);
+      balance.className = "reserve-balance" + (r.balance < 0 ? " neg" : "");
+      document.getElementById("reserveHint").textContent = r.balance < 0 ? "Dépassée" : "";
+      document.getElementById("reserveHint").className = "hint" + (r.balance < 0 ? " bad-text" : "");
+      document.getElementById("reserveMonth").textContent =
+        `En ${monthName(m).toLowerCase()} : +${money.format(r.monthIn)} reçus · −${money.format(r.monthOut)} dépensés.`;
     }
 
     function renderCategoryChart(rows) {
@@ -1394,6 +1530,16 @@
       document.getElementById("recvHint").textContent = `Il financera les dépenses de ${monthName(next.index).toLowerCase()} ${next.year}.`;
       fillIncomeForm("recv", y, m);
 
+      const reserveDate = document.getElementById("reserveDate");
+      reserveDate.value = reserveDate.value || `${monthDatePrefix(y, m)}-01`;
+      const yearEntries = state.reserve
+        .filter(r => String(r.date || "").startsWith(`${y}-`))
+        .sort((a, b) => String(b.date).localeCompare(String(a.date)));
+      document.getElementById("reserveSolde").textContent = `Solde : ${money.format(reserveSummary(y, m).balance)}`;
+      document.getElementById("reserveList").innerHTML = yearEntries.length
+        ? yearEntries.map(reserveRow).join("")
+        : `<div class="empty">Aucun revenu exceptionnel en ${y}.</div>`;
+
       document.getElementById("incomeYearLabel").textContent = y;
       document.getElementById("incomeHistory").innerHTML = MONTHS.map((month, index) => {
         const total = incomeTotal(y, index);
@@ -1408,13 +1554,108 @@
       }).join("");
     }
 
+    function editedExpense() {
+      return editing && editing.kind === "expense" ? state.expenses.find(x => x.id === editing.id) || null : null;
+    }
+
+    function editedReserve() {
+      return editing && editing.kind === "reserve" ? state.reserve.find(x => x.id === editing.id) || null : null;
+    }
+
+    function editedCategoryExists(expense) {
+      return state.budgets.some(b => expense.categoryId ? b.id === expense.categoryId : b.name === expense.category);
+    }
+
+    // Boutons et titres selon qu'on ajoute ou qu'on modifie ; abandonne si la ligne a disparu (suppression, synchro).
+    function renderEditModes() {
+      if (editing && !(editedExpense() || editedReserve())) editing = null;
+      const expenseOn = !!editedExpense();
+      document.getElementById("expenseFormTitle").textContent = expenseOn ? "Modifier la dépense" : "Nouvelle dépense";
+      document.getElementById("addExpense").textContent = expenseOn ? "Enregistrer les modifications" : "Ajouter";
+      document.getElementById("cancelExpenseEdit").hidden = !expenseOn;
+      const reserveOn = !!editedReserve();
+      document.getElementById("addReserve").textContent = reserveOn ? "Enregistrer les modifications" : "Ajouter à la réserve";
+      document.getElementById("cancelReserveEdit").hidden = !reserveOn;
+    }
+
+    function clearExpenseForm() {
+      document.getElementById("expenseAmount").value = "";
+      document.getElementById("expenseNote").value = "";
+      document.getElementById("expenseFromReserve").checked = false;
+      document.getElementById("expenseDate").value = `${monthDatePrefix(state.selectedYear, state.selectedMonth)}-01`;
+    }
+
+    function clearReserveForm() {
+      document.getElementById("reserveAmount").value = "";
+      document.getElementById("reserveLabel").value = "";
+      document.getElementById("reserveDate").value = `${monthDatePrefix(state.selectedYear, state.selectedMonth)}-01`;
+    }
+
+    function cancelEdit() {
+      if (!editing) return;
+      const kind = editing.kind;
+      editing = null;
+      if (kind === "expense") clearExpenseForm(); else clearReserveForm();
+      render();
+    }
+
+    function startEditExpense(id) {
+      const e = state.expenses.find(x => x.id === id);
+      if (!e) return;
+      if (editing && editing.kind === "reserve") clearReserveForm();
+      editing = { kind: "expense", id };
+      setView("expenses");
+      document.getElementById("expenseDate").value = e.date || "";
+      document.getElementById("expenseAmount").value = numberValue(e.amount);
+      document.getElementById("expenseNote").value = e.note || "";
+      document.getElementById("expenseFromReserve").checked = !!e.fromReserve;
+      render();
+      const match = state.budgets.find(b => e.categoryId ? b.id === e.categoryId : b.name === e.category);
+      document.getElementById("expenseCategory").value = match ? match.id : "__orig__";
+      document.getElementById("expenseAmount").focus();
+    }
+
+    function startEditReserve(id) {
+      const r = state.reserve.find(x => x.id === id);
+      if (!r) return;
+      if (editing && editing.kind === "expense") clearExpenseForm();
+      editing = { kind: "reserve", id };
+      setView("income");
+      document.getElementById("reserveDate").value = r.date || "";
+      document.getElementById("reserveAmount").value = numberValue(r.amount);
+      document.getElementById("reserveLabel").value = r.label || "";
+      render();
+      document.getElementById("reserveAmount").focus();
+    }
+
+    function reserveRow(entry) {
+      const isEditing = editing && editing.kind === "reserve" && editing.id === entry.id;
+      return `
+        <article class="expense-row${isEditing ? " editing" : ""}">
+          <div class="row-head">
+            <strong>${escapeHtml(entry.label || "Revenu exceptionnel")}</strong>
+            <span>${money.format(numberValue(entry.amount))}</span>
+          </div>
+          <small>${escapeHtml(entry.date || "")}</small>
+          <div class="row-actions">
+            <button class="mini-btn" data-edit-reserve="${escapeAttr(entry.id)}" type="button">Modifier</button>
+            <button class="icon-btn" data-delete-reserve="${escapeAttr(entry.id)}" title="Supprimer" type="button">×</button>
+          </div>
+        </article>`;
+    }
+
     function renderExpenses() {
       const select = document.getElementById("expenseCategory");
       const current = select.value;
-      select.innerHTML = state.budgets.map(item => `<option value="${escapeAttr(item.id)}">${escapeHtml(item.name)}</option>`).join("");
-      if (current && state.budgets.some(b => b.id === current)) select.value = current;
+      let options = state.budgets.map(item => `<option value="${escapeAttr(item.id)}">${escapeHtml(item.name)}</option>`).join("");
+      const edited = editedExpense();
+      if (edited && !editedCategoryExists(edited)) options += `<option value="__orig__">${escapeHtml(categoryLabel(edited))}</option>`;
+      select.innerHTML = options;
+      if (current && [...select.options].some(o => o.value === current)) select.value = current;
       const dateInput = document.getElementById("expenseDate");
       dateInput.value = dateInput.value || `${monthDatePrefix(state.selectedYear, state.selectedMonth)}-01`;
+      const reserve = reserveSummary(state.selectedYear, state.selectedMonth);
+      document.getElementById("expenseReserveHint").textContent = `Solde de la réserve : ${money.format(reserve.balance)}`;
       const list = monthExpenses(state.selectedYear, state.selectedMonth);
       document.getElementById("expenseList").innerHTML = list.length
         ? list.map(expenseRow).join("")
@@ -1422,14 +1663,18 @@
     }
 
     function expenseRow(expense) {
+      const isEditing = editing && editing.kind === "expense" && editing.id === expense.id;
       return `
-        <article class="expense-row">
+        <article class="expense-row${isEditing ? " editing" : ""}">
           <div class="row-head">
             <strong>${escapeHtml(categoryLabel(expense))}</strong>
-            <span>${money.format(numberValue(expense.amount))}</span>
+            <span>${expense.fromReserve ? `<span class="status res">Réserve</span> ` : ""}${money.format(numberValue(expense.amount))}</span>
           </div>
           <small>${escapeHtml(expense.date || "")}${expense.note ? ` - ${escapeHtml(expense.note)}` : ""}</small>
-          <button class="icon-btn" data-delete-expense="${escapeAttr(expense.id)}" title="Supprimer" type="button">×</button>
+          <div class="row-actions">
+            <button class="mini-btn" data-edit-expense="${escapeAttr(expense.id)}" type="button">Modifier</button>
+            <button class="icon-btn" data-delete-expense="${escapeAttr(expense.id)}" title="Supprimer" type="button">×</button>
+          </div>
         </article>`;
     }
 
@@ -1489,6 +1734,9 @@
       document.getElementById("yearSavingsRate").textContent = pct.format(ys.savingsRate);
       document.getElementById("yearWorstMonth").textContent = ys.worstSpent > 0 ? `${MONTHS[ys.worstMonth]} (${money.format(ys.worstSpent)})` : "—";
       renderYearChart(year);
+      const ry = reserveYear(year);
+      document.getElementById("reserveYearHint").textContent =
+        `Réserve en ${year} : +${money.format(ry.inn)} reçus, −${money.format(ry.out)} dépensés. Solde total : ${money.format(reserveSummary(year, state.selectedMonth).balance)}.`;
 
       document.getElementById("historyList").innerHTML = MONTHS.map((month, index) => {
         const s = monthSummary(year, index);
@@ -1715,6 +1963,8 @@
     let syncTimer = null;
     let syncStatus = { state: "idle", message: "" };
     let showCode = false;
+    // Saisie en cours de modification : { kind: "expense" | "reserve", id }
+    let editing = null;
 
     function saveSyncCfg() {
       try {
@@ -1912,15 +2162,18 @@
 
       const resetExpenseDate = () => {
         document.getElementById("expenseDate").value = `${monthDatePrefix(state.selectedYear, state.selectedMonth)}-01`;
+        document.getElementById("reserveDate").value = `${monthDatePrefix(state.selectedYear, state.selectedMonth)}-01`;
       };
 
       monthSelect.addEventListener("change", event => {
+        if (editing) cancelEdit();
         state.selectedMonth = Number(event.target.value);
         resetExpenseDate();
         render();
       });
 
       document.getElementById("yearSelect").addEventListener("change", event => {
+        if (editing) cancelEdit();
         state.selectedYear = Number(event.target.value);
         resetExpenseDate();
         render();
@@ -1946,6 +2199,19 @@
         const deleteExpense = event.target.closest("[data-delete-expense]");
         if (deleteExpense) {
           deleteItem("expenses", deleteExpense.dataset.deleteExpense);
+          commit();
+          return;
+        }
+
+        const editExpense = event.target.closest("[data-edit-expense]");
+        if (editExpense) { startEditExpense(editExpense.dataset.editExpense); return; }
+
+        const editReserve = event.target.closest("[data-edit-reserve]");
+        if (editReserve) { startEditReserve(editReserve.dataset.editReserve); return; }
+
+        const deleteReserve = event.target.closest("[data-delete-reserve]");
+        if (deleteReserve) {
+          deleteItem("reserve", deleteReserve.dataset.deleteReserve);
           commit();
           return;
         }
@@ -1985,33 +2251,72 @@
 
       document.getElementById("addExpense").addEventListener("click", () => {
         const amount = numberValue(document.getElementById("expenseAmount").value);
-        if (!amount) return;
-        const categoryId = document.getElementById("expenseCategory").value;
-        const budget = state.budgets.find(b => b.id === categoryId);
-        const t = stamp();
-        state.expenses.push({
-          id: uid(),
-          date: document.getElementById("expenseDate").value || `${monthDatePrefix(state.selectedYear, state.selectedMonth)}-01`,
-          categoryId,
-          category: budget ? budget.name : "",
-          amount,
-          note: document.getElementById("expenseNote").value.trim(),
-          c: t,
-          u: t
-        });
-        document.getElementById("expenseAmount").value = "";
-        document.getElementById("expenseNote").value = "";
+        if (!amount || amount < 0) return;
+        const select = document.getElementById("expenseCategory");
+        const edited = editedExpense();
+        const fallbackDate = `${monthDatePrefix(state.selectedYear, state.selectedMonth)}-01`;
+        const date = document.getElementById("expenseDate").value || fallbackDate;
+        const note = document.getElementById("expenseNote").value.trim();
+        const fromReserve = document.getElementById("expenseFromReserve").checked;
+
+        let categoryId;
+        let categoryName;
+        if (select.value === "__orig__" && edited) {
+          categoryId = edited.categoryId;
+          categoryName = edited.category;
+        } else {
+          categoryId = select.value;
+          const budget = state.budgets.find(b => b.id === categoryId);
+          categoryName = budget ? budget.name : "";
+        }
+
+        if (edited) {
+          edited.date = date;
+          if (categoryId) edited.categoryId = categoryId; else delete edited.categoryId;
+          edited.category = categoryName || "";
+          edited.amount = amount;
+          edited.note = note;
+          if (fromReserve) edited.fromReserve = true; else delete edited.fromReserve;
+          edited.u = stamp();
+          editing = null;
+        } else {
+          const t = stamp();
+          state.expenses.push({
+            id: uid(),
+            date,
+            categoryId,
+            category: categoryName,
+            amount,
+            note,
+            ...(fromReserve ? { fromReserve: true } : {}),
+            c: t,
+            u: t
+          });
+        }
+        clearExpenseForm();
         commit();
       });
 
-      document.getElementById("clearMonth").addEventListener("click", () => {
-        const label = `${monthName(state.selectedMonth).toLowerCase()} ${state.selectedYear}`;
-        if (!confirm(`Vider toutes les dépenses de ${label} ? Cette action est irréversible.`)) return;
-        const prefix = monthDatePrefix(state.selectedYear, state.selectedMonth);
-        state.expenses
-          .filter(e => String(e.date || "").startsWith(prefix))
-          .map(e => e.id)
-          .forEach(id => deleteItem("expenses", id));
+      document.getElementById("cancelExpenseEdit").addEventListener("click", cancelEdit);
+      document.getElementById("cancelReserveEdit").addEventListener("click", cancelEdit);
+
+      document.getElementById("addReserve").addEventListener("click", () => {
+        const amount = numberValue(document.getElementById("reserveAmount").value);
+        if (!amount || amount < 0) return;
+        const date = document.getElementById("reserveDate").value || `${monthDatePrefix(state.selectedYear, state.selectedMonth)}-01`;
+        const label = document.getElementById("reserveLabel").value.trim();
+        const edited = editedReserve();
+        if (edited) {
+          edited.date = date;
+          edited.label = label;
+          edited.amount = amount;
+          edited.u = stamp();
+          editing = null;
+        } else {
+          const t = stamp();
+          state.reserve.push({ id: uid(), date, label, amount, c: t, u: t });
+        }
+        clearReserveForm();
         commit();
       });
 
