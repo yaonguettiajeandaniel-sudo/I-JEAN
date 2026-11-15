@@ -743,6 +743,15 @@
           </div>
           <p class="fine" id="receivedHint"></p>
         </div>
+        <section class="panel" id="accountsPanel">
+          <div class="panel-title">
+            <h2>Comptes</h2>
+            <span class="hint" id="accountsTotal"></span>
+          </div>
+          <div id="accountsSummary" class="stack"></div>
+          <p class="fine bad-text" id="accountsWarn" hidden></p>
+          <button class="btn secondary" type="button" data-jump="accounts">Gérer les comptes et les virements</button>
+        </section>
         <section class="panel" id="reservePanel">
           <div class="panel-title">
             <h2>Réserve</h2>
@@ -790,6 +799,7 @@
             <div class="form-row"><label>Primes</label><input id="fundBonus" inputmode="decimal" type="number" min="0" step="0.01"></div>
             <div class="form-row"><label>Freelance / autres</label><input id="fundOther" inputmode="decimal" type="number" min="0" step="0.01"></div>
           </div>
+          <div class="form-row"><label>Compte crédité</label><select id="fundAccount"></select></div>
           <button class="btn" id="saveFund" type="button">Enregistrer</button>
         </section>
         <section class="panel">
@@ -802,6 +812,7 @@
             <div class="form-row"><label>Primes</label><input id="recvBonus" inputmode="decimal" type="number" min="0" step="0.01"></div>
             <div class="form-row"><label>Freelance / autres</label><input id="recvOther" inputmode="decimal" type="number" min="0" step="0.01"></div>
           </div>
+          <div class="form-row"><label>Compte crédité</label><select id="recvAccount"></select></div>
           <button class="btn" id="saveRecv" type="button">Enregistrer</button>
         </section>
         <section class="panel">
@@ -814,6 +825,7 @@
             <div class="form-row"><label>Date</label><input id="reserveDate" type="date"></div>
             <div class="form-row"><label>Montant</label><input id="reserveAmount" inputmode="decimal" type="number" min="0" step="0.01"></div>
             <div class="form-row"><label>Origine (optionnel)</label><input id="reserveLabel" placeholder="Ex. vente, prime, cadeau…"></div>
+            <div class="form-row"><label>Compte crédité</label><select id="reserveAccount"></select></div>
           </div>
           <button class="btn" id="addReserve" type="button">Ajouter à la réserve</button>
           <button class="btn secondary" id="cancelReserveEdit" type="button" hidden>Annuler la modification</button>
@@ -831,6 +843,7 @@
           <div class="form-grid">
             <div class="form-row"><label>Date</label><input id="expenseDate" type="date"></div>
             <div class="form-row"><label>Catégorie</label><select id="expenseCategory"></select></div>
+            <div class="form-row"><label>Payée depuis le compte</label><select id="expenseAccount"></select></div>
             <div class="form-row"><label>Montant</label><input id="expenseAmount" inputmode="decimal" type="number" min="0" step="0.01"></div>
             <div class="form-row"><label>Note</label><textarea id="expenseNote" placeholder="Optionnel"></textarea></div>
             <label class="check-row"><input type="checkbox" id="expenseFromReserve"><span>Payée par la réserve (hors budget du mois)</span></label>
@@ -871,6 +884,55 @@
           </div>
           <div id="savingEditList" class="stack"></div>
           <button class="btn" id="saveSavings" type="button">Enregistrer</button>
+        </section>
+      </section>
+
+      <section id="accounts" class="view" aria-label="Comptes">
+        <section class="panel">
+          <div class="panel-title">
+            <h2>Comptes</h2>
+            <button class="icon-btn" id="addAccount" type="button" title="Ajouter un compte">+</button>
+          </div>
+          <p class="fine" id="accountsAsOf"></p>
+          <p class="fine">Solde = départ + revenus + réserve reçue + virements reçus − dépenses − virements envoyés. Seules comptent les opérations datées entre la date de départ et aujourd'hui.</p>
+          <p class="fine bad-text" id="accountsMsg" hidden></p>
+          <div id="accountEditList" class="stack"></div>
+          <button class="btn" id="saveAccounts" type="button">Enregistrer</button>
+          <button class="btn secondary" type="button" data-jump="dashboard">Retour à l'accueil</button>
+        </section>
+
+        <section class="panel">
+          <h2 id="transferFormTitle">Virement entre comptes</h2>
+          <div class="form-grid">
+            <div class="form-row"><label>De</label><select id="transferFrom"></select></div>
+            <div class="form-row"><label>Vers</label><select id="transferTo"></select></div>
+            <div class="form-row"><label>Montant</label><input id="transferAmount" inputmode="decimal" type="number" min="0" step="0.01"></div>
+            <div class="form-row"><label>Date</label><input id="transferDate" type="date"></div>
+            <div class="form-row"><label>Note</label><input id="transferNote" placeholder="Optionnel"></div>
+          </div>
+          <p class="fine">Frais de retrait ou de transfert : saisis-les comme une dépense du compte concerné.</p>
+          <button class="btn" id="addTransfer" type="button">Enregistrer le virement</button>
+          <button class="btn secondary" id="cancelTransferEdit" type="button" hidden>Annuler la modification</button>
+          <div id="transferList" class="stack"></div>
+        </section>
+
+        <section class="panel">
+          <h2>Rapprocher un compte</h2>
+          <p class="fine">Saisis le solde réel constaté (appli de ta banque ou de ton mobile money). L'appli enregistre l'écart comme un ajustement daté d'aujourd'hui.</p>
+          <div class="form-grid">
+            <div class="form-row"><label>Compte</label><select id="reconcileAccount"></select></div>
+            <div class="form-row"><label>Solde réel constaté</label><input id="reconcileAmount" inputmode="decimal" type="number" step="0.01"></div>
+          </div>
+          <button class="btn" id="reconcileBtn" type="button">Rapprocher</button>
+          <p class="fine" id="reconcileInfo"></p>
+          <div id="adjustmentList" class="stack"></div>
+        </section>
+
+        <section class="panel" id="unassignedPanel" hidden>
+          <h2>Opérations sans compte</h2>
+          <p class="fine" id="unassignedText"></p>
+          <div class="form-row"><label>Affecter à ce compte</label><select id="unassignedAccount"></select></div>
+          <button class="btn secondary" id="assignUnassigned" type="button">Affecter</button>
         </section>
       </section>
 
@@ -1070,6 +1132,16 @@
       ["retraite", "Épargne retraite"], ["autre-objectif", "Autre objectif"]
     ];
 
+    // Listes d'éléments synchronisées (chacune : id, créé c, modifié u ; suppressions par pierres tombales).
+    const LIST_KEYS = ["budgets", "expenses", "reserve", "savings", "accounts", "transfers", "adjustments"];
+
+    function pad2(n) { return String(n).padStart(2, "0"); }
+
+    function todayISO() {
+      const d = new Date();
+      return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+    }
+
     // Identifiants fixes : deux appareils neufs n'inventent pas des catégories en double.
     function defaultBudgets() {
       return DEFAULT_BUDGETS.map(([key, name, percent], i) => ({ id: `default-${key}`, name, percent, c: i, u: 0 }));
@@ -1077,6 +1149,12 @@
 
     function defaultSavings() {
       return DEFAULT_SAVINGS.map(([key, name], i) => ({ id: `default-${key}`, name, target: 0, paid: 0, c: i, u: 0 }));
+    }
+
+    function defaultAccounts() {
+      const since = `${START.year}-${pad2(START.month + 1)}-01`;
+      return [["banque", "Banque"], ["mobile-money", "Mobile Money"]]
+        .map(([key, name], i) => ({ id: `default-${key}`, name, opening: 0, since, c: i, u: 0 }));
     }
 
     function startPeriod() {
@@ -1097,8 +1175,12 @@
         expenses: [],
         reserve: [],
         savings: defaultSavings(),
+        accounts: defaultAccounts(),
+        transfers: [],
+        adjustments: [],
         deleted: {},
         settings: { currency: "EUR", u: 0 },
+        lastAccount: "",
         lastBackup: null
       };
     }
@@ -1119,7 +1201,7 @@
       const rawIncomes = d.incomes && typeof d.incomes === "object" && !Array.isArray(d.incomes) ? d.incomes : {};
       Object.entries(rawIncomes).forEach(([k, v]) => {
         if (v && typeof v === "object") {
-          incomes[k] = { salary: numberValue(v.salary), bonus: numberValue(v.bonus), other: numberValue(v.other), u: Number(v.u) || 0 };
+          incomes[k] = { salary: numberValue(v.salary), bonus: numberValue(v.bonus), other: numberValue(v.other), u: Number(v.u) || 0, ...(v.accountId ? { accountId: String(v.accountId) } : {}) };
         }
       });
       const deleted = {};
@@ -1130,7 +1212,9 @@
         currency: CURRENCIES.some(([code]) => code === rawSettings.currency) ? rawSettings.currency : "EUR",
         u: Number(rawSettings.u) || 0
       };
-      return { years, incomes, budgets: fixList(d.budgets), expenses: fixList(d.expenses), reserve: fixList(d.reserve), savings: fixList(d.savings), deleted, settings };
+      const lists = {};
+      LIST_KEYS.forEach(key => { lists[key] = fixList(d[key]); });
+      return { years, incomes, ...lists, deleted, settings };
     }
 
     function newer(a, b) {
@@ -1154,20 +1238,21 @@
       [a.incomes, b.incomes].forEach(src => {
         Object.entries(src).forEach(([k, v]) => { incomes[k] = incomes[k] ? newer(incomes[k], v) : v; });
       });
+      const lists = {};
+      LIST_KEYS.forEach(key => { lists[key] = mergeList(a[key], b[key]); });
       return normalizeData({
         years: [...a.years, ...b.years],
         incomes,
-        budgets: mergeList(a.budgets, b.budgets),
-        expenses: mergeList(a.expenses, b.expenses),
-        reserve: mergeList(a.reserve, b.reserve),
-        savings: mergeList(a.savings, b.savings),
+        ...lists,
         deleted,
         settings: newer(a.settings, b.settings)
       });
     }
 
     function syncData(s) {
-      return { years: s.years, incomes: s.incomes, budgets: s.budgets, expenses: s.expenses, reserve: s.reserve, savings: s.savings, deleted: s.deleted, settings: s.settings };
+      const out = { years: s.years, incomes: s.incomes, deleted: s.deleted, settings: s.settings };
+      LIST_KEYS.forEach(key => { out[key] = s[key]; });
+      return out;
     }
 
     function deriveYears(s) {
@@ -1182,6 +1267,10 @@
       });
       (s.reserve || []).forEach(r => {
         const y = parseInt(String(r.date || "").slice(0, 4), 10);
+        if (Number.isInteger(y)) years.add(y);
+      });
+      [...(s.transfers || []), ...(s.adjustments || [])].forEach(item => {
+        const y = parseInt(String(item.date || "").slice(0, 4), 10);
         if (Number.isInteger(y)) years.add(y);
       });
       if (!years.size) years.add(startPeriod().year);
@@ -1200,8 +1289,11 @@
             ...normalizeData(parsed),
             selectedYear: Number.isInteger(parsed.selectedYear) ? parsed.selectedYear : base.selectedYear,
             selectedMonth: Number.isInteger(parsed.selectedMonth) ? parsed.selectedMonth : base.selectedMonth,
-            lastBackup: parsed.lastBackup || null
+            lastBackup: parsed.lastBackup || null,
+            lastAccount: typeof parsed.lastAccount === "string" ? parsed.lastAccount : ""
           };
+          // Données créées avant les comptes : on met les deux comptes par défaut.
+          if (!Array.isArray(parsed.accounts)) s.accounts = defaultAccounts();
           s.years = deriveYears(s);
           if (!s.years.includes(s.selectedYear)) s.selectedYear = s.years[0];
           return s;
@@ -1283,6 +1375,57 @@
       };
     }
 
+    function accountById(id) {
+      return state.accounts.find(a => a.id === id) || null;
+    }
+
+    function accountLabel(id) {
+      const a = accountById(id);
+      return a ? a.name : "compte supprimé";
+    }
+
+    function defaultAccountId() {
+      if (state.accounts.some(a => a.id === state.lastAccount)) return state.lastAccount;
+      return state.accounts[0] ? state.accounts[0].id : "";
+    }
+
+    // Solde = départ + revenus + réserve reçue + virements reçus − dépenses − virements envoyés
+    // (+/− ajustements), pour les opérations datées de « depuis » jusqu'à aujourd'hui.
+    // Un revenu mensuel compte à partir du 1er du mois concerné.
+    function accountBalance(acc, asOf = todayISO()) {
+      const since = acc.since || "0000-01-01";
+      const inside = date => typeof date === "string" && date >= since && date <= asOf;
+      let inn = 0;
+      let out = 0;
+      Object.entries(state.incomes).forEach(([key, row]) => {
+        if (row.accountId !== acc.id) return;
+        const [y, m] = key.split("-").map(Number);
+        if (inside(`${y}-${pad2(m + 1)}-01`)) inn += numberValue(row.salary) + numberValue(row.bonus) + numberValue(row.other);
+      });
+      state.reserve.forEach(r => { if (r.accountId === acc.id && inside(r.date)) inn += numberValue(r.amount); });
+      state.expenses.forEach(e => { if (e.accountId === acc.id && inside(e.date)) out += numberValue(e.amount); });
+      state.transfers.forEach(t => {
+        if (!inside(t.date)) return;
+        if (t.to === acc.id) inn += numberValue(t.amount);
+        if (t.from === acc.id) out += numberValue(t.amount);
+      });
+      state.adjustments.forEach(a => {
+        if (a.accountId !== acc.id || !inside(a.date)) return;
+        const v = numberValue(a.amount);
+        if (v >= 0) inn += v; else out += -v;
+      });
+      const opening = numberValue(acc.opening);
+      return { opening, inn, out, balance: opening + inn - out };
+    }
+
+    function unassignedCount() {
+      let n = state.expenses.filter(e => !e.accountId).length + state.reserve.filter(r => !r.accountId).length;
+      Object.values(state.incomes).forEach(row => {
+        if (!row.accountId && numberValue(row.salary) + numberValue(row.bonus) + numberValue(row.other) > 0) n++;
+      });
+      return n;
+    }
+
     function categoryMatches(expense, budget) {
       if (expense.categoryId) return expense.categoryId === budget.id;
       return expense.category === budget.name;
@@ -1341,7 +1484,7 @@
 
     function isEditingForm() {
       const el = document.activeElement;
-      return !!(el && el.closest && el.closest("#budgetEditList, #savingEditList, #income .form-grid"));
+      return !!(el && el.closest && el.closest("#budgetEditList, #savingEditList, #accountEditList, #income .form-grid"));
     }
 
     // fromSync : un rafraîchissement venu du serveur ne doit pas effacer ce que tu es en train de taper.
@@ -1350,14 +1493,17 @@
       state.years = deriveYears(state);
       moneyFormat = makeMoneyFormat(state.settings.currency);
       renderYearSelect();
+      renderAccountSelects();
       renderHeader();
       renderDashboard();
+      renderAccountsSummary();
       renderExpenses();
       if (!skipForms) {
         renderIncome();
         renderBudgets();
         renderSavings();
       }
+      renderAccountsView(skipForms);
       renderHistory();
       renderCurrency();
       renderEditModes();
@@ -1509,8 +1655,120 @@
         </article>`;
     }
 
+    function fillAccountSelect(id, { allowNone = true, pick } = {}) {
+      const select = document.getElementById(id);
+      const had = select.options.length > 0;
+      const current = select.value;
+      select.innerHTML = (allowNone ? `<option value="">Aucun compte</option>` : "")
+        + state.accounts.map(a => `<option value="${escapeAttr(a.id)}">${escapeHtml(a.name)}</option>`).join("");
+      const valid = [...select.options].some(o => o.value === current);
+      if (had && valid) select.value = current;
+      else select.value = pick !== undefined ? pick : defaultAccountId();
+    }
+
+    function renderAccountSelects() {
+      ["expenseAccount", "reserveAccount", "fundAccount", "recvAccount"].forEach(id => fillAccountSelect(id));
+      const first = state.accounts[0] ? state.accounts[0].id : "";
+      const second = state.accounts[1] ? state.accounts[1].id : first;
+      fillAccountSelect("transferFrom", { allowNone: false, pick: defaultAccountId() || first });
+      const from = document.getElementById("transferFrom").value;
+      fillAccountSelect("transferTo", { allowNone: false, pick: state.accounts.find(a => a.id !== from) ? state.accounts.find(a => a.id !== from).id : second });
+      fillAccountSelect("reconcileAccount", { allowNone: false, pick: first });
+      fillAccountSelect("unassignedAccount", { allowNone: false, pick: defaultAccountId() || first });
+    }
+
+    function renderAccountsSummary() {
+      const list = document.getElementById("accountsSummary");
+      const hint = document.getElementById("accountsTotal");
+      if (!state.accounts.length) {
+        list.innerHTML = `<div class="empty">Aucun compte. Crée-en un pour suivre tes soldes.</div>`;
+        hint.textContent = "";
+      } else {
+        let total = 0;
+        list.innerHTML = state.accounts.map(acc => {
+          const b = accountBalance(acc);
+          total += b.balance;
+          return `
+            <article class="history-row">
+              <div class="row-head"><strong>${escapeHtml(acc.name)}</strong><span class="${b.balance < 0 ? "bad-text" : ""}">${money.format(b.balance)}</span></div>
+            </article>`;
+        }).join("");
+        hint.textContent = `Total : ${money.format(total)}`;
+      }
+      const n = unassignedCount();
+      const warn = document.getElementById("accountsWarn");
+      warn.hidden = n === 0 || !state.accounts.length;
+      warn.textContent = `${n} opération(s) sans compte ne sont comptées dans aucun solde.`;
+    }
+
+    function transferRow(t) {
+      const isEditing = editing && editing.kind === "transfer" && editing.id === t.id;
+      return `
+        <article class="expense-row${isEditing ? " editing" : ""}">
+          <div class="row-head">
+            <strong>${escapeHtml(accountLabel(t.from))} → ${escapeHtml(accountLabel(t.to))}</strong>
+            <span>${money.format(numberValue(t.amount))}</span>
+          </div>
+          <small>${escapeHtml(t.date || "")}${t.note ? ` - ${escapeHtml(t.note)}` : ""}</small>
+          <div class="row-actions">
+            <button class="mini-btn" data-edit-transfer="${escapeAttr(t.id)}" type="button">Modifier</button>
+            <button class="icon-btn" data-delete-transfer="${escapeAttr(t.id)}" title="Supprimer" type="button">×</button>
+          </div>
+        </article>`;
+    }
+
+    function adjustmentRow(a) {
+      const v = numberValue(a.amount);
+      return `
+        <article class="expense-row">
+          <div class="row-head">
+            <strong>${escapeHtml(accountLabel(a.accountId))}</strong>
+            <span class="${v < 0 ? "bad-text" : "ok-text"}">${v > 0 ? "+" : ""}${money.format(v)}</span>
+          </div>
+          <small>${escapeHtml(a.date || "")} - ${escapeHtml(a.note || "Rapprochement")}</small>
+          <div class="row-actions">
+            <button class="icon-btn" data-delete-adjustment="${escapeAttr(a.id)}" title="Supprimer" type="button">×</button>
+          </div>
+        </article>`;
+    }
+
+    function renderAccountsView(skipEditList) {
+      const today = todayISO();
+      document.getElementById("accountsAsOf").textContent = `Soldes au ${today.split("-").reverse().join("/")}`;
+      if (!skipEditList) {
+        document.getElementById("accountEditList").innerHTML = state.accounts.length
+          ? state.accounts.map(acc => {
+            const b = accountBalance(acc);
+            return `
+              <article class="panel">
+                <div class="row-head">
+                  <input class="saving-head-input" data-account-name="${escapeAttr(acc.id)}" value="${escapeAttr(acc.name)}" placeholder="Nom du compte">
+                  <button class="icon-btn" data-delete-account="${escapeAttr(acc.id)}" title="Supprimer" type="button">×</button>
+                </div>
+                <div class="grid-2">
+                  <div class="form-row"><label>Solde de départ</label><input data-account-opening="${escapeAttr(acc.id)}" type="number" step="0.01" inputmode="decimal" value="${numberValue(acc.opening) || ""}"></div>
+                  <div class="form-row"><label>Au (date)</label><input data-account-since="${escapeAttr(acc.id)}" type="date" value="${escapeAttr(acc.since || "")}"></div>
+                </div>
+                <p class="fine">Solde actuel : <b class="${b.balance < 0 ? "bad-text" : ""}">${money.format(b.balance)}</b> · entrées ${money.format(b.inn)} · sorties ${money.format(b.out)}</p>
+              </article>`;
+          }).join("")
+          : `<div class="empty">Aucun compte. Ajoutes-en un avec le bouton +.</div>`;
+      }
+      const transferDate = document.getElementById("transferDate");
+      transferDate.value = transferDate.value || today;
+      const transfers = [...state.transfers].sort((a, b) => String(b.date).localeCompare(String(a.date)) || b.c - a.c).slice(0, 30);
+      document.getElementById("transferList").innerHTML = transfers.length ? transfers.map(transferRow).join("") : `<div class="empty">Aucun virement.</div>`;
+      const adjustments = [...state.adjustments].sort((a, b) => String(b.date).localeCompare(String(a.date)) || b.c - a.c).slice(0, 15);
+      document.getElementById("adjustmentList").innerHTML = adjustments.length ? adjustments.map(adjustmentRow).join("") : "";
+      const n = unassignedCount();
+      document.getElementById("unassignedPanel").hidden = n === 0 || !state.accounts.length;
+      document.getElementById("unassignedText").textContent = `${n} opération(s) (dépenses, revenus ou réserve) n'ont pas de compte et ne comptent dans aucun solde.`;
+    }
+
     function fillIncomeForm(prefix, year, index) {
       const row = incomeRow(year, index);
+      const accountSelect = document.getElementById(prefix + "Account");
+      accountSelect.value = row.accountId && accountById(row.accountId) ? row.accountId : (row.accountId ? "" : defaultAccountId());
       document.getElementById(prefix + "Salary").value = row.salary || "";
       document.getElementById(prefix + "Bonus").value = row.bonus || "";
       document.getElementById(prefix + "Other").value = row.other || "";
@@ -1568,7 +1826,7 @@
 
     // Boutons et titres selon qu'on ajoute ou qu'on modifie ; abandonne si la ligne a disparu (suppression, synchro).
     function renderEditModes() {
-      if (editing && !(editedExpense() || editedReserve())) editing = null;
+      if (editing && !(editedExpense() || editedReserve() || editedTransfer())) editing = null;
       const expenseOn = !!editedExpense();
       document.getElementById("expenseFormTitle").textContent = expenseOn ? "Modifier la dépense" : "Nouvelle dépense";
       document.getElementById("addExpense").textContent = expenseOn ? "Enregistrer les modifications" : "Ajouter";
@@ -1576,6 +1834,40 @@
       const reserveOn = !!editedReserve();
       document.getElementById("addReserve").textContent = reserveOn ? "Enregistrer les modifications" : "Ajouter à la réserve";
       document.getElementById("cancelReserveEdit").hidden = !reserveOn;
+      const transferOn = !!editedTransfer();
+      document.getElementById("transferFormTitle").textContent = transferOn ? "Modifier le virement" : "Virement entre comptes";
+      document.getElementById("addTransfer").textContent = transferOn ? "Enregistrer les modifications" : "Enregistrer le virement";
+      document.getElementById("cancelTransferEdit").hidden = !transferOn;
+    }
+
+    function editedTransfer() {
+      return editing && editing.kind === "transfer" ? state.transfers.find(x => x.id === editing.id) || null : null;
+    }
+
+    function clearTransferForm() {
+      document.getElementById("transferAmount").value = "";
+      document.getElementById("transferNote").value = "";
+      document.getElementById("transferDate").value = todayISO();
+    }
+
+    function setAccountsMessage(text) {
+      const el = document.getElementById("accountsMsg");
+      el.textContent = text || "";
+      el.hidden = !text;
+    }
+
+    function startEditTransfer(id) {
+      const t = state.transfers.find(x => x.id === id);
+      if (!t) return;
+      editing = { kind: "transfer", id };
+      setView("accounts");
+      render();
+      document.getElementById("transferFrom").value = accountById(t.from) ? t.from : "";
+      document.getElementById("transferTo").value = accountById(t.to) ? t.to : "";
+      document.getElementById("transferAmount").value = numberValue(t.amount);
+      document.getElementById("transferDate").value = t.date || todayISO();
+      document.getElementById("transferNote").value = t.note || "";
+      document.getElementById("transferAmount").focus();
     }
 
     function clearExpenseForm() {
@@ -1595,7 +1887,9 @@
       if (!editing) return;
       const kind = editing.kind;
       editing = null;
-      if (kind === "expense") clearExpenseForm(); else clearReserveForm();
+      if (kind === "expense") clearExpenseForm();
+      else if (kind === "reserve") clearReserveForm();
+      else clearTransferForm();
       render();
     }
 
@@ -1603,6 +1897,7 @@
       const e = state.expenses.find(x => x.id === id);
       if (!e) return;
       if (editing && editing.kind === "reserve") clearReserveForm();
+      if (editing && editing.kind === "transfer") clearTransferForm();
       editing = { kind: "expense", id };
       setView("expenses");
       document.getElementById("expenseDate").value = e.date || "";
@@ -1612,6 +1907,7 @@
       render();
       const match = state.budgets.find(b => e.categoryId ? b.id === e.categoryId : b.name === e.category);
       document.getElementById("expenseCategory").value = match ? match.id : "__orig__";
+      document.getElementById("expenseAccount").value = e.accountId && accountById(e.accountId) ? e.accountId : "";
       document.getElementById("expenseAmount").focus();
     }
 
@@ -1619,12 +1915,14 @@
       const r = state.reserve.find(x => x.id === id);
       if (!r) return;
       if (editing && editing.kind === "expense") clearExpenseForm();
+      if (editing && editing.kind === "transfer") clearTransferForm();
       editing = { kind: "reserve", id };
       setView("income");
       document.getElementById("reserveDate").value = r.date || "";
       document.getElementById("reserveAmount").value = numberValue(r.amount);
       document.getElementById("reserveLabel").value = r.label || "";
       render();
+      document.getElementById("reserveAccount").value = r.accountId && accountById(r.accountId) ? r.accountId : "";
       document.getElementById("reserveAmount").focus();
     }
 
@@ -1636,7 +1934,7 @@
             <strong>${escapeHtml(entry.label || "Revenu exceptionnel")}</strong>
             <span>${money.format(numberValue(entry.amount))}</span>
           </div>
-          <small>${escapeHtml(entry.date || "")}</small>
+          <small>${escapeHtml(entry.date || "")}${entry.accountId ? ` · ${escapeHtml(accountLabel(entry.accountId))}` : ""}</small>
           <div class="row-actions">
             <button class="mini-btn" data-edit-reserve="${escapeAttr(entry.id)}" type="button">Modifier</button>
             <button class="icon-btn" data-delete-reserve="${escapeAttr(entry.id)}" title="Supprimer" type="button">×</button>
@@ -1670,7 +1968,7 @@
             <strong>${escapeHtml(categoryLabel(expense))}</strong>
             <span>${expense.fromReserve ? `<span class="status res">Réserve</span> ` : ""}${money.format(numberValue(expense.amount))}</span>
           </div>
-          <small>${escapeHtml(expense.date || "")}${expense.note ? ` - ${escapeHtml(expense.note)}` : ""}</small>
+          <small>${escapeHtml(expense.date || "")}${expense.accountId ? ` · ${escapeHtml(accountLabel(expense.accountId))}` : ""}${expense.note ? ` - ${escapeHtml(expense.note)}` : ""}</small>
           <div class="row-actions">
             <button class="mini-btn" data-edit-expense="${escapeAttr(expense.id)}" type="button">Modifier</button>
             <button class="icon-btn" data-delete-expense="${escapeAttr(expense.id)}" title="Supprimer" type="button">×</button>
@@ -1820,9 +2118,35 @@
       });
     }
 
+    function commitAccountEdits() {
+      document.querySelectorAll("[data-account-name]").forEach(input => {
+        const item = state.accounts.find(a => a.id === input.dataset.accountName);
+        if (!item) return;
+        const name = input.value.trim() || item.name;
+        if (name !== item.name) { item.name = name; item.u = stamp(); }
+      });
+      document.querySelectorAll("[data-account-opening]").forEach(input => {
+        const item = state.accounts.find(a => a.id === input.dataset.accountOpening);
+        if (!item) return;
+        const value = numberValue(input.value);
+        if (value !== numberValue(item.opening)) { item.opening = value; item.u = stamp(); }
+      });
+      document.querySelectorAll("[data-account-since]").forEach(input => {
+        const item = state.accounts.find(a => a.id === input.dataset.accountSince);
+        if (!item) return;
+        const value = input.value || item.since || "";
+        if (value !== (item.since || "")) { item.since = value; item.u = stamp(); }
+      });
+    }
+
     function saveIncomeFrom(prefix, period) {
       const read = suffix => numberValue(document.getElementById(prefix + suffix).value);
-      state.incomes[incomeKey(period.year, period.index)] = { salary: read("Salary"), bonus: read("Bonus"), other: read("Other"), u: stamp() };
+      const accountId = document.getElementById(prefix + "Account").value;
+      if (accountId) state.lastAccount = accountId;
+      state.incomes[incomeKey(period.year, period.index)] = {
+        salary: read("Salary"), bonus: read("Bonus"), other: read("Other"), u: stamp(),
+        ...(accountId ? { accountId } : {})
+      };
       commit();
     }
 
@@ -2209,6 +2533,39 @@
         const editReserve = event.target.closest("[data-edit-reserve]");
         if (editReserve) { startEditReserve(editReserve.dataset.editReserve); return; }
 
+        const editTransfer = event.target.closest("[data-edit-transfer]");
+        if (editTransfer) { startEditTransfer(editTransfer.dataset.editTransfer); return; }
+
+        const deleteTransfer = event.target.closest("[data-delete-transfer]");
+        if (deleteTransfer) {
+          deleteItem("transfers", deleteTransfer.dataset.deleteTransfer);
+          commit();
+          return;
+        }
+
+        const deleteAdjustment = event.target.closest("[data-delete-adjustment]");
+        if (deleteAdjustment) {
+          deleteItem("adjustments", deleteAdjustment.dataset.deleteAdjustment);
+          commit();
+          return;
+        }
+
+        const deleteAccount = event.target.closest("[data-delete-account]");
+        if (deleteAccount) {
+          const id = deleteAccount.dataset.deleteAccount;
+          const acc = accountById(id);
+          const refs = state.expenses.filter(e => e.accountId === id).length
+            + state.reserve.filter(r => r.accountId === id).length
+            + state.transfers.filter(t => t.from === id || t.to === id).length
+            + state.adjustments.filter(a => a.accountId === id).length
+            + Object.values(state.incomes).filter(r => r.accountId === id).length;
+          if (acc && refs > 0 && !confirm(`« ${acc.name} » est utilisé par ${refs} opération(s). Elles resteront enregistrées mais ne compteront plus dans aucun solde. Supprimer quand même ?`)) return;
+          commitAccountEdits();
+          deleteItem("accounts", id);
+          commit();
+          return;
+        }
+
         const deleteReserve = event.target.closest("[data-delete-reserve]");
         if (deleteReserve) {
           deleteItem("reserve", deleteReserve.dataset.deleteReserve);
@@ -2258,6 +2615,8 @@
         const date = document.getElementById("expenseDate").value || fallbackDate;
         const note = document.getElementById("expenseNote").value.trim();
         const fromReserve = document.getElementById("expenseFromReserve").checked;
+        const accountId = document.getElementById("expenseAccount").value;
+        if (accountId) state.lastAccount = accountId;
 
         let categoryId;
         let categoryName;
@@ -2277,6 +2636,7 @@
           edited.amount = amount;
           edited.note = note;
           if (fromReserve) edited.fromReserve = true; else delete edited.fromReserve;
+          if (accountId) edited.accountId = accountId; else delete edited.accountId;
           edited.u = stamp();
           editing = null;
         } else {
@@ -2289,11 +2649,78 @@
             amount,
             note,
             ...(fromReserve ? { fromReserve: true } : {}),
+            ...(accountId ? { accountId } : {}),
             c: t,
             u: t
           });
         }
         clearExpenseForm();
+        commit();
+      });
+
+      document.getElementById("addAccount").addEventListener("click", () => {
+        commitAccountEdits();
+        const t = stamp();
+        state.accounts.push({ id: uid(), name: "Nouveau compte", opening: 0, since: todayISO(), c: t, u: t });
+        commit();
+        const inputs = document.querySelectorAll("[data-account-name]");
+        const last = inputs[inputs.length - 1];
+        if (last) { last.focus(); last.select(); }
+      });
+
+      document.getElementById("saveAccounts").addEventListener("click", () => {
+        commitAccountEdits();
+        commit();
+      });
+
+      document.getElementById("addTransfer").addEventListener("click", () => {
+        const from = document.getElementById("transferFrom").value;
+        const to = document.getElementById("transferTo").value;
+        const amount = numberValue(document.getElementById("transferAmount").value);
+        if (!from || !to || from === to) { setAccountsMessage("Choisis deux comptes différents."); return; }
+        if (!amount || amount < 0) { setAccountsMessage("Saisis le montant du virement."); return; }
+        setAccountsMessage("");
+        const date = document.getElementById("transferDate").value || todayISO();
+        const note = document.getElementById("transferNote").value.trim();
+        const edited = editedTransfer();
+        if (edited) {
+          Object.assign(edited, { from, to, amount, date, note });
+          edited.u = stamp();
+          editing = null;
+        } else {
+          const t = stamp();
+          state.transfers.push({ id: uid(), from, to, amount, date, note, c: t, u: t });
+        }
+        clearTransferForm();
+        commit();
+      });
+
+      document.getElementById("cancelTransferEdit").addEventListener("click", cancelEdit);
+
+      document.getElementById("reconcileBtn").addEventListener("click", () => {
+        const info = document.getElementById("reconcileInfo");
+        const acc = accountById(document.getElementById("reconcileAccount").value);
+        const raw = document.getElementById("reconcileAmount").value;
+        if (!acc || raw === "") { info.textContent = "Choisis un compte et saisis son solde réel."; return; }
+        if (todayISO() < (acc.since || "")) { info.textContent = `Ce compte démarre le ${acc.since} : ajuste plutôt son solde de départ.`; return; }
+        const real = numberValue(raw);
+        const diff = Math.round((real - accountBalance(acc).balance) * 100) / 100;
+        if (diff === 0) { info.textContent = "Le solde calculé est déjà égal au solde réel."; document.getElementById("reconcileAmount").value = ""; return; }
+        const t = stamp();
+        state.adjustments.push({ id: uid(), accountId: acc.id, date: todayISO(), amount: diff, note: "Rapprochement", c: t, u: t });
+        document.getElementById("reconcileAmount").value = "";
+        commit();
+        info.textContent = `Ajustement de ${diff > 0 ? "+" : ""}${money.format(diff)} enregistré sur ${acc.name}.`;
+      });
+
+      document.getElementById("assignUnassigned").addEventListener("click", () => {
+        const id = document.getElementById("unassignedAccount").value;
+        if (!id) return;
+        state.expenses.forEach(e => { if (!e.accountId) { e.accountId = id; e.u = stamp(); } });
+        state.reserve.forEach(r => { if (!r.accountId) { r.accountId = id; r.u = stamp(); } });
+        Object.values(state.incomes).forEach(row => {
+          if (!row.accountId && numberValue(row.salary) + numberValue(row.bonus) + numberValue(row.other) > 0) { row.accountId = id; row.u = stamp(); }
+        });
         commit();
       });
 
@@ -2305,16 +2732,19 @@
         if (!amount || amount < 0) return;
         const date = document.getElementById("reserveDate").value || `${monthDatePrefix(state.selectedYear, state.selectedMonth)}-01`;
         const label = document.getElementById("reserveLabel").value.trim();
+        const accountId = document.getElementById("reserveAccount").value;
+        if (accountId) state.lastAccount = accountId;
         const edited = editedReserve();
         if (edited) {
           edited.date = date;
           edited.label = label;
           edited.amount = amount;
+          if (accountId) edited.accountId = accountId; else delete edited.accountId;
           edited.u = stamp();
           editing = null;
         } else {
           const t = stamp();
-          state.reserve.push({ id: uid(), date, label, amount, c: t, u: t });
+          state.reserve.push({ id: uid(), date, label, amount, ...(accountId ? { accountId } : {}), c: t, u: t });
         }
         clearReserveForm();
         commit();
