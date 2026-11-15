@@ -470,7 +470,7 @@
     <div class="edit-banner" id="editBannerJournal" hidden>Modification du <b id="editBannerJournalDate"></b> <button type="button" class="btn" data-cancel-edit="journal">Annuler</button></div>
     <form class="entry" id="formJournal">
       <div class="field"><label for="jDate">Date</label><input type="date" id="jDate" required></div>
-      <div class="field"><label for="jReel">Recette réelle (F)</label><input type="number" id="jReel" class="mono" min="0" step="500" placeholder="23000"></div>
+      <div class="field"><label for="jReel">Recette réelle (F)</label><input type="number" id="jReel" class="mono" min="0" step="1" placeholder="23000"></div>
       <div class="field grow"><label for="jNote">Note (écart, incident…)</label><input type="text" id="jNote" placeholder="Ex. demi-journée, panne, jour férié"></div>
       <button class="btn primary" type="submit" id="submitJournal">Enregistrer</button>
     </form>
@@ -496,7 +496,7 @@
     <form class="entry" id="formEntretien">
       <div class="field"><label for="mDate">Date</label><input type="date" id="mDate" required></div>
       <div class="field grow"><label for="mLibelle">Libellé</label><input type="text" id="mLibelle" placeholder="Ex. vidange, pneu…" required></div>
-      <div class="field"><label for="mMontant">Montant (F)</label><input type="number" id="mMontant" class="mono" min="0" step="500" required></div>
+      <div class="field"><label for="mMontant">Montant (F)</label><input type="number" id="mMontant" class="mono" min="0" step="1" required></div>
       <div class="field"><label for="mType">Type</label>
         <select id="mType"><option value="depense">Dépense courante</option><option value="investissement">Investissement initial</option></select>
       </div>
@@ -532,7 +532,7 @@
       <div class="field grow"><label for="dType">Type de document</label><input type="text" id="dType" placeholder="Ex. VISITE TECHNIQUE" required></div>
       <div class="field"><label for="dEmission">Date d'émission</label><input type="date" id="dEmission"></div>
       <div class="field"><label for="dExpiration">Date d'expiration</label><input type="date" id="dExpiration"></div>
-      <div class="field"><label for="dMontant">Montant (F)</label><input type="number" id="dMontant" class="mono" min="0" step="500"></div>
+      <div class="field"><label for="dMontant">Montant (F)</label><input type="number" id="dMontant" class="mono" min="0" step="1"></div>
       <button class="btn primary" type="submit" id="submitDoc">Enregistrer</button>
     </form>
     <div class="table-wrap">
@@ -562,7 +562,7 @@
     <div class="edit-banner" id="editBannerEmprunt" hidden>Modification du versement <button type="button" class="btn" data-cancel-edit="emprunt">Annuler</button></div>
     <form class="entry" id="formEmprunt">
       <div class="field"><label for="veDate">Date du versement</label><input type="date" id="veDate" required></div>
-      <div class="field"><label for="veMontant">Montant versé (F)</label><input type="number" id="veMontant" class="mono" min="0" step="500" required></div>
+      <div class="field"><label for="veMontant">Montant versé (F)</label><input type="number" id="veMontant" class="mono" min="0" step="1" required></div>
       <button class="btn primary" type="submit" id="submitEmprunt">Enregistrer</button>
     </form>
     <div class="table-wrap" style="margin-bottom:10px;">
@@ -580,8 +580,8 @@
     <div class="edit-banner" id="editBannerCreditor" hidden>Modification du créancier <button type="button" class="btn" data-cancel-edit="creditor">Annuler</button></div>
     <form class="entry" id="formCreditor">
       <div class="field"><label for="crNom">Créancier</label><input type="text" id="crNom" placeholder="Nom" required></div>
-      <div class="field"><label for="crSomme">Somme initiale (F)</label><input type="number" id="crSomme" class="mono" min="0" step="500" required></div>
-      <div class="field"><label for="crRembourse">Déjà remboursé (F)</label><input type="number" id="crRembourse" class="mono" min="0" step="500" value="0"></div>
+      <div class="field"><label for="crSomme">Somme initiale (F)</label><input type="number" id="crSomme" class="mono" min="0" step="1" required></div>
+      <div class="field"><label for="crRembourse">Déjà remboursé (F)</label><input type="number" id="crRembourse" class="mono" min="0" step="1" value="0"></div>
       <button class="btn primary" type="submit" id="submitCreditor">Ajouter</button>
     </form>
 
@@ -594,7 +594,7 @@
       <div class="field"><label for="ddDate">Date</label><input type="date" id="ddDate" required></div>
       <div class="field grow"><label for="ddLibelle">Libellé</label><input type="text" id="ddLibelle" required></div>
       <div class="field"><label for="ddMode">Mode</label><input type="text" id="ddMode" placeholder="Ex. À crédit" value="À crédit"></div>
-      <div class="field"><label for="ddMontant">Montant (F)</label><input type="number" id="ddMontant" class="mono" min="0" step="500" required></div>
+      <div class="field"><label for="ddMontant">Montant (F)</label><input type="number" id="ddMontant" class="mono" min="0" step="1" required></div>
       <button class="btn primary" type="submit" id="submitDette">Ajouter</button>
     </form>
     <div class="subtabs">
@@ -1043,7 +1043,7 @@
     el.textContent = money(initial);
     el.onclick = function(){
       var input = document.createElement('input');
-      input.type = 'number'; input.step = '500'; input.min = '0'; input.className = 'inline-input';
+      input.type = 'number'; input.step = '1'; input.min = '0'; input.className = 'inline-input';
       input.value = initial;
       el.replaceWith(input);
       input.focus(); input.select();
@@ -1486,7 +1486,7 @@
           '<button class="btn ghost" data-del-creditor="'+c.id+'" title="Supprimer">✕</button>' +
           '</div>' +
           '<div class="rembourser-form" id="remb-'+c.id+'" hidden>' +
-          '<input type="number" min="1" step="500" class="mono" placeholder="Montant" id="rembInput-'+c.id+'">' +
+          '<input type="number" min="1" step="1" class="mono" placeholder="Montant" id="rembInput-'+c.id+'">' +
           '<button class="btn primary small" data-do-rembourser="'+c.id+'">OK</button>' +
           '</div>' +
           '</div>';
